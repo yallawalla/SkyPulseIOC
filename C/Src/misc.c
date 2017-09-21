@@ -1,0 +1,101 @@
+#include	"stm32f4xx_hal.h"
+#include 	"io.h"
+#include 	"proc.h"
+#include 	"misc.h"
+#include 	"usbd_cdc_if.h"
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+HAL_StatusTypeDef	FLASH_Program(uint32_t Address, uint32_t Data) {
+	HAL_StatusTypeDef status;
+	__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPERR  | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR );
+	if(*(uint32_t *)Address !=  Data) {
+		HAL_FLASH_Unlock();
+		do
+			status=HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,Address,Data);
+		while(status == HAL_BUSY);
+		HAL_FLASH_Lock();
+	}	
+	return status;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+HAL_StatusTypeDef	FLASH_Erase(uint32_t sector, uint32_t n) {
+FLASH_EraseInitTypeDef EraseInitStruct;
+HAL_StatusTypeDef ret;
+uint32_t	SectorError;
+	HAL_FLASH_Unlock();
+  EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+  EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+  EraseInitStruct.Sector = sector;
+  EraseInitStruct.NbSectors = n;
+  ret=HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+  HAL_FLASH_Lock(); 
+	return ret;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+#define _MAXBYTESLINE 16
+void	dumpHex(int a, int n) {
+	unsigned int k;
+	printf("\r\n:02000004%04X%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+	while(n) {
+		int	sum = _MAXBYTESLINE+(a & 0xffff)/256+(a & 0xff);
+		printf(":%02X%04X00",_MAXBYTESLINE,(a & 0xffff));
+		for(k = 0; k<_MAXBYTESLINE; ++k) {
+			printf("%02X",(*(unsigned char *)a & 0xff));
+			sum += *(unsigned char *)a;
+			if(((++a) & 0xffff) == 0 || --n == 0)
+				break;
+		}
+		printf("%02X\r\n",-sum & 0xff);
+		if(n && (a & 0xffff) == 0) {
+			printf(":02000004%04X,%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+		}
+	}
+	printf(":00000001FF\r\n");
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	poll_uart(_io *io) {
+UART_HandleTypeDef *huart=io->huart;
+	
+	io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
+	if(huart->gState == HAL_UART_STATE_READY) {
+		if(!huart->pTxBuffPtr)
+			huart->pTxBuffPtr=malloc(io->tx->size);
+		int len=_buffer_pull(io->tx, huart->pTxBuffPtr, io->tx->size);
+		if(len)
+			HAL_UART_Transmit_DMA(huart, huart->pTxBuffPtr, len);
+	}
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+_io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
+	_io* io=_io_init(sizeRx,sizeTx);
+	if(io) {
+		io->huart=huart;
+		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->tx->size);
+		_proc_add(poll_uart,io,"uart",0);
+	}
+	return io;
+}
