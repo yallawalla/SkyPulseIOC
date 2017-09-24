@@ -29,7 +29,8 @@ extern UART_HandleTypeDef huart3;
 extern CAN_HandleTypeDef	hcan2;
 //extern IWDG_HandleTypeDef hiwdg;
 extern _io	*_VCP;
-
+extern void	date_time(uint32_t, uint32_t);
+extern void SetTimeDate(void);
 #ifdef __cplusplus
 }
 #endif

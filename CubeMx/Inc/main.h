@@ -59,6 +59,46 @@
 #define __TXLEN 128
 #define __CMDLEN 128
 
+#define FSW2_Pin GPIO_PIN_2
+#define FSW2_GPIO_Port GPIOE
+#define FSW3_Pin GPIO_PIN_3
+#define FSW3_GPIO_Port GPIOE
+#define FAN_TACHO1_Pin GPIO_PIN_5
+#define FAN_TACHO1_GPIO_Port GPIOE
+#define FAN_TACHO2_Pin GPIO_PIN_6
+#define FAN_TACHO2_GPIO_Port GPIOE
+#define Psense0_Pin GPIO_PIN_0
+#define Psense0_GPIO_Port GPIOC
+#define Psense1_Pin GPIO_PIN_1
+#define Psense1_GPIO_Port GPIOC
+#define Psense2_Pin GPIO_PIN_2
+#define Psense2_GPIO_Port GPIOC
+#define Psense3_Pin GPIO_PIN_3
+#define Psense3_GPIO_Port GPIOC
+#define PUMP_CSENSE_Pin GPIO_PIN_0
+#define PUMP_CSENSE_GPIO_Port GPIOA
+#define T1_H2O_Pin GPIO_PIN_1
+#define T1_H2O_GPIO_Port GPIOA
+#define T1_H2OA2_Pin GPIO_PIN_2
+#define T1_H2OA2_GPIO_Port GPIOA
+#define _5V_Pin GPIO_PIN_3
+#define _5V_GPIO_Port GPIOA
+#define PUMP_TACHO_Pin GPIO_PIN_6
+#define PUMP_TACHO_GPIO_Port GPIOA
+#define Dsense1_Pin GPIO_PIN_4
+#define Dsense1_GPIO_Port GPIOC
+#define Dsense2_Pin GPIO_PIN_5
+#define Dsense2_GPIO_Port GPIOC
+#define _12V_Pin GPIO_PIN_0
+#define _12V_GPIO_Port GPIOB
+#define _24V_Pin GPIO_PIN_1
+#define _24V_GPIO_Port GPIOB
+#define cwbBUTTON_Pin GPIO_PIN_9
+#define cwbBUTTON_GPIO_Port GPIOD
+#define cwbDOOR_Pin GPIO_PIN_10
+#define cwbDOOR_GPIO_Port GPIOD
+#define cwbENGM_Pin GPIO_PIN_11
+#define cwbENGM_GPIO_Port GPIOD
 #define _RED1_Pin GPIO_PIN_0
 #define _RED1_GPIO_Port GPIOD
 #define _GREEN1_Pin GPIO_PIN_1
@@ -77,6 +117,12 @@
 #define _BLUE2_GPIO_Port GPIOD
 #define SYS_SHG_Pin GPIO_PIN_4
 #define SYS_SHG_GPIO_Port GPIOB
+#define FAN_PWM_Pin GPIO_PIN_8
+#define FAN_PWM_GPIO_Port GPIOB
+#define FSW0_Pin GPIO_PIN_0
+#define FSW0_GPIO_Port GPIOE
+#define FSW1_Pin GPIO_PIN_1
+#define FSW1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

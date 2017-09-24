@@ -3,16 +3,13 @@
 #include "stm32f4xx_hal.h"
 #include "fs.h"
 #include "can.h"
+#include "adc.h"
 #include "leds.h"
 #include "misc.h"
+#include "err.h"
 
 #include <string>
 using namespace std;
-
-#define	_ADC_ERR_DELAY	200
-#define _PUMP_ERR_DELAY	3000
-#define _FAN_ERR_DELAY	5000
-#define _EC20_EM_DELAY	5
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)
@@ -21,7 +18,7 @@ using namespace std;
 #define	_SYS_SHG_DISABLE	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4, GPIO_PIN_RESET)
 #define	_SYS_SHG_ENABLED	HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4)
 
-#define	_EMG_DISABLED			HAL_GPIO_ReadPin(GPIOA,GPIO_Pin_8)
+#define	_EMG_DISABLED			HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_8)
 
 typedef enum {
 	DBG_OFF			=0,
@@ -55,23 +52,6 @@ typedef enum {
 	idEM_ack							=0x0C0,
   idBOOT								=0x20
 } _StdId;
-//_____________________________________________________________________
-typedef	enum {
-	_NOERR								=0,
-	_V5										=1<<0,
-	_V12									=1<<1,
-	_V24									=1<<2,
-	_sprayInPressure			=1<<3,
-	_sysOverheat					=1<<4,
-	_pumpTacho						=1<<5,
-	_pumpPressure					=1<<6,
-	_pumpCurrent					=1<<7,
-	_fanTacho							=1<<8,
-	_emgDisabled					=1<<9,
-	_pyroNoresp						=1<<10,
-	_illstatereq					=1<<11,
-	_energy_missing				=1<<12
-} _Error;           		
 //_____________________________________________________________________
 typedef enum {
 	_STANDBY,
@@ -127,10 +107,10 @@ typedef __packed struct _IOC_SprayAck {
 //_____________________________________________________________________
 class _IOC {
 	private:
-		static	_Error 	error_mask;
-		static  _DEBUG_	debug;
-		static	string ErrMsg[];
-	
+		static _Error 	error_mask;
+		static _DEBUG_	debug;
+		static string		ErrMsg[];
+
 	public:
 		_IOC_State 		IOC_State;
 		_IOC_FootAck	IOC_FootAck;
@@ -138,13 +118,15 @@ class _IOC {
 		_FS						*com,*com1,*com3;
 		_CAN					*can;
 		_LED 					led;
+		_ADC					adc;
 
 
 _IOC();
 ~_IOC();
-	static void	*poll(void *);
+	static void	*pollCan(void *);
+	static void	*pollStatus(void *);
 	void SetState(_State);
-	void ErrParse(_Error);
+	void SetError(_Error);
 };
 
 #endif

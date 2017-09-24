@@ -3,6 +3,7 @@
 #include <string>
 #include "fs.h"
 #include "can.h"
+#include "pump.h"
 #include "misc.h"
 #include "proc.h"
 #include <string.h>
@@ -25,13 +26,28 @@ void _FS::Newline(void) {
 //_________________________________________________________________________________
 int	_FS::Fkey(int t) {
 		switch(t) {
-			case __f12:
-			case __F12:
+			case __f5:
+			case __F5:
+			{
+				_PUMP p;
+				p.Newline();
+				while(p.Parse())
+					_wait(2,_proc_loop);
+				return __F12;
+			}
+			case __f8:
+			case __F8:
+			{
 				_CAN	*c=_CAN::InstanceOf(&hcan2);
 				c->Newline();
 				while(c->Parse())
 					_wait(2,_proc_loop);
-				break;
+				return __F12;
+			}
+			case __f1:
+			case __F1:
+				SetTimeDate();
+			break;
 		}
 		return t;
 }
@@ -93,9 +109,10 @@ FRESULT _FS::Decode(char *p) {
 				if(wcard(sc[1],p)) {
 					printf("\r\n%-16s",p);
 					if (fno.fattrib & AM_DIR)
-						printf("/");
+						printf("%-8s","/");
 					else
-						printf("%d",(int)fno.fsize);								
+						printf("%-8d",(int)fno.fsize);	
+					date_time(fno.fdate,fno.ftime);
 				}
 			}
 		} while(dir.sect);

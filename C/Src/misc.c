@@ -99,3 +99,65 @@ _io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 	}
 	return io;
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+uint32_t pump_cbk=0;
+uint32_t fan1_cbk=0;
+uint32_t fan2_cbk=0;
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
+		pump_cbk=HAL_GetTick();
+	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
+		fan1_cbk=HAL_GetTick();
+	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2)
+		fan2_cbk=HAL_GetTick();	
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	date_time(uint32_t d,uint32_t t) {
+	int day=d % 32;
+	int month=(d>>5) % 16;
+	int year=(d>>9) + 2000;
+	
+	printf("%4d-%d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
+}
+
+void SetTimeDate() {
+extern RTC_HandleTypeDef hrtc;
+RTC_TimeTypeDef sTime;
+RTC_DateTypeDef sDate;
+	/**Initialize RTC and set the Time and Date 
+    */
+ // if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
+  sTime.Hours = 0x1;
+  sTime.Minutes = 0x2;
+  sTime.Seconds = 0x3;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  {
+ //   _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sDate.WeekDay = RTC_WEEKDAY_SUNDAY;
+  sDate.Month = RTC_MONTH_SEPTEMBER;
+  sDate.Date = 0x24;
+  sDate.Year = 0x17;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  {
+ //   _Error_Handler(__FILE__, __LINE__);
+  }
+
+    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
+//  }
+}

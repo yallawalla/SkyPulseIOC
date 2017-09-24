@@ -72,6 +72,9 @@ int	_CAN::Fkey(int t) {
 			while(SendRemote() != __CtrlE)
 				_wait(10,_proc_loop);
 			break;
+		case __f8:
+		case __F8:
+			return __F12;
 	}
 	return t;
 }

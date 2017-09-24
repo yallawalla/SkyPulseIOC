@@ -19,9 +19,9 @@ _DEBUG_	_IOC::debug				= DBG_OFF;
 *******************************************************************************/
 _IOC::_IOC() {
 	SetState(_STANDBY);
-	com=new 	_FS();
-	com1=new 	_FS(&huart1);
-	com3=new 	_FS(&huart3);
+	com=	new _FS();
+	com1=	new _FS(&huart1);
+	com3=	new _FS(&huart3);
 	
 	can=_CAN::InstanceOf(&hcan2);
 	can->canFilterCfg(idIOC_State,	0x780);
@@ -30,7 +30,8 @@ _IOC::_IOC() {
 	can->canFilterCfg(idBOOT,				0x7ff);
 
 	error_mask = _NOERR;
-	_proc_add((void *)poll,this,(char *)"can task",0);
+	_proc_add((void *)pollCan,this,(char *)"can task",0);
+	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 }
 /*******************************************************************************
 * Function Name	:
@@ -48,9 +49,33 @@ _IOC::~_IOC() {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	*_IOC::poll(void *v) {
-			_IOC *me=static_cast<_IOC *>(v);
+void	*_IOC::pollCan(void *v) {
+_IOC *me=static_cast<_IOC *>(v);
 			me->can->Task(me);
+			return NULL;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+void	*_IOC::pollStatus(void *v) {
+_IOC *me=static_cast<_IOC *>(v);
+			me->adc.Smooth();
+			me->SetError(me->adc.Error());
+	
+			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
+				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
+					me->SetError(_pumpTacho);
+				if(HAL_GetTick()-fan1_cbk > _FAN_ERR_DELAY)
+					me->SetError(_fan1Tacho);
+				if(HAL_GetTick()-fan2_cbk > _FAN_ERR_DELAY)
+					me->SetError(_fan2Tacho);
+			}
+			if(_EMG_DISABLED && _SYS_SHG_ENABLED)
+				me->SetError(_emgDisabled);
+
 			return NULL;
 }
 /*******************************************************************************
@@ -72,14 +97,14 @@ void	_IOC::SetState(_State s) {
 							IOC_State.State = _READY;
 							//Submit("@ready.led");
 						} else
-							ErrParse(_illstatereq);
+							SetError(_illstatereq);
 						break;
 					case	_ACTIVE:
 						if(IOC_State.State == _READY) {
 							IOC_State.State = _ACTIVE;
 							//Submit("@active.led");
 						} else
-							ErrParse(_illstatereq);
+							SetError(_illstatereq);
 						break;
 					case	_ERROR:
 						IOC_State.State = _ERROR;
@@ -87,7 +112,7 @@ void	_IOC::SetState(_State s) {
 						_SYS_SHG_DISABLE;
 						break;
 					default:
-						ErrParse(_illstatereq);
+						SetError(_illstatereq);
 						break;
 				}
 }
@@ -97,7 +122,7 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::ErrParse(_Error e) {
+void	_IOC::SetError(_Error e) {
 
 			e = (_Error)(e & ~error_mask);
 			e ? led.RED1(3000): led.GREEN1(20);
@@ -129,10 +154,11 @@ string _IOC::ErrMsg[] = {
 	"24V supply",
 	"spray input pressure",
 	"cooler temperature",
-	"pump speed out of range",
+	"pump stall",
 	"pump pressure out of range",
 	"pump current out of range",
-	"fan speed out of range",
+	"fan1 stall",
+	"fan2 stall",
 	"emergency button pressed",
 	"handpiece ejected",
 	"illegal status request",
