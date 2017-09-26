@@ -26,7 +26,7 @@ public:
 	virtual int				Fkey(int);
 	static _CAN*			instance;
 
-	_io								*canBuffer;	
+	_io								*io,*canBuffer;	
 	void 							Task(void *),
 										canFilterCfg(int, int),
 										Send(CanTxMsgTypeDef *);

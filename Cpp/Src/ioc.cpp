@@ -24,11 +24,12 @@ _IOC::_IOC() {
 	com3=	new _FS(&huart3);
 	
 	can=_CAN::InstanceOf(&hcan2);
+	
 	can->canFilterCfg(idIOC_State,	0x780);
 	can->canFilterCfg(idEC20_req,		0x780);
 	can->canFilterCfg(idEM_ack,			0x7ff);
 	can->canFilterCfg(idBOOT,				0x7ff);
-
+	
 	error_mask = _NOERR;
 	_proc_add((void *)pollCan,this,(char *)"can task",0);
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
@@ -62,12 +63,11 @@ _IOC *me=static_cast<_IOC *>(v);
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
-			me->adc.Smooth();
-			me->SetError(me->adc.Error());
+			me->adcSmooth();
+			me->SetError(me->pump.Error());
+			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
-				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
-					me->SetError(_pumpTacho);
 				if(HAL_GetTick()-fan1_cbk > _FAN_ERR_DELAY)
 					me->SetError(_fan1Tacho);
 				if(HAL_GetTick()-fan2_cbk > _FAN_ERR_DELAY)
@@ -76,6 +76,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			if(_EMG_DISABLED && _SYS_SHG_ENABLED)
 				me->SetError(_emgDisabled);
 
+			
 			return NULL;
 }
 /*******************************************************************************

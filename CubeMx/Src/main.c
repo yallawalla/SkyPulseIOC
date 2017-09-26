@@ -145,6 +145,11 @@ int main(void)
   MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
+	HAL_TIM_PWM_Start(&htim10,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_2);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
 	ioc();
   /* USER CODE END 2 */
 
@@ -413,6 +418,9 @@ static void MX_DAC_Init(void)
 static void MX_RTC_Init(void)
 {
 
+  RTC_TimeTypeDef sTime;
+  RTC_DateTypeDef sDate;
+
     /**Initialize RTC Only 
     */
   hrtc.Instance = RTC;
@@ -425,6 +433,32 @@ static void MX_RTC_Init(void)
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Initialize RTC and set the Time and Date 
+    */
+  if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
+  sTime.Hours = 9;
+  sTime.Minutes = 30;
+  sTime.Seconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_SEPTEMBER;
+  sDate.Date = 25;
+  sDate.Year = 17;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
   }
 
 }
@@ -519,7 +553,7 @@ static void MX_TIM10_Init(void)
   htim10.Instance = TIM10;
   htim10.Init.Prescaler = 0;
   htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 50000;
+  htim10.Init.Period = 2400;
   htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
   {
@@ -532,7 +566,7 @@ static void MX_TIM10_Init(void)
   }
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 0;
+  sConfigOC.Pulse = 10;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim10, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)

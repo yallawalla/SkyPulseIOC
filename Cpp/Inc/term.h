@@ -15,16 +15,17 @@ class _TERM {
 		char 		*cmdbuf,*cmdp;
 	public:
 		_TERM() {
-			io=NULL;
+//			io=NULL;
 			seq=timeout=0;
 			cmdp=cmdbuf=new char[__CMDLEN];
 		};
-	_io	*io;
+//	_io	*io;
 	bool	Cmd(int c);
 	char	*Cmd(void);
 	int		Escape(void);
 	void	Repeat(int);
 	void *Parse(void);
+	void *Parse(_io *);
 		
 	virtual void	Newline(void);
 	virtual int		Fkey(int fkey)				{	return fkey;			};

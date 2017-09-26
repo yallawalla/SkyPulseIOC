@@ -3,6 +3,7 @@
 #include "stm32f4xx_hal.h"
 #include "fs.h"
 #include "can.h"
+#include "pump.h"
 #include "adc.h"
 #include "leds.h"
 #include "misc.h"
@@ -105,7 +106,7 @@ typedef __packed struct _IOC_SprayAck {
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
-class _IOC {
+class _IOC : public _ADC {
 	private:
 		static _Error 	error_mask;
 		static _DEBUG_	debug;
@@ -117,8 +118,9 @@ class _IOC {
 		_IOC_SprayAck	IOC_SprayAck;
 		_FS						*com,*com1,*com3;
 		_CAN					*can;
+
+		_PUMP 				pump;
 		_LED 					led;
-		_ADC					adc;
 
 
 _IOC();

@@ -19,11 +19,7 @@
 	*/
 /*******************************************************************************/
 _PUMP::_PUMP()  {
-				fpl=20;
-				fph=50;
-				ftl=25;
-				fth=40;
-
+				ftl=25; fth=40; fpl=20; fph=50;
 				offset.cooler=12500;
 				gain.cooler=13300;
 				idx=0;
@@ -50,7 +46,7 @@ void	_PUMP::SaveSettings(FILE *f) {
 }
 //_________________________________________________________________________________
 void	_PUMP::Newline(void) {
-				printf("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
+				printf("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100)/100,'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
 				if(idx>0)
 					printf("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
 				for(int i=4*(5-idx)+6;idx && i--;printf("\b"));
@@ -81,8 +77,17 @@ int		_PUMP::Fkey(int t) {
 			return EOF;
 }
 /*******************************************************************************/
-int		_PUMP::Rpm(void) {
-			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph);
+int		_PUMP::Rpm(int fsc) {
+			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
+}
+/*******************************************************************************/
+_Error _PUMP::Error(void) {	
+			HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, Rpm(1<<12));
+			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
+				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
+					return _pumpTacho;	
+			}
+			return _NOERR;
 }
 /*******************************************************************************/
 void 	_PUMP::Increment(int a, int b)	{

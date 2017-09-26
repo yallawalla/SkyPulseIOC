@@ -108,38 +108,43 @@ int		i=getchar();
 			return EOF;
 }
 //______________________________________________________________________________________
-void	*_TERM::Parse(void) {
-void 	*v=this;
-_io			*temp=_stdio(io);
-int			i;
-				do {
-					i=Escape();
-					switch(i) {
-						case EOF:
-							break;
-						case __CtrlZ:
-							while(1);
-						case __CtrlY:
-							NVIC_SystemReset();
-						break;
-						default:
-							i=Fkey(i);
-							if(i==EOF)
-								break;
-							if(i==__f12 || i==__F12) {
-								v=NULL;
-								i=__CR;
-							}
-							if(Cmd(i)) {
-								error=Decode(Cmd());
-								if(error != 0)
-									printf("... WTF(%d)",error);
-								Newline();
-							}
-					}
-				} while(i != EOF);
-				_stdio(temp);
+void	*_TERM::Parse(_io *io) {
+_io		*temp=_stdio(io);
+void	*v=Parse();
+			_stdio(temp);
 			return v;
+}
+//______________________________________________________________________________________
+void	*_TERM::Parse(void) {
+int		i;
+void 	*v=this;
+			do {
+				i=Escape();
+				switch(i) {
+					case EOF:
+						break;
+					case __CtrlZ:
+						while(1);
+					case __CtrlY:
+						NVIC_SystemReset();
+					break;
+					default:
+						i=Fkey(i);
+						if(i==EOF)
+							break;
+						if(i==__f12 || i==__F12) {
+							v=NULL;
+							i=__CR;
+						}
+						if(Cmd(i)) {
+							error=Decode(Cmd());
+							if(error != 0)
+								printf("... WTF(%d)",error);
+							Newline();
+						}
+				}
+			} while(i != EOF);
+		return v;
 }
 
 /**

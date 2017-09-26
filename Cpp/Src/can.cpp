@@ -8,14 +8,14 @@ _CAN	*_CAN::instance=NULL;
 * Return				:
 *******************************************************************************/
 _CAN::_CAN(CAN_HandleTypeDef *handle) {
-		io = NULL;
 		remote = new _FS(NULL);
 		hcan = handle;
 		hcan->pRxMsg=new CanRxMsgTypeDef;
 		hcan->pTxMsg=new CanTxMsgTypeDef;
-		canBuffer	=	_io_init(10*sizeof(CanRxMsgTypeDef), 10*sizeof(CanTxMsgTypeDef));
+		canBuffer	=	_io_init(100*sizeof(CanRxMsgTypeDef), 100*sizeof(CanTxMsgTypeDef));
 		HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 		filter_count=0;
+		io=NULL;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -27,7 +27,6 @@ int _CAN::SendRemote() {
 	CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};	
 	int i;	
 	while(tx.DLC  < 8) {
-		_stdio(io);
 		i=getchar();
 		if(i==EOF || i==__CtrlE)
 			break; 
@@ -44,12 +43,7 @@ int _CAN::SendRemote() {
 * Return				:
 *******************************************************************************/
 void _CAN::Send(CanTxMsgTypeDef *msg) {
-	if(_buffer_count(canBuffer->tx))
-		_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
-	else {
-		memcpy(hcan->pTxMsg,msg,sizeof(CanTxMsgTypeDef));
-		HAL_CAN_Transmit_IT(hcan);
-	}
+	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
 }
 /*******************************************************************************
 * Function Name	: 
@@ -145,18 +139,29 @@ FRESULT _CAN::Decode(char *c) {
 void	_CAN::Task(void *v) {
 	_IOC *parent=static_cast<_IOC *>(v);
 	
-	CanTxMsgTypeDef	  tx={0,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
-	
-	if(remote) {
-		tx.DLC=_buffer_pull(remote->io->tx,tx.Data,8);
-		tx.StdId=idCOM2CAN;
-		if(tx.DLC)
-			Send(&tx);
+	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
+	_io* temp=_stdio(io);										//remote console printout !!!
+
+	while(1) {
+		if(((hcan->Instance->TSR&CAN_TSR_TME0) != CAN_TSR_TME0) && \
+			 ((hcan->Instance->TSR&CAN_TSR_TME1) != CAN_TSR_TME1) && \
+			 ((hcan->Instance->TSR&CAN_TSR_TME2) != CAN_TSR_TME2)) 	
+					break;
+		if(_buffer_pull(canBuffer->tx,tx,sizeof(CanTxMsgTypeDef)))
+			HAL_CAN_Transmit_IT(hcan);
+		else if(remote) {
+			tx->DLC=_buffer_pull(remote->io->tx,tx->Data,8);
+			tx->StdId=idCOM2CAN;
+			if(tx->DLC)
+				HAL_CAN_Transmit_IT(hcan);
+			else
+				break;
+		} else
+			break;
 	}
 
 	if(_buffer_pull(canBuffer->rx,rx,sizeof(CanRxMsgTypeDef))) {
-		_io *temp = _stdio(this->io);
 		switch(rx->StdId) {
 			case idIOC_State:
 				if(rx->DLC)
@@ -178,8 +183,8 @@ void	_CAN::Task(void *v) {
 				Newline();	
 			break;
 		}
-		_stdio(temp);
 	}
+	_stdio(temp);
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize
@@ -225,5 +230,10 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
 		if(_buffer_pull(_CAN::instance->canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
 			HAL_CAN_Transmit_IT(hcan);
 }
+
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
+		HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+}
+
 }
 

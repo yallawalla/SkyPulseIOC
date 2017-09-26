@@ -92,7 +92,7 @@ UART_HandleTypeDef *huart=io->huart;
 *******************************************************************************/
 _io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 	_io* io=_io_init(sizeRx,sizeTx);
-	if(io) {
+	if(io && huart) {
 		io->huart=huart;
 		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->tx->size);
 		_proc_add(poll_uart,io,"uart",0);

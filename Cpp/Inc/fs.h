@@ -18,31 +18,28 @@ class _FS:public _TERM, public _FAT {
 	private:
 		int	wcard(char *, char *);
 		int	find_recurse (char *, char *, int);
-
 	public:	
+		_io *io;
 		virtual void		Newline(void);
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 	
-		static void			pollUart(_FS *me) {
-			me->Parse();
+		static void			parseUsart(_FS *me) {
+			me->Parse(me->io);
 		}
 		
-		static void			pollUsb(_FS *me) {
+		static void			parseUsb(_FS *me) {
 			me->io=_VCP;
-			me->Parse();
+			me->Parse(_VCP);
 		}
-	
+		
 		_FS(UART_HandleTypeDef *huart)	{
 			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
 			}
-			if(huart)
-				io=init_uart(huart,__RXLEN,__TXLEN);
-			else
-				io=_io_init(__RXLEN,__TXLEN);
-			_proc_add((void *)pollUart,this,(char *)"pollUart",0);
+			io=init_uart(huart,__RXLEN,__TXLEN);
+			_proc_add((void *)parseUsart,this,(char *)"parseUsart",0);
 		};
 		
 		_FS()	{
@@ -50,7 +47,7 @@ class _FS:public _TERM, public _FAT {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
 			}
-			_proc_add((void *)pollUsb,this,(char *)"FS",0);
+			_proc_add((void *)parseUsb,this,(char *)"FS",0);
 		};
 
 		~_FS(void)	{};

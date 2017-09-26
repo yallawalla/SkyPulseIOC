@@ -14,14 +14,14 @@ TCHAR		_FAT::lfn[_MAX_LFN + 1];
 FILINFO	_FAT::fno;
 //_________________________________________________________________________________
 void _FS::Newline(void) {
-	printf("\r\n");
-	if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
-		if(lfn[strlen(lfn)-1]=='/')
-			printf("%s",lfn);
-				else
-					printf("%s/",lfn);
-	} else
-	printf("?:/"); 		
+		printf("\r\n");
+		if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
+			if(lfn[strlen(lfn)-1]=='/')
+				printf("%s",lfn);
+					else
+						printf("%s/",lfn);
+		} else
+		printf("?:/"); 		
 }
 //_________________________________________________________________________________
 int	_FS::Fkey(int t) {
@@ -33,20 +33,25 @@ int	_FS::Fkey(int t) {
 				p.Newline();
 				while(p.Parse())
 					_wait(2,_proc_loop);
-				return __F12;
+				t= __F12;
+				break;
 			}
 			case __f8:
 			case __F8:
 			{
 				_CAN	*c=_CAN::InstanceOf(&hcan2);
 				c->Newline();
+				c->io=io;
 				while(c->Parse())
 					_wait(2,_proc_loop);
-				return __F12;
+				t= __F12;
+				c->io=NULL;
+				break;
 			}
 			case __f1:
 			case __F1:
 				SetTimeDate();
+				t=EOF;
 			break;
 		}
 		return t;

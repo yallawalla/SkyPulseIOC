@@ -3,9 +3,12 @@
 #include	<stdio.h>
 #include	"term.h"
 #include	"adc.h"
+#include	"err.h"
 #include	"ff.h"
 #include	<algorithm>
 #define	__ramp(x,x1,x2,y1,y2)	std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
+
+extern DAC_HandleTypeDef hdac;
 
 class	_PUMP : public _TERM, public _ADC {
 	private:
@@ -19,8 +22,8 @@ class	_PUMP : public _TERM, public _ADC {
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 		void		Increment(int, int);
-		int			Rpm(void);
-
+		int			Rpm(int);
+		_Error	Error(void);
 };
 
 #endif

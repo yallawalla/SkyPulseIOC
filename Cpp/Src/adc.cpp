@@ -27,7 +27,7 @@ int		_ADC::Th2o() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-void	_ADC::Smooth() {
+void	_ADC::adcSmooth() {
 	fval.T1					+= (val.T1					- fval.T1)/16;
 	fval.T2					+= (val.T2					- fval.T2)/16;
 	fval.V5					+= (val.V5					- fval.V5)/16;
@@ -45,7 +45,7 @@ void	_ADC::Smooth() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-_Error _ADC::Error() {
+_Error _ADC::adcError() {
 _Error e=_NOERR;
 				
 		if(HAL_GetTick() > _ADC_ERR_DELAY) {

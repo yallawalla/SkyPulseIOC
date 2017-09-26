@@ -33,7 +33,7 @@ const int Ttab[]={ 1000, 2500, 5000, 8000 };
 const	int Rtab[]={ (0xffff*_Rdiv(18813.0,5100.0)), (0xffff*_Rdiv(10000.0,5100.0)), (0xffff*_Rdiv(3894.6,5100.0)), (0xffff*_Rdiv(1462.6,5100.0))};
 
 typedef struct	{
-			unsigned short	T1,T2,V5,V12,V24,cooler,bottle,compressor,air,Ipump;
+			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air,diode1,diode2;
 		} adc;
 
 class	_ADC {
@@ -41,8 +41,8 @@ class	_ADC {
 
 	public:
 	_ADC();
-	void		Smooth(void);
-	_Error	Error(void);
+	void		adcSmooth(void);
+	_Error	adcError(void);
 	
 	static adc val, fval, gain, offset;
 	static int Th2o(void);
