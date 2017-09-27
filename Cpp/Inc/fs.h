@@ -16,8 +16,9 @@ class _FAT {
 //_________________________________________________________________________________
 class _FS:public _TERM, public _FAT {
 	private:
-		int	wcard(char *, char *);
-		int	find_recurse (char *, char *, int);
+		int		wcard(char *, char *);
+		int		find_recurse (char *, char *, int);
+		void	printRtc(void);
 	public:	
 		_io *io;
 		virtual void		Newline(void);

@@ -2,14 +2,16 @@
 #define IOC_H
 #include "stm32f4xx_hal.h"
 #include "fs.h"
-#include "can.h"
-#include "pump.h"
 #include "adc.h"
 #include "leds.h"
 #include "misc.h"
 #include "err.h"
+#include "can.h"
+#include "fan.h"
+#include "pump.h"
 
 #include <string>
+#include <ctype.h>
 using namespace std;
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
@@ -118,8 +120,8 @@ class _IOC : public _ADC {
 		_IOC_SprayAck	IOC_SprayAck;
 		_FS						*com,*com1,*com3;
 		_CAN					*can;
-
-		_PUMP 				pump;
+		_PUMP 				*pump;
+		_FAN 					*fan;
 		_LED 					led;
 
 
@@ -130,5 +132,4 @@ _IOC();
 	void SetState(_State);
 	void SetError(_Error);
 };
-
 #endif

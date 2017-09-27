@@ -19,11 +19,13 @@ _DEBUG_	_IOC::debug				= DBG_OFF;
 *******************************************************************************/
 _IOC::_IOC() {
 	SetState(_STANDBY);
-	com=	new _FS();
+	com	=	new _FS();
 	com1=	new _FS(&huart1);
 	com3=	new _FS(&huart3);
 	
-	can=_CAN::InstanceOf(&hcan2);
+	can	=_CAN::InstanceOf(&hcan2);
+	pump=_PUMP::InstanceOf();
+	fan=_FAN::InstanceOf();
 	
 	can->canFilterCfg(idIOC_State,	0x780);
 	can->canFilterCfg(idEC20_req,		0x780);
@@ -33,6 +35,14 @@ _IOC::_IOC() {
 	error_mask = _NOERR;
 	_proc_add((void *)pollCan,this,(char *)"can task",0);
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
+	
+	FIL f;
+	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
+		pump->LoadSettings((FILE *)&f);
+		fan->LoadSettings((FILE *)&f);
+		f_close(&f);
+	}	else
+		printf("... error settings file");
 }
 /*******************************************************************************
 * Function Name	:
@@ -64,7 +74,8 @@ _IOC *me=static_cast<_IOC *>(v);
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
 			me->adcSmooth();
-			me->SetError(me->pump.Error());
+			me->SetError(me->pump->Status());
+			me->SetError(me->fan->Status());
 			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
@@ -76,7 +87,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			if(_EMG_DISABLED && _SYS_SHG_ENABLED)
 				me->SetError(_emgDisabled);
 
-			
+			rpmUpdate(me->pump->Rpm(1<<12),me->fan->Rpm(1<<12));
 			return NULL;
 }
 /*******************************************************************************

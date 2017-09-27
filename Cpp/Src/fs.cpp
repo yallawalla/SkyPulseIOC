@@ -1,12 +1,6 @@
 #include "term.h"
-#include <ctype.h>
-#include <string>
-#include "fs.h"
-#include "can.h"
-#include "pump.h"
-#include "misc.h"
-#include "proc.h"
-#include <string.h>
+#include "ioc.h"
+
 
 FATFS		_FAT::fatfs;
 DIR			_FAT::dir;			
@@ -29,12 +23,20 @@ int	_FS::Fkey(int t) {
 			case __f5:
 			case __F5:
 			{
-				_PUMP p;
-				p.Newline();
-				while(p.Parse())
+				_PUMP	*p=_PUMP::InstanceOf();
+				p->Newline();
+				while(p->Parse())
 					_wait(2,_proc_loop);
-				t= __F12;
-				break;
+				return __F12;
+			}
+			case __f6:
+			case __F6:
+			{
+				_FAN	*p=_FAN::InstanceOf();
+				p->Newline();
+				while(p->Parse())
+					_wait(2,_proc_loop);
+				return __F12;
 			}
 			case __f8:
 			case __F8:
@@ -44,17 +46,31 @@ int	_FS::Fkey(int t) {
 				c->io=io;
 				while(c->Parse())
 					_wait(2,_proc_loop);
-				t= __F12;
 				c->io=NULL;
+				return __F12;
+			}
+			case __f11:
+			case __F11:
+			{
+				FIL f;
+				if(f_open(&f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
+					_PUMP::InstanceOf()->SaveSettings((FILE *)&f);
+					_FAN::InstanceOf()->SaveSettings((FILE *)&f);
+					printf("... saved");
+					f_close(&f);
+					return EOF;
+				}	else
+					printf("... error settings file");		
 				break;
 			}
 			case __f1:
 			case __F1:
 				SetTimeDate();
-				t=EOF;
-			break;
+				break;
+			default:
+				return t;
 		}
-		return t;
+		return EOF;
 }
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
@@ -173,6 +189,21 @@ FRESULT _FS::Decode(char *p) {
 			return FR_NO_FILE;
 		if(FRESULT err=f_mkdir(sc[1]))
 			return err;	
+	}
+//__copy file______________________________________________________________________
+	else if(!strncmp("time",sc[0],len)) {
+		int h, m;
+		if(sscanf(sc[1],"%d:%d",&h,&m)==2) {
+			RTC_TimeTypeDef sTime;
+			sTime.Hours = h;
+			sTime.Minutes =m;
+			sTime.Seconds = 0;
+			sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+			sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+			if(HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+				return FR_NOT_READY;
+		} else
+			printRtc();
 	}
 //__copy file______________________________________________________________________
 	else if(!strncmp("copy",sc[0],len)) {
@@ -323,6 +354,16 @@ int	_FS::wcard(char *t, char *s) {
 			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : 
 				!*t : 
 					wcard(t+1,s) || (*s && wcard(t,s+1));
+}
+//_________________________________________________________________________________
+string days[]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+string months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+void	_FS::printRtc() {
+RTC_TimeTypeDef t;
+RTC_DateTypeDef d;
+		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
+		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
+		printf("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay].c_str(),d.Date,months[d.Month].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
 }
 //_________________________________________________________________________________
 int	_FS::find_recurse (char * dir_name, char *w, int fact) {

@@ -13,14 +13,14 @@
 class _CAN : public _TERM {
 
 private:
-	CAN_HandleTypeDef *hcan;
+  _CAN(CAN_HandleTypeDef *);
 	_FS *	remote;
 	int		SendRemote(void);
 	int		filter_count;
+	CAN_HandleTypeDef *hcan;
 
 	
 public:
-  _CAN(CAN_HandleTypeDef *);
 	virtual void			Newline(void);
 	virtual FRESULT		Decode(char *);
 	virtual int				Fkey(int);
@@ -33,9 +33,9 @@ public:
 	
 	
 	static _CAN				*InstanceOf(CAN_HandleTypeDef *hcan) {
-		if(instance==NULL)
-			instance=new _CAN(hcan);
-		return instance;
+										if(instance==NULL)
+											instance=new _CAN(hcan);
+										return instance;
 	}
 };
 #endif

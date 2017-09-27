@@ -77,11 +77,14 @@ UART_HandleTypeDef *huart=io->huart;
 	
 	io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
 	if(huart->gState == HAL_UART_STATE_READY) {
+		int len;
 		if(!huart->pTxBuffPtr)
 			huart->pTxBuffPtr=malloc(io->tx->size);
-		int len=_buffer_pull(io->tx, huart->pTxBuffPtr, io->tx->size);
-		if(len)
-			HAL_UART_Transmit_DMA(huart, huart->pTxBuffPtr, len);
+		do {
+			len=_buffer_pull(io->tx, huart->pTxBuffPtr, io->tx->size);
+			if(len)
+				HAL_UART_Transmit_DMA(huart, huart->pTxBuffPtr, len);
+		} while(len > 0);
 	}
 }
 /*******************************************************************************
@@ -116,6 +119,20 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		fan1_cbk=HAL_GetTick();
 	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2)
 		fan2_cbk=HAL_GetTick();	
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+extern TIM_HandleTypeDef htim10;
+extern DAC_HandleTypeDef hdac;
+
+void rpmUpdate(uint32_t pump, uint32_t fan) {
+	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,pump);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
+	htim10.Instance->CCR1 = htim10.Instance->ARR * fan / (1<<12);
 }
 /*******************************************************************************
 * Function Name	: 

@@ -1,32 +1,35 @@
-#ifndef			FAN_H
-#define			FAN_H
-#include		"stdio.h"
-#include		"adc.h"
-#include		"dac.h"
-#include		"tim.h"
-#include		"fit.h"
-#include		"isr.h"
+#ifndef		FAN_H
+#define		FAN_H
+#include	<stdio.h>
+#include	"term.h"
+#include	"adc.h"
+#include	"err.h"
+#include	"ff.h"
+#include	<algorithm>
+#define	__ramp(x,x1,x2,y1,y2)	std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
 
-class	_FAN:_ADC,_TIM3 {
+extern TIM_HandleTypeDef htim10;
+
+class	_FAN : public _TERM, public _ADC {
 	private:
-int		idx,led,timeout;
-int		fpl, fph, ftl, fth;
-_FIT	*tacho;
-	
-	public:
+		int fpl,fph,ftl,fth,idx;
 		_FAN();
+	public:
+		static _FAN*			instance;
+		void	LoadSettings(FILE *);
+		void	SaveSettings(FILE *);
 
-int		Poll(void);
-int		Rpm(void);
-int		Increment(int, int);
-void	LoadSettings(FILE *);
-void	SaveSettings(FILE *);
-void	Enable(void),Disable(void);
-bool	Align(void);
-void	LoadLimits(FILE *);
-void	SaveLimits(FILE *);
-bool	Test(void);
-
+		virtual void		Newline(void);
+		virtual FRESULT	Decode(char *);
+		virtual int			Fkey(int);
+		void		Increment(int, int);
+		int			Rpm(int);
+		_Error	Status(void);
+		static _FAN	*InstanceOf() {
+									if(instance==NULL)
+										instance=new _FAN();
+									return instance;
+	}
 };
 
 #endif

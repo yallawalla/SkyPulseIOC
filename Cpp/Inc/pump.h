@@ -13,8 +13,9 @@ extern DAC_HandleTypeDef hdac;
 class	_PUMP : public _TERM, public _ADC {
 	private:
 		int fpl,fph,ftl,fth,idx;
-	public:
 		_PUMP();
+	public:
+		static _PUMP*			instance;
 		void	LoadSettings(FILE *);
 		void	SaveSettings(FILE *);
 
@@ -23,7 +24,12 @@ class	_PUMP : public _TERM, public _ADC {
 		virtual int			Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
-		_Error	Error(void);
+		_Error	Status(void);
+		static _PUMP	*InstanceOf() {
+									if(instance==NULL)
+										instance=new _PUMP();
+									return instance;
+	}
 };
 
 #endif

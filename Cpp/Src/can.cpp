@@ -63,14 +63,19 @@ void _CAN::Newline(void) {
 int	_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
+			printf("remote desktop...\r\n");
 			while(SendRemote() != __CtrlE)
 				_wait(10,_proc_loop);
+			printf("close...");
+			Newline();
 			break;
 		case __f8:
 		case __F8:
-			return __F12;
+			return __F12;			
+		default:
+			return t;
 	}
-	return t;
+	return EOF;
 }
 /*******************************************************************************
 * Function Name	: 

@@ -27,10 +27,12 @@ HAL_StatusTypeDef canFilterCfg(CAN_HandleTypeDef *);
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
 extern CAN_HandleTypeDef	hcan2;
+extern RTC_HandleTypeDef 	hrtc;
 //extern IWDG_HandleTypeDef hiwdg;
 extern _io	*_VCP;
 extern void	date_time(uint32_t, uint32_t);
 extern void SetTimeDate(void);
+extern void	rpmUpdate(uint32_t, uint32_t);
 #ifdef __cplusplus
 }
 #endif
