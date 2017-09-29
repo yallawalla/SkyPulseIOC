@@ -65,6 +65,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			me->adcSmooth();
 			me->SetError(me->pump->Status());
 			me->SetError(me->fan->Status());
+			me->SetError(me->spray->Status());
 			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
@@ -75,8 +76,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			}
 			if(_EMG_DISABLED && _SYS_SHG_ENABLED)
 				me->SetError(_emgDisabled);
-
-			rpmUpdate(me->pump->Rpm(1<<12),me->fan->Rpm(1<<12));
+			
 			return NULL;
 }
 /*******************************************************************************

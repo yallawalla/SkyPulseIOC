@@ -11,6 +11,7 @@
 * @{
 */
 #include	"fan.h"
+#include	"misc.h"
 _FAN	*_FAN::instance=NULL;
 /*******************************************************************************/
 /**
@@ -85,6 +86,7 @@ int		_FAN::Rpm(int fsc) {
 }
 /*******************************************************************************/
 _Error _FAN::Status(void) {	
+			fan_drive  =Rpm(__PWMRATE);
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
 				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
 					return _pumpTacho;	

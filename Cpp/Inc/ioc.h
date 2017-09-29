@@ -9,6 +9,7 @@
 #include "can.h"
 #include "fan.h"
 #include "pump.h"
+#include "spray.h"
 
 #include <string>
 #include <ctype.h>
@@ -122,6 +123,7 @@ class _IOC : public _ADC {
 		_CAN						*can;
 		_PUMP 					*pump;
 		_FAN 						*fan;
+		_SPRAY 					*spray;
 		_LED 						led;
 
 		_IOC();

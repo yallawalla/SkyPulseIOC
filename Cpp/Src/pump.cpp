@@ -11,6 +11,7 @@
 * @{
 */
 #include	"pump.h"
+#include	"misc.h"
 _PUMP	*_PUMP::instance=NULL;
 /*******************************************************************************/
 /**
@@ -85,7 +86,7 @@ int		_PUMP::Rpm(int fsc) {
 }
 /*******************************************************************************/
 _Error _PUMP::Status(void) {	
-//			HAL_DAC_SetValue(&hdac, DAC_CHANNEL_1, DAC_ALIGN_12B_R, Rpm(1<<12));
+			pump_drive =Rpm(1<<12);
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
 				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
 					return _pumpTacho;	

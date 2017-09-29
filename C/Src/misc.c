@@ -111,6 +111,9 @@ _io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 uint32_t pump_cbk=0;
 uint32_t fan1_cbk=0;
 uint32_t fan2_cbk=0;
+uint16_t pump_drive,fan_drive;
+uint16_t valve_drive[4]={400,400,400,400};
+
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
@@ -126,13 +129,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 * Output				:
 * Return				:
 *******************************************************************************/
-extern TIM_HandleTypeDef htim10;
-extern DAC_HandleTypeDef hdac;
-
-void rpmUpdate(uint32_t pump, uint32_t fan) {
-	HAL_DAC_SetValue(&hdac,DAC_CHANNEL_1,DAC_ALIGN_12B_R,pump);
-	HAL_DAC_Start(&hdac,DAC_CHANNEL_1);
-	htim10.Instance->CCR1 = htim10.Instance->ARR * fan / (1<<12);
+void HAL_SYSTICK_Callback(void) {
+		TIM10->CCR1=fan_drive;
 }
 /*******************************************************************************
 * Function Name	: 

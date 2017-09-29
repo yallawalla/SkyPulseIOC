@@ -24,7 +24,4 @@ typedef	enum {
 #define _FAN_ERR_DELAY		5000
 #define _TACHO_ERR_DELAY	100
 #define _EC20_EM_DELAY		5
-
-extern	uint32_t pump_cbk, fan1_cbk, fan2_cbk;
-
 #endif

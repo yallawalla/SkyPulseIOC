@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/Matjaz/Desktop/skyCube/CubeMx/Inc
+HeaderPath=C:/Users/Mocnik/Desktop/skyCube/CubeMx/Inc
 HeaderFiles=ffconf.h;user_diskio.h;fatfs.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;usb_device.h;usbd_conf.h;usbd_desc.h;usbd_cdc_if.h;
-SourcePath=C:/Users/Matjaz/Desktop/skyCube/CubeMx/Src
+SourcePath=C:/Users/Mocnik/Desktop/skyCube/CubeMx/Src
 SourceFiles=ffconf.h;user_diskio.h;fatfs.h;stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;user_diskio.c;fatfs.c;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;usb_device.h;usbd_conf.h;usbd_desc.h;usbd_cdc_if.h;usb_device.c;usbd_conf.c;usbd_desc.c;usbd_cdc_if.c;
 
 [PreviousLibFiles]

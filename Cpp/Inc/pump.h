@@ -15,7 +15,7 @@ class	_PUMP : public _TERM, public _ADC {
 		int fpl,fph,ftl,fth,idx;
 		_PUMP();
 	public:
-		static _PUMP*			instance;
+		static _PUMP* instance;
 		void	LoadSettings(FILE *);
 		void	SaveSettings(FILE *);
 
@@ -29,7 +29,7 @@ class	_PUMP : public _TERM, public _ADC {
 									if(instance==NULL)
 										instance=new _PUMP();
 									return instance;
-	}
+		}
 };
 
 #endif
