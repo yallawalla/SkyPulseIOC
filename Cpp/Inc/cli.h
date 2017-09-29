@@ -1,5 +1,5 @@
-#ifndef FS_H
-#define FS_H
+#ifndef CLI_H
+#define CLI_H
 
 #include "ff.h"
 #include "term.h"
@@ -14,7 +14,7 @@ class _FAT {
 	static	FILINFO	fno;
 };
 //_________________________________________________________________________________
-class _FS:public _TERM, public _FAT {
+class _CLI:public _TERM, public _FAT {
 	private:
 		int		wcard(char *, char *);
 		int		find_recurse (char *, char *, int);
@@ -25,16 +25,16 @@ class _FS:public _TERM, public _FAT {
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 	
-		static void			parseUsart(_FS *me) {
+		static void			parseUsart(_CLI *me) {
 			me->Parse(me->io);
 		}
 		
-		static void			parseUsb(_FS *me) {
+		static void			parseUsb(_CLI *me) {
 			me->io=_VCP;
 			me->Parse(_VCP);
 		}
 		
-		_FS(UART_HandleTypeDef *huart)	{
+		_CLI(UART_HandleTypeDef *huart)	{
 			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
@@ -43,7 +43,7 @@ class _FS:public _TERM, public _FAT {
 			_proc_add((void *)parseUsart,this,(char *)"parseUsart",0);
 		};
 		
-		_FS()	{
+		_CLI() {
 			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
@@ -51,7 +51,7 @@ class _FS:public _TERM, public _FAT {
 			_proc_add((void *)parseUsb,this,(char *)"FS",0);
 		};
 
-		~_FS(void)	{};
+		~_CLI(void)	{};
 };
 
 #endif

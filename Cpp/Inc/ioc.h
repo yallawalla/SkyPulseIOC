@@ -1,7 +1,7 @@
 #ifndef IOC_H
 #define IOC_H
 #include "stm32f4xx_hal.h"
-#include "fs.h"
+#include "cli.h"
 #include "adc.h"
 #include "leds.h"
 #include "misc.h"
@@ -115,21 +115,24 @@ class _IOC : public _ADC {
 		static string		ErrMsg[];
 
 	public:
-		_IOC_State 		IOC_State;
-		_IOC_FootAck	IOC_FootAck;
-		_IOC_SprayAck	IOC_SprayAck;
-		_FS						*com,*com1,*com3;
-		_CAN					*can;
-		_PUMP 				*pump;
-		_FAN 					*fan;
-		_LED 					led;
+		_IOC_State 			IOC_State;
+		_IOC_FootAck		IOC_FootAck;
+		_IOC_SprayAck		IOC_SprayAck;
+		_CLI						*com,*com1,*com3;
+		_CAN						*can;
+		_PUMP 					*pump;
+		_FAN 						*fan;
+		_LED 						led;
 
-
-_IOC();
-~_IOC();
-	static void	*pollCan(void *);
-	static void	*pollStatus(void *);
-	void SetState(_State);
-	void SetError(_Error);
+		_IOC();
+		~_IOC();
+			
+		static void	*task(_IOC *v) {
+			return v->can->Task(v);
+		}
+		
+		static void	*pollStatus(void *);
+		void SetState(_State);
+		void SetError(_Error);
 };
 #endif

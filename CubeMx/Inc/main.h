@@ -58,6 +58,7 @@
 #define __RXLEN 128
 #define __TXLEN 128
 #define __CMDLEN 128
+#define __PWMRATE 2000
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
@@ -99,6 +100,14 @@
 #define cwbDOOR_GPIO_Port GPIOD
 #define cwbENGM_Pin GPIO_PIN_11
 #define cwbENGM_GPIO_Port GPIOD
+#define _BOTTLE_OUT_Pin GPIO_PIN_6
+#define _BOTTLE_OUT_GPIO_Port GPIOC
+#define _BOTTLE_IN_Pin GPIO_PIN_7
+#define _BOTTLE_IN_GPIO_Port GPIOC
+#define _AIR_Pin GPIO_PIN_8
+#define _AIR_GPIO_Port GPIOC
+#define _WATER_Pin GPIO_PIN_9
+#define _WATER_GPIO_Port GPIOC
 #define _RED1_Pin GPIO_PIN_0
 #define _RED1_GPIO_Port GPIOD
 #define _GREEN1_Pin GPIO_PIN_1

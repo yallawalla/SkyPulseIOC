@@ -7,7 +7,7 @@ DIR			_FAT::dir;
 TCHAR		_FAT::lfn[_MAX_LFN + 1];
 FILINFO	_FAT::fno;
 //_________________________________________________________________________________
-void _FS::Newline(void) {
+void _CLI::Newline(void) {
 		printf("\r\n");
 		if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
 			if(lfn[strlen(lfn)-1]=='/')
@@ -18,7 +18,7 @@ void _FS::Newline(void) {
 		printf("?:/"); 		
 }
 //_________________________________________________________________________________
-int	_FS::Fkey(int t) {
+int	_CLI::Fkey(int t) {
 		switch(t) {
 			case __f5:
 			case __F5:
@@ -58,9 +58,9 @@ int	_FS::Fkey(int t) {
 					_FAN::InstanceOf()->SaveSettings((FILE *)&f);
 					printf("... saved");
 					f_close(&f);
-					return EOF;
 				}	else
 					printf("... error settings file");		
+				Newline();
 				break;
 			}
 			case __f1:
@@ -75,7 +75,7 @@ int	_FS::Fkey(int t) {
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
-FRESULT _FS::Decode(char *p) {
+FRESULT _CLI::Decode(char *p) {
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
 
@@ -350,7 +350,7 @@ FRESULT _FS::Decode(char *p) {
 	return FR_OK;
 }
 //_________________________________________________________________________________
-int	_FS::wcard(char *t, char *s) {
+int	_CLI::wcard(char *t, char *s) {
 			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : 
 				!*t : 
 					wcard(t+1,s) || (*s && wcard(t,s+1));
@@ -358,7 +358,7 @@ int	_FS::wcard(char *t, char *s) {
 //_________________________________________________________________________________
 string days[]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
 string months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-void	_FS::printRtc() {
+void	_CLI::printRtc() {
 RTC_TimeTypeDef t;
 RTC_DateTypeDef d;
 		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
@@ -366,7 +366,7 @@ RTC_DateTypeDef d;
 		printf("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay].c_str(),d.Date,months[d.Month].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
 }
 //_________________________________________________________________________________
-int	_FS::find_recurse (char * dir_name, char *w, int fact) {
+int	_CLI::find_recurse (char * dir_name, char *w, int fact) {
 DIR	dir;
 FILINFO	fno;
 		if (f_opendir(&dir,dir_name) != FR_OK)

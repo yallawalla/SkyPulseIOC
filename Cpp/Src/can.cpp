@@ -8,7 +8,7 @@ _CAN	*_CAN::instance=NULL;
 * Return				:
 *******************************************************************************/
 _CAN::_CAN(CAN_HandleTypeDef *handle) {
-		remote = new _FS(NULL);
+		remote = new _CLI(NULL);
 		hcan = handle;
 		hcan->pRxMsg=new CanRxMsgTypeDef;
 		hcan->pTxMsg=new CanTxMsgTypeDef;
@@ -141,7 +141,7 @@ FRESULT _CAN::Decode(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_CAN::Task(void *v) {
+void	*_CAN::Task(void *v) {
 	_IOC *parent=static_cast<_IOC *>(v);
 	
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
@@ -190,6 +190,7 @@ void	_CAN::Task(void *v) {
 		}
 	}
 	_stdio(temp);
+	return NULL;
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize

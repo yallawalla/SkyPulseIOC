@@ -3,7 +3,7 @@
 
 #include	"stm32f4xx_hal.h"
 #include	<string.h>
-#include	"fs.h"
+#include	"cli.h"
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -14,7 +14,7 @@ class _CAN : public _TERM {
 
 private:
   _CAN(CAN_HandleTypeDef *);
-	_FS *	remote;
+	_CLI	*remote;
 	int		SendRemote(void);
 	int		filter_count;
 	CAN_HandleTypeDef *hcan;
@@ -27,7 +27,7 @@ public:
 	static _CAN*			instance;
 
 	_io								*io,*canBuffer;	
-	void 							Task(void *),
+	void 							*Task(void *),
 										canFilterCfg(int, int),
 										Send(CanTxMsgTypeDef *);
 	

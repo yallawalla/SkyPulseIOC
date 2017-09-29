@@ -19,9 +19,9 @@ _DEBUG_	_IOC::debug				= DBG_OFF;
 *******************************************************************************/
 _IOC::_IOC() {
 	SetState(_STANDBY);
-	com	=	new _FS();
-	com1=	new _FS(&huart1);
-	com3=	new _FS(&huart3);
+	com	=	new _CLI();
+	com1=	new _CLI(&huart1);
+	com3=	new _CLI(&huart3);
 	
 	can	=_CAN::InstanceOf(&hcan2);
 	pump=_PUMP::InstanceOf();
@@ -33,7 +33,7 @@ _IOC::_IOC() {
 	can->canFilterCfg(idBOOT,				0x7ff);
 	
 	error_mask = _NOERR;
-	_proc_add((void *)pollCan,this,(char *)"can task",0);
+	_proc_add((void *)task,this,(char *)"can task",0);
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	
 	FIL f;
@@ -53,17 +53,6 @@ _IOC::_IOC() {
 _IOC::~_IOC() {
 	
 
-}
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-void	*_IOC::pollCan(void *v) {
-_IOC *me=static_cast<_IOC *>(v);
-			me->can->Task(me);
-			return NULL;
 }
 /*******************************************************************************
 * Function Name	:
