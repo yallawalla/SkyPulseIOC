@@ -38,6 +38,15 @@ int	_CLI::Fkey(int t) {
 					_wait(2,_proc_loop);
 				return __F12;
 			}
+			case __f7:
+			case __F7:
+			{
+				_SPRAY	*p=_SPRAY::InstanceOf();
+				p->Newline();
+				while(p->Parse())
+					_wait(2,_proc_loop);
+				return __F12;
+			}
 			case __f8:
 			case __F8:
 			{
@@ -56,6 +65,7 @@ int	_CLI::Fkey(int t) {
 				if(f_open(&f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
 					_PUMP::InstanceOf()->SaveSettings((FILE *)&f);
 					_FAN::InstanceOf()->SaveSettings((FILE *)&f);
+					_SPRAY::InstanceOf()->SaveSettings((FILE *)&f);
 					printf("... saved");
 					f_close(&f);
 				}	else

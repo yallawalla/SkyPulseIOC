@@ -40,6 +40,7 @@ _IOC::_IOC() {
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
 		pump->LoadSettings((FILE *)&f);
 		fan->LoadSettings((FILE *)&f);
+		spray->LoadSettings((FILE *)&f);
 		f_close(&f);
 	}	else
 		printf("... error settings file");
@@ -65,7 +66,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			me->adcSmooth();
 			me->SetError(me->pump->Status());
 			me->SetError(me->fan->Status());
-			me->SetError(me->spray->Status());
+			me->SetError(me->spray->Status(me));
 			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
@@ -139,7 +140,7 @@ void	_IOC::SetError(_Error e) {
 					//Submit("@error.led");
 			}
 
-			for(int n=0; e && _IOC::debug & (1<<DBG_ERR); e = (_Error)(e>>1), ++n)
+			for(int n=0; e && debug & (1<<DBG_ERR); e = (_Error)(e>>1), ++n)
 				if(e & (1<<0))
 					printf("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
 }

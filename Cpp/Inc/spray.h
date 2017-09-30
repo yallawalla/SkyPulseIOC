@@ -17,8 +17,31 @@ typedef	struct {
 	bool	Simulator:1;
 	bool	Ready:1;
 }	mode;
+//________________________________________________________________________________________________
+class	_VALVE {
+	private:
+		int 	n;
+		bool	inv;
+	public:
+		_VALVE(int k, bool i) {	
+			n = k; 
+			inv=i;
+		};
+		
+		int	 Set();
+		void Set(int);
+		void Set(int, int);
 
-class	_SPRAY:public _ADC {
+		
+		bool Opened(void)							{ return inv ? Set() : !Set();};
+		bool Closed(void)							{ return !Opened();};
+		void Open(void)								{ inv ? Set(__PWMRATE): Set(0);};
+		void Close(void)							{ inv ? Set(0): Set(__PWMRATE*9/10);};
+		void Open(int i)							{ inv ? Set(__PWMRATE*9/10,i): Set(0,i);};
+		void Close(int i)							{ inv ? Set(0,i): Set(__PWMRATE*9/10,i);};
+};
+
+class	_SPRAY : public _TERM, public _ADC {
 	private:
 		_SPRAY();
 		int	Bottle_ref, Bottle_P;
@@ -27,23 +50,25 @@ class	_SPRAY:public _ADC {
 
 	public:
 		static _SPRAY* instance;
+		void		LoadSettings(FILE *);
+		void		SaveSettings(FILE *);
 		virtual void		Newline(void);
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 		void		Increment(int, int);
 
-		mode		mode;
-		_IOC_SprayAck	IOC_SprayAck;
-
 		_VALVE	*BottleIn,*BottleOut,*Air,*Water;
+		_Error	Status(void *);
+		mode		mode;
+
 		int			AirLevel, WaterLevel;
-		int			Status(void);
-		void		LoadSettings(FILE *);
-		void		SaveSettings(FILE *);
-		void		Increment(int, int);
-	
-		_LCD		*lcd;
-		_PLOT<unsigned short>  plot;	
+		static _SPRAY	*InstanceOf(void) {
+									if(instance==NULL)
+										instance=new _SPRAY;
+									return instance;
+	}	
+//		_LCD		*lcd;
+//		_PLOT<unsigned short>  plot;	
 	
 		bool		Simulator(void);
 		double	pComp,pBott,pNozz,Pin,Pout;

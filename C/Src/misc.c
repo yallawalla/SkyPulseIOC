@@ -113,6 +113,7 @@ uint32_t fan1_cbk=0;
 uint32_t fan2_cbk=0;
 uint16_t pump_drive,fan_drive;
 uint16_t valve_drive[4]={400,400,400,400};
+uint16_t valve_time[4]={0,0,0,0};
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
