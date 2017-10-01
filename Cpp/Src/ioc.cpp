@@ -26,6 +26,7 @@ _IOC::_IOC() {
 	can	=_CAN::InstanceOf(&hcan2);
 	pump=_PUMP::InstanceOf();
 	fan=_FAN::InstanceOf();
+	spray=_SPRAY::InstanceOf();
 	
 	can->canFilterCfg(idIOC_State,	0x780);
 	can->canFilterCfg(idEC20_req,		0x780);

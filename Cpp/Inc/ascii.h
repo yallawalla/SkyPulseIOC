@@ -17,6 +17,8 @@
 #define	__CtrlP			0x10
 #define	__CtrlQ			0x11
 #define	__CtrlR			0x12
+#define	__CtrlS			0x13
+#define	__CtrlT			0x14
 #define	__CtrlV			0x16
 #define	__CtrlZ			0x1a
 #define	__CtrlY			0x19

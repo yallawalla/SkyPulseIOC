@@ -4,13 +4,13 @@
 #include	"stm32f4xx_hal.h"
 #include 	<stdlib.h>
 #include 	"err.h"
+
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
 * Output				:
 * Return				:
 *******************************************************************************/
-extern	ADC_HandleTypeDef hadc1;
 #define	_ADC_ERR_DELAY		200
 #define	_UREF							3.3
 #define	_Rdiv(a,b)				((a)/(a+b))

@@ -71,8 +71,6 @@ int		_PUMP::Fkey(int t) {
 					case __Right:
 						Increment(0,1);
 					break;
-					default:
-						return t;
 				}
 			return EOF;
 }

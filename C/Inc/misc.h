@@ -28,9 +28,11 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
 extern CAN_HandleTypeDef	hcan2;
 extern RTC_HandleTypeDef 	hrtc;
+extern ADC_HandleTypeDef	hadc1;
 
 extern	uint32_t pump_cbk, fan1_cbk, fan2_cbk;
-extern	uint16_t pump_drive, fan_drive, valve_drive[], valve_time[];
+extern	uint16_t pump_drive, fan_drive, valve_drive[];
+extern	uint32_t valve_time[];
 
 extern _io	*_VCP;
 extern void	date_time(uint32_t, uint32_t);

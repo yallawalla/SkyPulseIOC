@@ -113,7 +113,7 @@ uint32_t fan1_cbk=0;
 uint32_t fan2_cbk=0;
 uint16_t pump_drive,fan_drive;
 uint16_t valve_drive[4]={400,400,400,400};
-uint16_t valve_time[4]={0,0,0,0};
+uint32_t valve_time[4]={0,0,0,0};
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
@@ -132,6 +132,14 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 *******************************************************************************/
 void HAL_SYSTICK_Callback(void) {
 		TIM10->CCR1=fan_drive;
+		for(int i=0; i<sizeof(valve_time)/sizeof(uint32_t); ++i)
+			if(valve_time[i] && HAL_GetTick() > valve_time[i]) {
+				valve_time[i]=0;
+				if(valve_drive[i])
+					valve_drive[i]=0;
+				else
+					valve_drive[i]=__PWMRATE;
+			}
 }
 /*******************************************************************************
 * Function Name	: 

@@ -1,4 +1,5 @@
 #include	"adc.h"
+#include	"misc.h"
 adc	_ADC::val	={0},
 		_ADC::fval={0},
 		_ADC::offset={0},

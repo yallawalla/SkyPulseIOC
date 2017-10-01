@@ -1,5 +1,5 @@
-#ifndef					SPRAY_H
-#define					SPRAY_H
+#ifndef		SPRAY_H
+#define		SPRAY_H
 
 #include	<stdio.h>
 #include	"term.h"
@@ -7,10 +7,10 @@
 #include	"err.h"
 #include	"ff.h"
 #include	<algorithm>
+#include	"lcd.h"
 
-#define					_BAR(a) ((a)*16384.0)
-extern void			Simulate(void);					
-
+#define		_BAR(a) ((a)*16384.0)
+				
 typedef	struct {
 	bool	On:1;
 	bool	Vibrate:1;
@@ -67,11 +67,11 @@ class	_SPRAY : public _TERM, public _ADC {
 										instance=new _SPRAY;
 									return instance;
 	}	
-//		_LCD		*lcd;
-//		_PLOT<unsigned short>  plot;	
+	_LCD						*lcd;
 	
-		bool		Simulator(void);
-		double	pComp,pBott,pNozz,Pin,Pout;
+	
+	bool		Simulator(void);
+	double	pComp,pBott,pNozz,Pin,Pout;
 };
 
 #endif

@@ -31,10 +31,10 @@ void	_VALVE::Set(int i, int t) {
 		valve_time[n]=HAL_GetTick()+t;
 };
 _SPRAY::_SPRAY() {	
-		Water=			new _VALVE(7,true);
-		Air=				new _VALVE(6,true);
-		BottleIn=		new _VALVE(5,true);
-		BottleOut=	new _VALVE(4,false);
+		Water=			new _VALVE(3,true);
+		Air=				new _VALVE(2,true);
+		BottleIn=		new _VALVE(1,true);
+		BottleOut=	new _VALVE(0,false);
 
 		offset.air=offset.bottle=offset.compressor=	_BAR(1);
 		gain.air=																		_BAR(2);
@@ -56,6 +56,7 @@ _SPRAY::_SPRAY() {
 		Water->Close();
 		
 		simrate=timeout=count=0;
+		lcd=NULL;
 		Pin=4.0;
 		pComp= pBott=pNozz=Pout=1.0;
 }
@@ -131,10 +132,10 @@ _Error	e=_NOERR;
 			Air->Close();
 		
 		if(mode.Simulator && Simulator()) {
-#ifdef USE_LCD
-		if(lcd && plot.Refresh())
+
+		if(lcd->Refresh())
 			lcd->Grid();
-#endif
+
 		}		
 		return e;
 }
@@ -155,8 +156,8 @@ void _SPRAY::Newline(void) {
 //_________________________________________________________________________________
 int		_SPRAY::Fkey(int t) {
 			switch(t) {
-					case __f5:
-					case __F5:
+					case __f7:
+					case __F7:
 						return __F12;
 					case __Up:
 						Increment(1,0);
@@ -170,8 +171,17 @@ int		_SPRAY::Fkey(int t) {
 					case __Right:
 						Increment(0,1);
 					break;
-					default:
-						return t;
+					case __Esc:
+						mode.On ? mode.On=false: mode.On=true;
+					break;		
+					case __CtrlS:
+						HAL_ADC_DeInit(&hadc1);
+						lcd=new _LCD;
+						lcd->Add(&_ADC::val.compressor,_BAR(1.0),_BAR(0.02), LCD_COLOR_YELLOW);
+						lcd->Add(&_ADC::val.bottle,_BAR(1.0),_BAR(0.02), LCD_COLOR_GREY);
+						lcd->Add(&_ADC::val.air,_BAR(1.0),_BAR(0.02), LCD_COLOR_MAGENTA);
+						mode.Simulator=true;
+					break;
 				}
 			return EOF;
 }
@@ -252,61 +262,58 @@ void	_SPRAY::Increment(int a, int b) {
 
 *******************************************************************************/
 bool	_SPRAY::Simulator(void) {
-//					
-//_TIM		*tim=_TIM::Instance();
+#define Uc1	 pComp
+#define Uc2	 pBott
+#define Uc3	 pNozz
 
-//#define Uc1	 pComp
-//#define Uc2	 pBott
-//#define Uc3	 pNozz
+#define Rin		10
+#define Rout	100
 
-//#define Rin		10
-//#define Rout	100
+#define R2		100
+#define Rw 		300
+#define Ra 		300
+#define Rsp		10
+#define C1 		1e-2
+#define C3		100e-6
+#define C2 		50e-3
+#define dt		1e-3
 
-//#define R2		100
-//#define Rw 		300
-//#define Ra 		300
-//#define Rsp		10
-//#define C1 		1e-2
-//#define C3		100e-6
-//#define C2 		50e-3
-//#define dt		1e-3
+double	Iin=(Pin-Uc1)/Rin;
+double	I12=(Uc1-Uc2)/R2;
+double	I13=(Uc1-Uc3)/Ra;
+double	I23=(Uc2-Uc3)/Rw;
+double	I3=(Uc3-Pout)/Rsp;
+double	Iout=(Uc2 - Pout)/Rout;
 
-//double	Iin=(Pin-Uc1)/Rin;
-//double	I12=(Uc1-Uc2)/R2;
-//double	I13=(Uc1-Uc3)/Ra;
-//double	I23=(Uc2-Uc3)/Rw;
-//double	I3=(Uc3-Pout)/Rsp;
-//double	Iout=(Uc2 - Pout)/Rout;
+	I13 = Air->Set() * I13/__PWMRATE;
 
-//	I13 = I13*tim->Pwm(6)/__PWMRATE;
+	if(BottleIn->Closed()) {
+		I12=0;
+		lcd->Colour(&_ADC::val.bottle,LCD_COLOR_GREY);
+	} else
+		lcd->Colour(&_ADC::val.bottle,LCD_COLOR_RED);
 
-//	if(BottleIn->Closed()) {
-//		I12=0;
-//		plot.Colour(&_ADC::val.bottle,LCD_COLOR_GREY);
-//	} else
-//		plot.Colour(&_ADC::val.bottle,LCD_COLOR_RED);
+	if(BottleOut->Closed())
+		Iout=0;
+	else
+		lcd->Colour(&_ADC::val.bottle,LCD_COLOR_BLUE);
 
-//	if(BottleOut->Closed())
-//		Iout=0;
-//	else
-//		plot.Colour(&_ADC::val.bottle,LCD_COLOR_BLUE);
+	if(Water->Closed())
+		I23=0;
 
-//	if(Water->Closed())
-//		I23=0;
+	Uc1 += (Iin-I12-I13)/C1*dt;
+	Uc2 += (I12-I23-Iout)/C2*dt;
+	Uc3 += (I23+I13-I3)/C3*dt;	
 
-//	Uc1 += (Iin-I12-I13)/C1*dt;
-//	Uc2 += (I12-I23-Iout)/C2*dt;
-//	Uc3 += (I23+I13-I3)/C3*dt;	
+	val.compressor	=_BAR(pComp);
+	val.bottle			=_BAR(pBott + 0.05*I12*R2);
+	val.air					=_BAR(pNozz + I13*Ra);
 
-//	buffer.compressor	=_BAR(pComp);
-//	buffer.bottle			=_BAR(pBott + 0.05*I12*R2);
-//	buffer.air				=_BAR(pNozz + I13*Ra);
+	val.V5	= _V5to16X;
+	val.V12	= _V12to16X;
+	val.V24	= _V24to16X;
 
-//	buffer.V5		= _V5to16X;
-//	buffer.V12	= _V12to16X;
-//	buffer.V24	= _V24to16X;
-
-//	buffer.T2=(unsigned short)0xafff;
+	val.T2=(unsigned short)0xafff;
 	if(simrate && HAL_GetTick() < simrate)
 		return false;
 	simrate = HAL_GetTick() + 10;
