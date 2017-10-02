@@ -32,13 +32,12 @@ class	_VALVE {
 		void Set(int);
 		void Set(int, int);
 
-		
 		bool Opened(void)							{ return inv ? Set() : !Set();};
 		bool Closed(void)							{ return !Opened();};
 		void Open(void)								{ inv ? Set(__PWMRATE): Set(0);};
-		void Close(void)							{ inv ? Set(0): Set(__PWMRATE*9/10);};
-		void Open(int i)							{ inv ? Set(__PWMRATE*9/10,i): Set(0,i);};
-		void Close(int i)							{ inv ? Set(0,i): Set(__PWMRATE*9/10,i);};
+		void Close(void)							{ inv ? Set(0): Set(__PWMRATE);};
+		void Open(int i)							{ inv ? Set(__PWMRATE,i): Set(0,i);};
+		void Close(int i)							{ inv ? Set(0,i): Set(__PWMRATE,i);};
 };
 
 class	_SPRAY : public _TERM, public _ADC {

@@ -112,7 +112,7 @@ uint32_t pump_cbk=0;
 uint32_t fan1_cbk=0;
 uint32_t fan2_cbk=0;
 uint16_t pump_drive,fan_drive;
-uint16_t valve_drive[4]={400,400,400,400};
+uint16_t valve_drive[4]={0,0,0,0};
 uint32_t valve_time[4]={0,0,0,0};
 
 
@@ -154,26 +154,28 @@ void	date_time(uint32_t d,uint32_t t) {
 	
 	printf("%4d-%d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
 }
-
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void SetTimeDate() {
 extern RTC_HandleTypeDef hrtc;
-RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
-	/**Initialize RTC and set the Time and Date 
-    */
- // if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
-  sTime.Hours = 0x1;
-  sTime.Minutes = 0x2;
-  sTime.Seconds = 0x3;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
- //   _Error_Handler(__FILE__, __LINE__);
-  }
+	int d,y;
+	char month[4];
+	char *months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
-  sDate.WeekDay = RTC_WEEKDAY_SUNDAY;
-  sDate.Month = RTC_MONTH_SEPTEMBER;
+	sscanf(__DATE__,"%s %d %d",month,&d,&y);
+	for(int i=0; i<6;++i)
+		if(!strcmp(months[i],month))
+			break;
+		
+		
+	
+  sDate.WeekDay = i;
+  sDate.Month = m;
   sDate.Date = 0x24;
   sDate.Year = 0x17;
 

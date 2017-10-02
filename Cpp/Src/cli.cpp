@@ -212,6 +212,7 @@ FRESULT _CLI::Decode(char *p) {
 			sTime.StoreOperation = RTC_STOREOPERATION_RESET;
 			if(HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
 				return FR_NOT_READY;
+			sTime.StoreOperation = RTC_STOREOPERATION_SET;
 		} else
 			printRtc();
 	}
@@ -366,14 +367,14 @@ int	_CLI::wcard(char *t, char *s) {
 					wcard(t+1,s) || (*s && wcard(t,s+1));
 }
 //_________________________________________________________________________________
-string days[]={"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+string days[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
 string months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 void	_CLI::printRtc() {
 RTC_TimeTypeDef t;
 RTC_DateTypeDef d;
 		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
 		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
-		printf("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay].c_str(),d.Date,months[d.Month].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
+		printf("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
 }
 //_________________________________________________________________________________
 int	_CLI::find_recurse (char * dir_name, char *w, int fact) {

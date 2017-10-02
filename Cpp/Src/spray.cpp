@@ -31,11 +31,16 @@ void	_VALVE::Set(int i, int t) {
 		valve_time[n]=HAL_GetTick()+t;
 };
 _SPRAY::_SPRAY() {	
-		Water=			new _VALVE(3,true);
-		Air=				new _VALVE(2,true);
-		BottleIn=		new _VALVE(1,true);
 		BottleOut=	new _VALVE(0,false);
+		BottleIn=		new _VALVE(1,true);
+		Air=				new _VALVE(2,true);
+		Water=			new _VALVE(3,true);
 
+		BottleIn->Close();
+		BottleOut->Close();
+		Air->Close();
+		Water->Close();
+	
 		offset.air=offset.bottle=offset.compressor=	_BAR(1);
 		gain.air=																		_BAR(2);
 		gain.bottle=																_BAR(1.3);
@@ -50,11 +55,6 @@ _SPRAY::_SPRAY() {
 		mode.On=false;
 		idx=0;
 
-		BottleIn->Close();
-		BottleOut->Close();
-		Air->Close();
-		Water->Close();
-		
 		simrate=timeout=count=0;
 		lcd=NULL;
 		Pin=4.0;
