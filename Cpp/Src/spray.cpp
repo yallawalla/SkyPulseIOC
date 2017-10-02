@@ -142,12 +142,12 @@ _Error	e=_NOERR;
 //_________________________________________________________________________________
 void _SPRAY::Newline(void) {
 		if(mode.Simulator) {
-			printf("\r:air/water   %3d,%3d,%3.1lf,%3.1lf",
+			printf("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
 				AirLevel,WaterLevel,
 					Pin,Pout);
 			for(int i=1+4*(3-idx);i--;printf("\b"));							
 		} else {
-			printf("\r:air/water   %3d,%3d,%3.1lf",
+			printf("\r:air/water    %3d,%3d,%3.1lf",
 				AirLevel,WaterLevel,
 					(double)(fval.compressor-offset.compressor)/gain.compressor);
 			for(int i=1+4*(2-idx);i--;printf("\b"));							
@@ -184,10 +184,6 @@ int		_SPRAY::Fkey(int t) {
 					break;
 				}
 			return EOF;
-}
-//_________________________________________________________________________________
-FRESULT	_SPRAY::Decode(char *c) {
-			return FR_OK;
 }
 /*******************************************************************************/
 /**

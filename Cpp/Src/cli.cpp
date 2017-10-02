@@ -58,6 +58,15 @@ int	_CLI::Fkey(int t) {
 				c->io=NULL;
 				return __F12;
 			}
+			case __f9:
+			case __F9:
+			{
+				_TIME	t;
+				t.Newline();
+				while(t.Parse())
+					_wait(2,_proc_loop);
+				return __F12;
+			}
 			case __f11:
 			case __F11:
 			{

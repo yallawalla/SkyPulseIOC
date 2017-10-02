@@ -10,6 +10,7 @@
 #include "fan.h"
 #include "pump.h"
 #include "spray.h"
+#include "time.h"
 
 #include <string>
 #include <ctype.h>

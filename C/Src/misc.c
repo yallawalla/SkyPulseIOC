@@ -163,18 +163,18 @@ void	date_time(uint32_t d,uint32_t t) {
 void SetTimeDate() {
 extern RTC_HandleTypeDef hrtc;
 RTC_DateTypeDef sDate;
-	int d,y;
+	int d,m;
 	char month[4];
 	char *months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
-	sscanf(__DATE__,"%s %d %d",month,&d,&y);
+	sscanf(__DATE__,"%s %d %d",month,&d,&m);
 	for(int i=0; i<6;++i)
 		if(!strcmp(months[i],month))
 			break;
 		
 		
 	
-  sDate.WeekDay = i;
+  sDate.WeekDay = d;
   sDate.Month = m;
   sDate.Date = 0x24;
   sDate.Year = 0x17;

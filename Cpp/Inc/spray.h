@@ -52,7 +52,6 @@ class	_SPRAY : public _TERM, public _ADC {
 		void		LoadSettings(FILE *);
 		void		SaveSettings(FILE *);
 		virtual void		Newline(void);
-		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 		void		Increment(int, int);
 

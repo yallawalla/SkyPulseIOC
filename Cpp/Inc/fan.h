@@ -20,7 +20,6 @@ class	_FAN : public _TERM, public _ADC {
 		void	SaveSettings(FILE *);
 
 		virtual void		Newline(void);
-		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
