@@ -221,7 +221,8 @@ FRESULT _CLI::Decode(char *p) {
 			sTime.StoreOperation = RTC_STOREOPERATION_RESET;
 			if(HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
 				return FR_NOT_READY;
-			sTime.StoreOperation = RTC_STOREOPERATION_SET;
+			__HAL_RTC_TAMPER1_DISABLE(&hrtc);
+			__HAL_RTC_TAMPER2_DISABLE(&hrtc);
 		} else
 			printRtc();
 	}
