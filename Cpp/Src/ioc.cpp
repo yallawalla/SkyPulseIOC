@@ -27,6 +27,7 @@ _IOC::_IOC() {
 	pump=_PUMP::InstanceOf();
 	fan=_FAN::InstanceOf();
 	spray=_SPRAY::InstanceOf();
+	ws2812=_WS::InstanceOf();
 	
 	can->canFilterCfg(idIOC_State,	0x780);
 	can->canFilterCfg(idEC20_req,		0x780);
@@ -34,6 +35,7 @@ _IOC::_IOC() {
 	can->canFilterCfg(idBOOT,				0x7ff);
 	
 	error_mask = _NOERR;
+	
 	_proc_add((void *)task,this,(char *)"can task",0);
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	

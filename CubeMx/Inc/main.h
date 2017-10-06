@@ -59,6 +59,8 @@
 #define __TXLEN 128
 #define __CMDLEN 128
 #define __PWMRATE 2000
+#define __VALVES 4
+#define __LEDS 80
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
@@ -100,6 +102,10 @@
 #define cwbDOOR_GPIO_Port GPIOD
 #define cwbENGM_Pin GPIO_PIN_11
 #define cwbENGM_GPIO_Port GPIOD
+#define _LED1_Pin GPIO_PIN_12
+#define _LED1_GPIO_Port GPIOD
+#define _LED2_Pin GPIO_PIN_13
+#define _LED2_GPIO_Port GPIOD
 #define _BOTTLE_OUT_Pin GPIO_PIN_6
 #define _BOTTLE_OUT_GPIO_Port GPIOC
 #define _BOTTLE_IN_Pin GPIO_PIN_7

@@ -15,7 +15,7 @@ class	_FAN : public _TERM, public _ADC {
 		int fpl,fph,ftl,fth,idx;
 		_FAN();
 	public:
-		static _FAN*			instance;
+		static _FAN*	instance;
 		void	LoadSettings(FILE *);
 		void	SaveSettings(FILE *);
 

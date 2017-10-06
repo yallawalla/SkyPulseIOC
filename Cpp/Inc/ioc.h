@@ -11,6 +11,7 @@
 #include "pump.h"
 #include "spray.h"
 #include "time.h"
+#include "ws2812.h"
 
 #include <string>
 #include <ctype.h>
@@ -125,6 +126,7 @@ class _IOC : public _ADC {
 		_PUMP 					*pump;
 		_FAN 						*fan;
 		_SPRAY 					*spray;
+		_WS 				*ws2812;
 		_LED 						led;
 
 		_IOC();

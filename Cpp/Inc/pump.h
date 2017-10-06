@@ -25,9 +25,9 @@ class	_PUMP : public _TERM, public _ADC {
 		int			Rpm(int);
 		_Error	Status(void);
 		static _PUMP	*InstanceOf() {
-									if(instance==NULL)
-										instance=new _PUMP();
-									return instance;
+										if(instance==NULL)
+											instance=new _PUMP();
+										return instance;
 		}
 };
 

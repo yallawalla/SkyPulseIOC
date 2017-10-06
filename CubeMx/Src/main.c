@@ -67,9 +67,11 @@ DMA_HandleTypeDef hdma_dac1;
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim10;
+DMA_HandleTypeDef hdma_tim4_ch1;
 DMA_HandleTypeDef hdma_tim8_up;
 
 UART_HandleTypeDef huart1;
@@ -81,7 +83,6 @@ DMA_HandleTypeDef hdma_usart3_tx;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-void ioc(void);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -98,16 +99,21 @@ static void MX_TIM9_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_RTC_Init(void);
 static void MX_TIM8_Init(void);
+static void MX_TIM4_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
                                 
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+void ioc(void);																										// main app. C++ relay object
 
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+uint32_t pump_cbk, fan1_cbk, fan2_cbk, valve_timeout[__VALVES];		// DMA memory registers..
+uint16_t pump_drive, fan_drive, valve_drive[__VALVES], led_drive[__LEDS*24+2];
 /* USER CODE END 0 */
 
 int main(void)
@@ -149,8 +155,12 @@ int main(void)
   MX_TIM3_Init();
   MX_RTC_Init();
   MX_TIM8_Init();
+  MX_TIM4_Init();
 
   /* USER CODE BEGIN 2 */
+//uint16_t k[]={20,20,20,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+//	memcpy(led_drive, k,sizeof(k)/sizeof(uint16_t));
+
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_2);
@@ -160,9 +170,12 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_4);
-	
+
 	HAL_TIM_DMABurst_WriteStart(&htim8,TIM_DMABASE_CCR1,TIM_DMA_UPDATE,(uint32_t *)valve_drive,TIM_DMABURSTLENGTH_4TRANSFERS);
 	HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_1,(uint32_t *)&pump_drive,1,DAC_ALIGN_12B_R);
+	
+	HAL_TIM_PWM_Start_DMA(&htim4,TIM_CHANNEL_1,(uint32_t *)led_drive, __LEDS*24+2);
+	
 	ioc();
   /* USER CODE END 2 */
 
@@ -451,27 +464,27 @@ static void MX_RTC_Init(void)
     /**Initialize RTC and set the Time and Date 
     */
   if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
-//  sTime.Hours = 9;
-//  sTime.Minutes = 30;
-//  sTime.Seconds = 0;
-//  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-//  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-//  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
+  sTime.Hours = 9;
+  sTime.Minutes = 30;
+  sTime.Seconds = 0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
-//  sDate.WeekDay = RTC_WEEKDAY_TUESDAY;
-//  sDate.Month = RTC_MONTH_OCTOBER;
-//  sDate.Date = 3;
-//  sDate.Year = 17;
+  sDate.WeekDay = RTC_WEEKDAY_TUESDAY;
+  sDate.Month = RTC_MONTH_OCTOBER;
+  sDate.Date = 3;
+  sDate.Year = 17;
 
-//  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
-//    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
+    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
   }
 
 }
@@ -508,6 +521,48 @@ static void MX_TIM3_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
+}
+
+/* TIM4 init function */
+static void MX_TIM4_Init(void)
+{
+
+  TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+  htim4.Instance = TIM4;
+  htim4.Init.Prescaler = 0;
+  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim4.Init.Period = 74;
+  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  HAL_TIM_MspPostInit(&htim4);
 
 }
 
@@ -708,6 +763,9 @@ static void MX_DMA_Init(void)
   __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
   /* DMA1_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);

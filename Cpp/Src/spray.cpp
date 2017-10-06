@@ -28,7 +28,7 @@ void	_VALVE::Set(int i) {
 };
 void	_VALVE::Set(int i, int t) { 
 		valve_drive[n]=i;
-		valve_time[n]=HAL_GetTick()+t;
+		valve_timeout[n]=HAL_GetTick()+t;
 };
 _SPRAY::_SPRAY() {	
 		BottleOut=	new _VALVE(0,false);
