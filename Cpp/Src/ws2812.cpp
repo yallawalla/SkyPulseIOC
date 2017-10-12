@@ -20,14 +20,15 @@
 #include	"stdio.h"
 
 _WS	*_WS::instance=NULL;
+HSV	_WS::HSVbuf[__LEDS];
+
 ws2812 _WS::ws[] = 
-			{{8,{0,0,0},NULL,noCOMM,NULL},
-			{24,{0,0,0},NULL,noCOMM,NULL},
-			{8,{0,0,0},NULL,noCOMM,NULL},
-			{8,{0,0,0},NULL,noCOMM,NULL},
-			{24,{0,0,0},NULL,noCOMM,NULL},
-			{8,{0,0,0},NULL,noCOMM,NULL},
-			{0,{0,0,0},NULL,noCOMM,NULL}};
+			{{8,{0,0,0},NULL,noCOMM},
+			{24,{1,0,0},NULL,noCOMM},
+			{8,{2,0,0},NULL,noCOMM},
+			{8,{3,0,0},NULL,noCOMM},
+			{24,{4,0,0},NULL,noCOMM},
+			{8,{5,0,0},NULL,noCOMM}};
 /*******************************************************************************/
 /**
 	* @brief	_WS class constructor
@@ -37,9 +38,6 @@ ws2812 _WS::ws[] =
 /*******************************************************************************/
 _WS::~_WS() {
 			_proc_remove((void *)proc_WS2812,this);
-			delete dma_buf;
-			for(int i=0; ws[i].size; ++i)
-				delete ws[i].cbuf;
 }
 /*******************************************************************************/
 /**
@@ -48,23 +46,15 @@ _WS::~_WS() {
 	* @retval : None
 	*/
 /*******************************************************************************/
+#define __IMAX sizeof(ws)/sizeof(ws2812)
 _WS::_WS()  {
 			
 //
 // ________________________________________________________________________________
-			ws2812 *w=ws;
-			int i=0;
-			while(w->size)																		// count number of leds
-				i+=w++->size;
-			dma_buf=(dma *)led_drive;													// allocate dma buffer
-			dma_size=80*24-2;	i*sizeof(dma)/sizeof(short)/2;						// polovica zaradi 2xbursta
-			
-			w=ws;
-			i=0;
-			while(w->size) {
-				w->cbuf=new HSV_set[w->size];										// alloc color buffer
-				w->lbuf=&dma_buf[i];													// pointer to dma tab
-				i+=w++->size;
+			int k=0;
+			for(int i=0; i< __IMAX; ++i) {
+				ws[i].hsvp=&HSVbuf[k];
+				k+= ws[i].size;	
 			}
 			_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
 			idx=idxled=0;
@@ -76,41 +66,30 @@ _WS::_WS()  {
 	* @retval : None
 	*/
 /*******************************************************************************/
-void		_WS::trigger() {
-int			i,j,k;
-dma			*p;
-RGB_set	q;
-int			imax=sizeof(ws)/sizeof(ws2812);
+void	_WS::trigger() {
+RGB		rgbL,rgbR;
+HSV		*hsvL=ws[0].hsvp,
+			*hsvR=ws[__IMAX/2].hsvp;
+	
+uint16_t	k,*p=led_drive;
 
-				for(i=0; i<imax/2; ++i) {
-					for(j=0; j<ws[i].size; ++j) {
-						if(ws[i].cbuf) {
-							HSV2RGB(ws[i].cbuf[j], &q);
-							for(k=0,p=ws[i].lbuf; k<8; ++k) {
-								(q.b & (0x80>>k)) ? (p[j].b[k][0]=53)	: (p[j].b[k][0]=20);
-								(q.g & (0x80>>k)) ? (p[j].g[k][0]=53)	: (p[j].g[k][0]=20);
-								(q.r & (0x80>>k)) ? (p[j].r[k][0]=53)	: (p[j].r[k][0]=20);
-							}
-						}
-							else
-								for(k=0,p=ws[i].lbuf; k<24; ++k)
-									p[j].g[k][0]=20;
-
-						if(ws[i+imax/2].cbuf) {
-							HSV2RGB(ws[i+imax/2].cbuf[j], &q);
-							for(k=0,p=ws[i].lbuf; k<8; ++k) {
-								(q.b & (0x80>>k)) ? (p[j].b[k][1]=53)	: (p[j].b[k][1]=20);
-								(q.g & (0x80>>k)) ? (p[j].g[k][1]=53)	: (p[j].g[k][1]=20);
-								(q.r & (0x80>>k)) ? (p[j].r[k][1]=53)	: (p[j].r[k][1]=20);
-							}
-						}
-							else
-								for(k=0,p=ws[i].lbuf; k<24; ++k)
-									p[j].g[k][1]=20;
+			while(hsvL != ws[__IMAX/2].hsvp) {
+				HSV2RGB(*hsvL++, &rgbL);
+				HSV2RGB(*hsvR++, &rgbR);
+				for(k=0; k<8; ++k) {
+					(rgbL.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					(rgbR.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
 				}
-			}		
-			HAL_TIM_PWM_Start_DMA(&htim4,TIM_CHANNEL_1,(uint32_t *)led_drive, __LEDS*24+2);
-
+				for(k=0; k<8; ++k) {
+					(rgbL.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					(rgbR.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+				}
+				for(k=0; k<8; ++k) {
+					(rgbL.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					(rgbR.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+				}
+			}
+			__rearmDMA(p-led_drive+2);
 }
 /*******************************************************************************/
 /**
@@ -124,7 +103,7 @@ int			j,k,trg=0;
 ws2812	*w=ws;
 //------------------------------------------------------------------------------
 				do {
-					HSV_set	color = w->color;
+					HSV	color = w->color;
 					k=0;
 //------------------------------------------------------------------------------
 					switch(w->mode) {
@@ -135,13 +114,13 @@ ws2812	*w=ws;
 							color.v=0;
 						case FILL_ON:
 							for(j=k=0; j<w->size;++j) {
-								w->cbuf[j].h = color.h;
-								w->cbuf[j].s = color.s;
+								w->hsvp[j].h = color.h;
+								w->hsvp[j].s = color.s;
 
-								if(w->cbuf[j].v < color.v)
-									w->cbuf[j].v += (color.v - w->cbuf[j].v)/10+1;
-								else if(w->cbuf[j].v > color.v)
-									w->cbuf[j].v -= (w->cbuf[j].v - color.v)/10+1;
+								if(w->hsvp[j].v < color.v)
+									w->hsvp[j].v += (color.v - w->hsvp[j].v)/10+1;
+								else if(w->hsvp[j].v > color.v)
+									w->hsvp[j].v -= (w->hsvp[j].v - color.v)/10+1;
 								else
 									++k;
 							}
@@ -151,9 +130,9 @@ ws2812	*w=ws;
 							color.v=0;
 						case SWITCH_ON:
 							for(j=k=0; j<w->size;++j) {
-								w->cbuf[j].h = color.h;
-								w->cbuf[j].s = color.s;
-								w->cbuf[j].v = color.v;
+								w->hsvp[j].h = color.h;
+								w->hsvp[j].s = color.s;
+								w->hsvp[j].v = color.v;
 							}
 							k=w->size;
 						break;
@@ -164,22 +143,22 @@ ws2812	*w=ws;
 							j=w->size; 
 							k=0;
 							while(--j) {
-								w->cbuf[j].h = w->cbuf[j-1].h;
-								w->cbuf[j].s = w->cbuf[j-1].s;
+								w->hsvp[j].h = w->hsvp[j-1].h;
+								w->hsvp[j].s = w->hsvp[j-1].s;
 								
-								if(w->cbuf[j].v < w->cbuf[j-1].v)
-									w->cbuf[j].v += (w->cbuf[j-1].v - w->cbuf[j].v)/4+1;
-								else if(w->cbuf[j].v > w->cbuf[j-1].v)
-									w->cbuf[j].v -= (w->cbuf[j].v - w->cbuf[j-1].v)/4+1;
+								if(w->hsvp[j].v < w->hsvp[j-1].v)
+									w->hsvp[j].v += (w->hsvp[j-1].v - w->hsvp[j].v)/4+1;
+								else if(w->hsvp[j].v > w->hsvp[j-1].v)
+									w->hsvp[j].v -= (w->hsvp[j].v - w->hsvp[j-1].v)/4+1;
 								else
 									++k;
 							}
-							w->cbuf[j].h = color.h;
-							w->cbuf[j].s = color.s;
-							if(w->cbuf[j].v < color.v)
-								w->cbuf[j].v += (color.v - w->cbuf[j].v)/4+1;
-							else if(w->cbuf[j].v > color.v)
-								w->cbuf[j].v -= (w->cbuf[j].v - color.v)/4+1;
+							w->hsvp[j].h = color.h;
+							w->hsvp[j].s = color.s;
+							if(w->hsvp[j].v < color.v)
+								w->hsvp[j].v += (color.v - w->hsvp[j].v)/4+1;
+							else if(w->hsvp[j].v > color.v)
+								w->hsvp[j].v -= (w->hsvp[j].v - color.v)/4+1;
 							else
 								++k;
 							break;
@@ -188,22 +167,22 @@ ws2812	*w=ws;
 							color.v=0;
 						case FILL_LEFT_ON:
 							for(j=k=0; j<w->size-1;++j) {
-								w->cbuf[j].h = w->cbuf[j+1].h;
-								w->cbuf[j].s = w->cbuf[j+1].s;
+								w->hsvp[j].h = w->hsvp[j+1].h;
+								w->hsvp[j].s = w->hsvp[j+1].s;
 								
-								if(w->cbuf[j].v < w->cbuf[j+1].v)
-									w->cbuf[j].v += (w->cbuf[j+1].v - w->cbuf[j].v)/4+1;
-								else if(w->cbuf[j].v > w->cbuf[j+1].v)
-									w->cbuf[j].v -= (w->cbuf[j].v - w->cbuf[j+1].v)/4+1;
+								if(w->hsvp[j].v < w->hsvp[j+1].v)
+									w->hsvp[j].v += (w->hsvp[j+1].v - w->hsvp[j].v)/4+1;
+								else if(w->hsvp[j].v > w->hsvp[j+1].v)
+									w->hsvp[j].v -= (w->hsvp[j].v - w->hsvp[j+1].v)/4+1;
 								else
 									++k;
 							}
-							w->cbuf[j].h = color.h;
-							w->cbuf[j].s = color.s;
-							if(w->cbuf[j].v < color.v)
-								w->cbuf[j].v += (color.v - w->cbuf[j].v)/4+1;
-							else if(w->cbuf[j].v > color.v)
-								w->cbuf[j].v -= (w->cbuf[j].v - color.v)/4+1;
+							w->hsvp[j].h = color.h;
+							w->hsvp[j].s = color.s;
+							if(w->hsvp[j].v < color.v)
+								w->hsvp[j].v += (color.v - w->hsvp[j].v)/4+1;
+							else if(w->hsvp[j].v > color.v)
+								w->hsvp[j].v -= (w->hsvp[j].v - color.v)/4+1;
 							else
 								++k;
 							break;
@@ -212,13 +191,13 @@ ws2812	*w=ws;
 							color.v=0;
 						case RUN_RIGHT_ON:
 							for(j=k=0; j<w->size-1;++j) {
-								if(w->cbuf[j] != w->cbuf[j+1])
-									w->cbuf[j] = w->cbuf[j+1];
+								if(w->hsvp[j] != w->hsvp[j+1])
+									w->hsvp[j] = w->hsvp[j+1];
 								else
 									++k;
 							}
-							if(w->cbuf[j] != color)
-								w->cbuf[j] = color;
+							if(w->hsvp[j] != color)
+								w->hsvp[j] = color;
 							else
 								++k;
 							break;
@@ -229,13 +208,13 @@ ws2812	*w=ws;
 							j=w->size; 
 							k=0;
 							while(--j) {
-								if(w->cbuf[j] != w->cbuf[j-1])
-									w->cbuf[j] = w->cbuf[j-1];
+								if(w->hsvp[j] != w->hsvp[j-1])
+									w->hsvp[j] = w->hsvp[j-1];
 								else
 									++k;
 							}
-							if(w->cbuf[j] != color)
-								w->cbuf[j] = color;
+							if(w->hsvp[j] != color)
+								w->hsvp[j] = color;
 							else
 								++k;
 							break;
@@ -249,7 +228,7 @@ ws2812	*w=ws;
 							if(k==w->size)
 								w->mode=noCOMM;
 						}
-				} while((++w)->size);
+				} while(++w != &ws[__IMAX]);
 
 				if(trg)
 					me->trigger();
@@ -444,7 +423,7 @@ int		_WS::GetColor(int color) {
 				if(flag) {
 					printf("\rHSB:%d,%d,%d      ",w->color.h,w->color.s,w->color.v);
 					for(int i=0; i<w->size; ++i)
-						w->cbuf[i] =w->color;
+						w->hsvp[i] =w->color;
 					trigger();
 					flag=0;
 				}
@@ -475,7 +454,7 @@ void		_WS::SaveSettings(FILE *f){
  *   - h = [0,360], s = [0,255], v = [0,255]
  *   - NB: if s == 0, then h = 0 (undefined)
  ******************************************************************************/
-void _WS::RGB2HSV(RGB_set RGB, HSV_set *HSV){
+void _WS::RGB2HSV(RGB RGB, HSV *HSV){
  unsigned char min, max, delta;
  
  if(RGB.r<RGB.g)min=RGB.r; else min=RGB.g;
@@ -484,27 +463,27 @@ void _WS::RGB2HSV(RGB_set RGB, HSV_set *HSV){
  if(RGB.r>RGB.g)max=RGB.r; else max=RGB.g;
  if(RGB.b>max)max=RGB.b;
  
- HSV->v = max;                // v, 0..255
+ HSV->v = max;                			// v, 0..255
  
- delta = max - min;                      // 0..255, < v
+ delta = max - min;									// 0..255, < v
  
  if( max != 0 )
- HSV->s = (int)(delta)*255 / max;        // s, 0..255
+ HSV->s = (int)(delta)*255 / max;		// s, 0..255
  else {
- // r = g = b = 0        // s = 0, v is undefined
+ // r = g = b = 0										// s = 0, v is undefined
  HSV->s = 0;
  HSV->h = 0;
  return;
  }
  
  if( RGB.r == max )
- HSV->h = (RGB.g - RGB.b)*60/delta;        // between yellow & magenta
+ HSV->h = (RGB.g - RGB.b)*60/delta;					// between yellow & magenta
  else if( RGB.g == max )
- HSV->h = 120 + (RGB.b - RGB.r)*60/delta;    // between cyan & yellow
+ HSV->h = 120 + (RGB.b - RGB.r)*60/delta;		// between cyan & yellow
  else
- HSV->h = 240 + (RGB.r - RGB.g)*60/delta;    // between magenta & cyan
+ HSV->h = 240 + (RGB.r - RGB.g)*60/delta;		// between magenta & cyan
  
- if( HSV->h < 0 )
+ if(HSV->h < 0 )
  HSV->h += 360;
 }
 /*******************************************************************************
@@ -520,7 +499,7 @@ void _WS::RGB2HSV(RGB_set RGB, HSV_set *HSV){
  *   - h = [0,360], s = [0,255], v = [0,255]
  *   - NB: if s == 0, then h = 0 (undefined)
  ******************************************************************************/
-void _WS::HSV2RGB(HSV_set HSV, RGB_set *RGB){
+void _WS::HSV2RGB(HSV HSV, RGB *RGB){
  int i;
  float f, p, q, t, h, s, v;
  
@@ -585,6 +564,8 @@ void _WS::HSV2RGB(HSV_set HSV, RGB_set *RGB){
 void _WS::Newline(void) {
 	printf("\r:color n,HSV %4d,%3d,%3d,%3d",idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v);
 		for(int i=1+4*(3-idx); i--; printf("\b"));
+	for(int i=0; i<ws[idxled].size; ++i)
+		ws[idxled].hsvp[i] = ws[idxled].color;
 	trigger();
 }
 /*******************************************************************************/

@@ -3,17 +3,13 @@
 #include				"stm32f4xx_hal.h"
 #include				"term.h"
 #include 				<algorithm>
-typedef struct	{unsigned char r; unsigned char g; unsigned char b; }	RGB_set;
-typedef struct	{
-	signed short	h;
-	unsigned char s,v;
-}	HSV_set;
-
-inline bool operator == (HSV_set &a, HSV_set &b) {
+typedef struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
+typedef struct	{int16_t h; uint8_t s; uint8_t v; }	HSV;
+inline bool operator == (HSV &a, HSV &b) {
     return a.h == b.h && a.s == b.s && a.v == b.v;
 }
 
-inline bool operator != (HSV_set &a, HSV_set &b) {
+inline bool operator != (HSV &a, HSV &b) {
     return !(a==b);
 }
 
@@ -26,28 +22,27 @@ typedef enum		{ noCOMM,
 										RUN_LEFT_OFF, RUN_RIGHT_OFF
 								}	wsCmd;
 
-typedef struct	{
-	uint16_t g[8][2];					// green
-	uint16_t r[8][2];					// red
-	uint16_t b[8][2];					// blue
-} dma;
+//typedef struct	{
+//	uint16_t g[8][2];			// green
+//	uint16_t r[8][2];			// red
+//	uint16_t b[8][2];			// blue
+//} DMA;
 
 typedef	struct	{
-	int				size;						// N of leds in element				
-	HSV_set		color, *cbuf;		// color of element, color buffer, size of elemnt
-	wsCmd			mode;						// mode of animation
-	dma 			*lbuf;					// pointer to dma buffer
+	int		size;						// N of leds in element				
+	HSV		color;					// base color of element
+	HSV		*hsvp;					// color buffer, size of elemnt
+	wsCmd	mode;						// mode of animation
 } ws2812;
 
 class	_WS : public _TERM {
 	private:
 		int			idx,idxled;
-		void 		RGB2HSV( RGB_set, HSV_set *);
-		void		HSV2RGB( HSV_set, RGB_set *);
+		void 		RGB2HSV( RGB, HSV *);
+		void		HSV2RGB( HSV, RGB *);
 		void		trigger(void);
-		dma			*dma_buf;
-		int			dma_size;
 		static 	ws2812 	ws[];
+		static	HSV	HSVbuf[];
 		_WS(void);
 		~_WS(void);
 	public:
@@ -55,13 +50,14 @@ class	_WS : public _TERM {
 		virtual void	Newline(void);
 		virtual int		Fkey(int);
 		void					Increment(int, int);
+		void					LoadSettings(FILE *);
+		void					SaveSettings(FILE *);
 	
 		int						ColorOn(char *);
 		int						ColorOff(char *);
 		int						SetColor(char *);
 		int						GetColor(int);
 		void					Cmd(int,wsCmd);
-		void					SaveSettings(FILE *);
 		static void		*proc_WS2812(_WS *);
 		static _WS		*InstanceOf() {
 										if(instance==NULL)
@@ -70,4 +66,18 @@ class	_WS : public _TERM {
 		}
 };
 
+
+#define __rearmDMA(len)																																												\
+	do {																																																				\
+			__HAL_DMA_DISABLE(htim4.hdma[TIM_DMA_ID_UPDATE]);																												\
+			__HAL_TIM_DISABLE(&htim4);																																							\
+			__HAL_TIM_SET_COUNTER(&htim4,0);																																				\
+			while(htim4.hdma[TIM_DMA_ID_UPDATE]->Instance->CR & DMA_SxCR_EN);																				\
+			htim4.hdma[TIM_DMA_ID_UPDATE]->Instance->NDTR=len;																											\
+			__HAL_DMA_CLEAR_FLAG(htim4.hdma[TIM_DMA_ID_UPDATE],																											\
+						DMA_FLAG_HTIF2_6 | DMA_FLAG_TEIF2_6 | DMA_FLAG_DMEIF2_6	| DMA_FLAG_FEIF2_6 | DMA_FLAG_TCIF2_6);		\
+			__HAL_DMA_ENABLE(htim4.hdma[TIM_DMA_ID_UPDATE]);																												\
+			__HAL_TIM_ENABLE(&htim4);																																								\
+	} while(0)
+	
 #endif
