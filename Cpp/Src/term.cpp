@@ -1,9 +1,4 @@
 #include "term.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "io.h"
 /**
 ******************************************************************************
 * @file
@@ -106,35 +101,39 @@ void	*v=Parse();
 			return v;
 }
 //______________________________________________________________________________________
+void	*_TERM::Parse(FIL *f) {
+			return Parse(fgetc((FILE *)f));
+}
+//______________________________________________________________________________________
 void	*_TERM::Parse(void) {
-int		i;
+			return Parse(Escape());
+}
+//______________________________________________________________________________________
+void	*_TERM::Parse(int i) {
 void 	*v=this;
-			do {
-				i=Escape();
-				switch(i) {
-					case EOF:
-						break;
-					case __CtrlZ:
-						while(1);
-					case __CtrlY:
-						NVIC_SystemReset();
+			switch(i) {
+				case EOF:
 					break;
-					default:
-						i=Fkey(i);
-						if(i==EOF)
-							break;
-						if(i==__f12 || i==__F12) {
-							v=NULL;
-							i=__CR;
-						}
-						if(Cmd(i)) {
-							error=Decode(Cmd());
-							if(error != 0)
-								printf("... WTF(%d)",error);
-							Newline();
-						}
-				}
-			} while(i != EOF);
+				case __CtrlZ:
+					while(1);
+				case __CtrlY:
+					NVIC_SystemReset();
+				break;
+				default:
+					i=Fkey(i);
+					if(i==EOF)
+						break;
+					if(i==__f12 || i==__F12) {
+						v=NULL;
+						i=__CR;
+					}
+					if(Cmd(i)) {
+						error=Decode(Cmd());
+						if(error != 0)
+							printf("... WTF(%d)",error);
+						Newline();
+					}
+			}
 		return v;
 }
 

@@ -6,6 +6,7 @@
 #endif
 
 #include		<stdio.h>
+#include		<string.h>
 #include		<stdlib.h>
 #include		<stdarg.h>
 #include		"ffconf.h"
@@ -50,7 +51,7 @@ int			__put (_buffer *, int);
 //______________________________________________________________________________________
 void		Watchdog(void);
 //______________________________________________________________________________________
-struct	__FILE 
+struct	__FILE
 { 
 				_io		*io;
 };

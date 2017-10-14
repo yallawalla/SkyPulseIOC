@@ -14,7 +14,7 @@ class _FAT {
 	static	FILINFO	fno;
 };
 //_________________________________________________________________________________
-class _CLI:public _TERM, public _FAT {
+class _CLI : public _TERM, public _FAT {
 	private:
 		int		wcard(char *, char *);
 		int		find_recurse (char *, char *, int);

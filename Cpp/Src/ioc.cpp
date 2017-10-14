@@ -44,6 +44,7 @@ _IOC::_IOC() {
 		pump->LoadSettings((FILE *)&f);
 		fan->LoadSettings((FILE *)&f);
 		spray->LoadSettings((FILE *)&f);
+		ws2812->LoadSettings((FILE *)&f);
 		f_close(&f);
 	}	else
 		printf("... error settings file");

@@ -81,9 +81,10 @@ int	_CLI::Fkey(int t) {
 			{
 				FIL f;
 				if(f_open(&f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
-					_PUMP::InstanceOf()->SaveSettings((FILE *)&f);
-					_FAN::InstanceOf()->SaveSettings((FILE *)&f);
+					_PUMP:: InstanceOf()->SaveSettings((FILE *)&f);
+					_FAN::  InstanceOf()->SaveSettings((FILE *)&f);
 					_SPRAY::InstanceOf()->SaveSettings((FILE *)&f);
+					_WS::   InstanceOf()->SaveSettings((FILE *)&f);
 					printf("... saved");
 					f_close(&f);
 				}	else
@@ -218,7 +219,7 @@ FRESULT _CLI::Decode(char *p) {
 		if(FRESULT err=f_mkdir(sc[1]))
 			return err;	
 	}
-//__copy file______________________________________________________________________
+//__set timee______________________________________________________________________
 	else if(!strncmp("time",sc[0],len)) {
 		int h, m;
 		if(sscanf(sc[1],"%d:%d",&h,&m)==2) {
@@ -234,6 +235,10 @@ FRESULT _CLI::Decode(char *p) {
 			__HAL_RTC_TAMPER2_DISABLE(&hrtc);
 		} else
 			printRtc();
+	}
+//__set timee______________________________________________________________________
+	else if(!strncmp("color",sc[0],len)) {
+		return _WS::InstanceOf()->Decode(sc[1]);
 	}
 //__copy file______________________________________________________________________
 	else if(!strncmp("copy",sc[0],len)) {
@@ -299,6 +304,9 @@ FRESULT _CLI::Decode(char *p) {
 //__dump memory contents___________________________________________________________
 	else if(!strncmp("dump",sc[0],len)) {
 		dumpHex(strtoul( sc[1],NULL,0),strtoul( sc[2],NULL,0));
+	}
+	else if(!strncmp("wait",sc[0],len)) {
+		_wait(atoi(sc[1]),_proc_loop);
 	}
 //__dump memory contents___________________________________________________________
 	else if(!strncmp("file",sc[0],len)) {
@@ -370,6 +378,15 @@ FRESULT _CLI::Decode(char *p) {
 //			USBD_Start(&USBD_Device);
 //		} else
 				return FR_NOT_READY;
+	} 
+	else if(!strncmp("@",sc[0],1)) {
+		FIL f;
+		if(f_open(&f,++sc[0],FA_READ) != FR_OK)
+			return FR_INVALID_PARAMETER;
+		Newline();
+		while(Parse(&f) && !f_eof(&f))
+			_wait(2,_proc_loop);	
+		f_close(&f);	
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)

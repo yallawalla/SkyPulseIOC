@@ -38,7 +38,7 @@ int			c=EOF;
 				if(f==stdin) {
 					if(f->io) {
 						c=f->io->get(f->io->rx);
-						if(f->io->file && c==EOF)
+						if(c==EOF && f->io->file)
 							c=f_getc(f->io->file);
 					}
 					return c;

@@ -646,14 +646,14 @@
               <FilePath>..\..\C\Src\proc.c</FilePath>
             </File>
             <File>
-              <FileName>misc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\C\Src\misc.c</FilePath>
-            </File>
-            <File>
               <FileName>retarget.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\C\Src\retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\C\Src\misc.c</FilePath>
             </File>
             <File>
               <FileName>lcd.lib</FileName>

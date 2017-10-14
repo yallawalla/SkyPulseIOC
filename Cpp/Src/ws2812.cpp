@@ -7,7 +7,6 @@
 	* @brief	WS2812B driver class
 	*
 	*/
-	
 /** @addtogroup
 * @{
 */
@@ -17,18 +16,18 @@
 #include	"misc.h"
 #include	"math.h"
 #include	"string.h"
-#include	"stdio.h"
+#include	"ctype.h"
 
 _WS	*_WS::instance=NULL;
 HSV	_WS::HSVbuf[__LEDS];
 
 ws2812 _WS::ws[] = 
-			{{8,{0,0,0},NULL,noCOMM},
-			{24,{1,0,0},NULL,noCOMM},
-			{8,{2,0,0},NULL,noCOMM},
-			{8,{3,0,0},NULL,noCOMM},
-			{24,{4,0,0},NULL,noCOMM},
-			{8,{5,0,0},NULL,noCOMM}};
+			{{8,{0,255,50},  NULL,noCOMM},
+			{24,{60,255,50}, NULL,noCOMM},
+			{8,{120,255,50}, NULL,noCOMM},
+			{8,{180,255,50}, NULL,noCOMM},
+			{24,{240,255,50},NULL,noCOMM},
+			{8,{300,255,50}, NULL,noCOMM}};
 /*******************************************************************************/
 /**
 	* @brief	_WS class constructor
@@ -37,7 +36,7 @@ ws2812 _WS::ws[] =
 	*/
 /*******************************************************************************/
 _WS::~_WS() {
-			_proc_remove((void *)proc_WS2812,this);
+				_proc_remove((void *)proc_WS2812,this);
 }
 /*******************************************************************************/
 /**
@@ -48,17 +47,14 @@ _WS::~_WS() {
 /*******************************************************************************/
 #define __IMAX sizeof(ws)/sizeof(ws2812)
 _WS::_WS()  {
-			
-//
-// ________________________________________________________________________________
-			int k=0;
-			for(int i=0; i< __IMAX; ++i) {
-				ws[i].hsvp=&HSVbuf[k];
-				k+= ws[i].size;	
-			}
-			_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
-			idx=idxled=0;
-		}
+int			k=0;
+				for(int i=0; i< __IMAX; ++i) {
+					ws[i].hsvp=&HSVbuf[k];
+					k+= ws[i].size;	
+				}
+				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
+				idx=idxled=0;
+}
 /*******************************************************************************/
 /**
 	* @brief	_WS trigger method
@@ -66,30 +62,30 @@ _WS::_WS()  {
 	* @retval : None
 	*/
 /*******************************************************************************/
-void	_WS::trigger() {
-RGB		rgbL,rgbR;
-HSV		*hsvL=ws[0].hsvp,
-			*hsvR=ws[__IMAX/2].hsvp;
+void		_WS::trigger() {
+RGB			rgbL,rgbR;
+HSV			*hsvL=ws[0].hsvp,
+				*hsvR=ws[__IMAX/2].hsvp;
 	
 uint16_t	k,*p=led_drive;
 
-			while(hsvL != ws[__IMAX/2].hsvp) {
-				HSV2RGB(*hsvL++, &rgbL);
-				HSV2RGB(*hsvR++, &rgbR);
-				for(k=0; k<8; ++k) {
-					(rgbL.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-					(rgbR.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+				while(hsvL != ws[__IMAX/2].hsvp) {
+					HSV2RGB(*hsvL++, &rgbL);
+					HSV2RGB(*hsvR++, &rgbR);
+					for(k=0; k<8; ++k) {
+						(rgbL.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbR.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					}
+					for(k=0; k<8; ++k) {
+						(rgbL.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbR.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					}
+					for(k=0; k<8; ++k) {
+						(rgbL.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbR.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+					}
 				}
-				for(k=0; k<8; ++k) {
-					(rgbL.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-					(rgbR.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-				}
-				for(k=0; k<8; ++k) {
-					(rgbL.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-					(rgbR.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-				}
-			}
-			__rearmDMA(p-led_drive+2);
+				__rearmDMA(p-led_drive+2);
 }
 /*******************************************************************************/
 /**
@@ -234,27 +230,6 @@ ws2812	*w=ws;
 					me->trigger();
 				return NULL;
 }
-//______________________________________________________________________________________
-int			strscan(char *s,char *ss[],int c) {
-				int		i=0;
-				while(1)
-				{
-					while(*s==' ') ++s;
-					if(!*s)
-						return(i);
-
-					ss[i++]=s;
-					while(*s && *s!=c)
-					{
-						if(*s==' ')
-							*s='\0';
-						s++;
-					}
-					if(!*s)
-						return(i);
-					*s++=0;
-				}
-}
 /*******************************************************************************/
 /**
 	* @brief	_WS parser, initial '.' character
@@ -262,43 +237,33 @@ int			strscan(char *s,char *ss[],int c) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-int			_WS::ColorOn(char *c) {
-char		*p=strtok(c," ,");
-				switch(*p) {
-//________________________________________________
-					case '0':
-					case '1':
-					case '2':
-					case '3':
-					case '4':
-					case '5':
-						do {
+FRESULT	_WS::ColorOn(char *p) {
+char		*c=strchr(p,'+');
+				*c++=0;
+				p=strtok(p,",");
+				while(p) {
+					if(!isdigit(*p))
+						return FR_INVALID_PARAMETER;
+					switch(*c) {
+						case 0:
 							ws[atoi(p)].mode=SWITCH_ON;
-							p=strtok(NULL," ,");
-							} while(p);
 						break;
-//________________________________________________
-					case 'f':
-						for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
+						case 'f':
 							ws[atoi(p)].mode=FILL_ON;
 						break;
-//________________________________________________
-					case 'l':
-						for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
+						case 'l':
 							ws[atoi(p)].mode=RUN_LEFT_ON;
 						break;
-//________________________________________________
-					case 'r':
-						for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
+						case 'r':
 							ws[atoi(p)].mode=RUN_RIGHT_ON;
 						break;
-//________________________________________________
-
-					default:
-						return FR_INVALID_PARAMETER;
+						default:
+							return FR_INVALID_PARAMETER;
+					}
+					p=strtok(NULL,",");
 				}
-			return FR_OK;
-			}	
+				return FR_OK;
+}	
 /*******************************************************************************/
 /**
 	* @brief	_WS parser, initial '.' character
@@ -306,41 +271,32 @@ char		*p=strtok(c," ,");
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_WS::ColorOff(char *c) {
-char	*p=strtok(c," ,");
-			switch(*p) {
-//______________________________________________
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				do {
-						ws[atoi(p)].mode=SWITCH_OFF;
-						p=strtok(NULL," ,");
-						} while(p);
-					break;
-//______________________________________________
-				case 'f':
-					for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
-						ws[atoi(p)].mode=FILL_OFF;
-					break;
-//______________________________________________
-				case 'l':
-					for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
-						ws[atoi(p)].mode=RUN_LEFT_OFF;
-					break;
-//______________________________________________
-				case 'r':
-					for(p=strtok(NULL," ,"); p; p=strtok(NULL,","))
-						ws[atoi(p)].mode=RUN_RIGHT_OFF;
-					break;
-//______________________________________________
-				default:
-					return FR_INVALID_PARAMETER;
+FRESULT	_WS::ColorOff(char *p) {
+char		*c=strchr(p,'-');
+				*c++=0;
+				p=strtok(p,",");
+				while(p) {
+					if(!isdigit(*p))
+						return FR_INVALID_PARAMETER;
+					switch(*c) {
+						case 0:
+							ws[atoi(p)].mode=SWITCH_OFF;
+						break;
+						case 'f':
+							ws[atoi(p)].mode=FILL_OFF;
+						break;
+						case 'l':
+							ws[atoi(p)].mode=RUN_LEFT_OFF;
+						break;
+						case 'r':
+							ws[atoi(p)].mode=RUN_RIGHT_OFF;
+						break;
+						default:
+							return FR_INVALID_PARAMETER;
+					}
+					p=strtok(NULL,",");
 				}
-			return FR_OK;
+				return FR_OK;
 }	
 /*******************************************************************************/
 /**
@@ -349,30 +305,23 @@ char	*p=strtok(c," ,");
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_WS::SetColor(char *c) {
-int		i;
-			c=strtok(c,", ");
-			switch(*c) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-					i=atoi(c);
-					ws[i].color.h =atoi(strtok(NULL,", "));
-					ws[i].color.s =atoi(strtok(NULL,", "));
-					ws[i].color.v =atoi(strtok(NULL,", "));
-					break;						
-				case 't':
-					i=atoi(strtok(NULL,", "));
-					if(i<5 || i>1000)
-						return FR_INVALID_PARAMETER;
-					_proc_find((void *)proc_WS2812,this)->dt=i;	
+FRESULT	_WS::ColorSet(char *p) {
+char		*c=strchr(p,'=');
+				*c++=0;
+				p=strtok(p,",");
+				switch(*p) {
+					case 't':
+						_proc_find((void *)proc_WS2812,this)->dt=atoi(c);	
 					break;
-				default:
-					return FR_INVALID_PARAMETER;
-				}
+					default:
+						while(p) {
+							if(!isdigit(*p))
+								return FR_INVALID_PARAMETER;
+							int i=atoi(p);
+							if(sscanf(c,"%hu,%hhu,%hhu",&ws[i].color.h, &ws[i].color.s, &ws[i].color.v) != 3)
+								return FR_INVALID_PARAMETER;
+							p=strtok(NULL,",");
+						}				}
 			return FR_OK;
 }
 /*******************************************************************************/
@@ -382,54 +331,10 @@ int		i;
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_WS::GetColor(int color) {
-	
-			_TERM key;
-			ws2812 *w=&ws[color];
-			int flag=0;
-			
-			printf("\n\rHSB:%d,%d,%d      ",w->color.h,w->color.s,w->color.v);
-			while(1) {
-				switch(key.Escape()) {
-					case EOF:
-						break;
-					case __Up:
-						++flag;
-					w->color.h=std::min(359,w->color.h + 1);
-						break;				
-					case __Down:
-						++flag;
-						w->color.h=std::max(1,w->color.h - 1);
-						break;
-					case __Right:
-						++flag;
-						w->color.s=std::min(255,w->color.s + 1);
-						break;				
-					case __Left:
-						++flag;
-						w->color.s=std::max(1,w->color.s - 1);
-						break;				
-					case __PageUp:
-						++flag;
-						w->color.v=std::min(255,w->color.v + 1);
-						break;				
-					case __PageDown:
-						++flag;
-						w->color.v=std::max(1,w->color.v - 1);
-						break;				
-					case __Esc:
-						return FR_OK;
-				}
-				if(flag) {
-					printf("\rHSB:%d,%d,%d      ",w->color.h,w->color.s,w->color.v);
-					for(int i=0; i<w->size; ++i)
-						w->hsvp[i] =w->color;
-					trigger();
-					flag=0;
-				}
-				_wait(10,_proc_loop);
-			}	
-				}
+void		_WS::SaveSettings(FILE *f){
+				for(int i=0; i < __IMAX; ++i)
+					fprintf(f,"color %d,%d,%d,%d\r\n",i,ws[i].color.h,ws[i].color.s,ws[i].color.v);
+}
 /*******************************************************************************/
 /**
 	* @brief	_WS class load/save settings method
@@ -437,9 +342,12 @@ int		_WS::GetColor(int color) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-void		_WS::SaveSettings(FILE *f){
-				for(int i=0; ws[i].size; ++i)
-					fprintf(f,"=color %d,%d,%d,%d\r\n",i,ws[i].color.h,ws[i].color.s,ws[i].color.v);
+void		_WS::LoadSettings(FILE *f){
+char		c[128],k;
+				for(int i=0; i < __IMAX; ++i) {
+					fgets(c,sizeof(c),f);
+					sscanf(c,"color %hhu,%hu,%hhu,%hhu",&k, &ws[i].color.h, &ws[i].color.s, &ws[i].color.v);
+				}
 }
 /*******************************************************************************
  * Function RGB2HSV
@@ -454,7 +362,7 @@ void		_WS::SaveSettings(FILE *f){
  *   - h = [0,360], s = [0,255], v = [0,255]
  *   - NB: if s == 0, then h = 0 (undefined)
  ******************************************************************************/
-void _WS::RGB2HSV(RGB RGB, HSV *HSV){
+void 		_WS::RGB2HSV(RGB RGB, HSV *HSV){
  unsigned char min, max, delta;
  
  if(RGB.r<RGB.g)min=RGB.r; else min=RGB.g;
@@ -499,7 +407,7 @@ void _WS::RGB2HSV(RGB RGB, HSV *HSV){
  *   - h = [0,360], s = [0,255], v = [0,255]
  *   - NB: if s == 0, then h = 0 (undefined)
  ******************************************************************************/
-void _WS::HSV2RGB(HSV HSV, RGB *RGB){
+void 		_WS::HSV2RGB(HSV HSV, RGB *RGB){
  int i;
  float f, p, q, t, h, s, v;
  
@@ -561,12 +469,12 @@ void _WS::HSV2RGB(HSV HSV, RGB *RGB){
 	* @retval : None
 	*/
 /*******************************************************************************/
-void _WS::Newline(void) {
-	printf("\r:color n,HSV %4d,%3d,%3d,%3d",idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v);
-		for(int i=1+4*(3-idx); i--; printf("\b"));
-	for(int i=0; i<ws[idxled].size; ++i)
-		ws[idxled].hsvp[i] = ws[idxled].color;
-	trigger();
+void		_WS::Newline(void) {
+				printf("\r:color n,HSV %4d,%3d,%3d,%3d",idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v);
+					for(int i=1+4*(3-idx); i--; printf("\b"));
+				for(int i=0; i<ws[idxled].size; ++i)
+					ws[idxled].hsvp[i] = ws[idxled].color;
+				trigger();
 }
 /*******************************************************************************/
 /**
@@ -575,8 +483,8 @@ void _WS::Newline(void) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_WS::Fkey(int t) {
-			switch(t) {
+int			_WS::Fkey(int t) {
+				switch(t) {
 					case __f10:
 					case __F10:
 						return __F12;
@@ -602,23 +510,39 @@ int		_WS::Fkey(int t) {
 	* @retval : None
 	*/ 
 /*******************************************************************************/
-void	_WS::Increment(int a, int b) {
-			idx= std::min(std::max(idx+b,0),3);
-			switch(idx) {
-				case 0:
-					idxled= std::min(std::max(idxled+a,0),5);
-					break;
-				case 1:
-					ws[idxled].color.h=std::min(std::max(ws[idxled].color.h+a,0),359);
-					break;
-				case 2:
-					ws[idxled].color.s=std::min(std::max(ws[idxled].color.s+a,0),255);
-					break;
-				case 3:
-					ws[idxled].color.v=std::min(std::max(ws[idxled].color.v+a,0),255);
-					break;
-			}
-			Newline();
+FRESULT	_WS::Decode(char *c) {
+				if(strchr(c,'='))
+					return ColorSet(c);
+				if(strchr(c,'+'))
+					return ColorOn(c);
+				if(strchr(c,'-'))
+					return ColorOff(c);	
+				return FR_INVALID_PARAMETER;
+}
+/*******************************************************************************/
+/**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/ 
+/*******************************************************************************/
+void		_WS::Increment(int a, int b) {
+				idx= std::min(std::max(idx+b,0),3);
+				switch(idx) {
+					case 0:
+						idxled= std::min(std::max(idxled+a,0),5);
+						break;
+					case 1:
+						ws[idxled].color.h=std::min(std::max(ws[idxled].color.h+a,0),359);
+						break;
+					case 2:
+						ws[idxled].color.s=std::min(std::max(ws[idxled].color.s+a,0),255);
+						break;
+					case 3:
+						ws[idxled].color.v=std::min(std::max(ws[idxled].color.v+a,0),255);
+						break;
+				}
+				Newline();
 }		
 
 /**

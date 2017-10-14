@@ -25,7 +25,9 @@ class _TERM {
 	int		Escape(void);
 	void	Repeat(int);
 	void *Parse(void);
+	void *Parse(int);
 	void *Parse(_io *);
+	void *Parse(FIL *);
 		
 	virtual	void		Newline(void)			{ printf("\r\n>");	}
 	virtual int			Fkey(int fkey)		{	return fkey;			};

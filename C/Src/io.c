@@ -11,15 +11,11 @@
 * @brief PFM6 miscellaneous
 * @{
 */
-#include 	<stdio.h>
-#include 	<stdlib.h>
-#include 	<stdarg.h>
-#include 	<string.h>
 #include 	"io.h"
 //_________________________________________________________________________________
 _io			*_stdio(_io	*p) {
-_io			*io=__stdin.io;
-				__stdin.io=__stdout.io=p;
+_io			*io=stdin->io;
+				stdin->io=stdout->io=p;
 				return(io);
 }
 //______________________________________________________________________________________

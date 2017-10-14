@@ -22,12 +22,6 @@ typedef enum		{ noCOMM,
 										RUN_LEFT_OFF, RUN_RIGHT_OFF
 								}	wsCmd;
 
-//typedef struct	{
-//	uint16_t g[8][2];			// green
-//	uint16_t r[8][2];			// red
-//	uint16_t b[8][2];			// blue
-//} DMA;
-
 typedef	struct	{
 	int		size;						// N of leds in element				
 	HSV		color;					// base color of element
@@ -46,20 +40,21 @@ class	_WS : public _TERM {
 		_WS(void);
 		~_WS(void);
 	public:
-		static _WS*		instance;
-		virtual void	Newline(void);
-		virtual int		Fkey(int);
-		void					Increment(int, int);
-		void					LoadSettings(FILE *);
-		void					SaveSettings(FILE *);
+		static _WS*			instance;
+		virtual void		Newline(void);
+		virtual int			Fkey(int);
+		virtual	FRESULT	Decode(char *);
+		void						Increment(int, int);
+		void						LoadSettings(FILE *);
+		void						SaveSettings(FILE *);
 	
-		int						ColorOn(char *);
-		int						ColorOff(char *);
-		int						SetColor(char *);
-		int						GetColor(int);
-		void					Cmd(int,wsCmd);
-		static void		*proc_WS2812(_WS *);
-		static _WS		*InstanceOf() {
+		FRESULT					ColorOn(char *);
+		FRESULT					ColorOff(char *);
+		FRESULT					ColorSet(char *);
+		void						Cmd(int,wsCmd);
+		static void			*proc_WS2812(_WS *);
+	
+		static _WS			*InstanceOf() {
 										if(instance==NULL)
 											instance=new _WS();
 										return instance;
