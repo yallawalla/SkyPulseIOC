@@ -82,6 +82,9 @@ _IOC *me=static_cast<_IOC *>(v);
 			if(_EMG_DISABLED && _SYS_SHG_ENABLED)
 				me->SetError(_emgDisabled);
 			
+			me->led.poll();
+			if(me->footsw.poll(&me->IOC_FootAck.State) != EOF)
+				me->IOC_FootAck.Send();
 			return NULL;
 }
 /*******************************************************************************

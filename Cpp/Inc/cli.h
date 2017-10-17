@@ -16,24 +16,24 @@ class _FAT {
 //_________________________________________________________________________________
 class _CLI : public _TERM, public _FAT {
 	private:
-		int		wcard(char *, char *);
-		int		find_recurse (char *, char *, int);
-		void	printRtc(void);
+		int			wcard(char *, char *);
+		int			find_recurse (char *, char *, int);
+		void		printRtc(void);
 	public:	
-		_io *io;
+		_io			*io;
 		virtual void		Newline(void);
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
-	
+
 		static void			parseUsart(_CLI *me) {
 			me->Parse(me->io);
 		}
-		
+
 		static void			parseUsb(_CLI *me) {
 			me->io=_VCP;
 			me->Parse(_VCP);
 		}
-		
+
 		_CLI(UART_HandleTypeDef *huart)	{
 			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);

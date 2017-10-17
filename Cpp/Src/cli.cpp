@@ -1,7 +1,6 @@
 #include "term.h"
 #include "ioc.h"
 
-
 FATFS		_FAT::fatfs;
 DIR			_FAT::dir;			
 TCHAR		_FAT::lfn[_MAX_LFN + 1];
@@ -378,15 +377,16 @@ FRESULT _CLI::Decode(char *p) {
 //			USBD_Start(&USBD_Device);
 //		} else
 				return FR_NOT_READY;
-	} 
-	else if(!strncmp("@",sc[0],1)) {
+	} else if(!strncmp("@",sc[0],1)) {
 		FIL f;
 		if(f_open(&f,++sc[0],FA_READ) != FR_OK)
 			return FR_INVALID_PARAMETER;
 		Newline();
+//		_io* temp=_stdio(NULL);
 		while(Parse(&f) && !f_eof(&f))
 			_wait(2,_proc_loop);	
 		f_close(&f);	
+//		_stdio(temp);
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)

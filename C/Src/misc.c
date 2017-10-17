@@ -74,7 +74,6 @@ void	dumpHex(int a, int n) {
 *******************************************************************************/
 void	poll_uart(_io *io) {
 UART_HandleTypeDef *huart=io->huart;
-	
 	io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
 	if(huart->gState == HAL_UART_STATE_READY) {
 		int len;

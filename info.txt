@@ -1,3 +1,31 @@
-todo
-- SetDate
-- pump, fan, tim >> dma
+f inserted.led
+col 0,3,-r
+col 0,3=180,180,50
+col 0,3,+r
+
+f ejected.led
+col 0,3,-r
+col 0,3=1,255,50
+col 0,3,+r
+
+f onoff.led
+col t=20
+col 0,1,3,4=180,180,50
+col 2,5=0,255,50
+col 0,1,2,3,4,5,+r
+wait 1000
+col 2,5,-l
+
+f standby.led
+col 2,-l
+col 5,-r
+
+f ready.led
+col 2,5,-l
+w 200
+col 2,5,+l
+
+f error.led
+col 0,3-
+col 0,3=1,255,50
+col 0,3+

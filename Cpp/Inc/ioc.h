@@ -67,14 +67,6 @@ typedef enum {
 } _State;
 //_____________________________________________________________________
 typedef enum {
-	_OFF,
-	_1,
-	_2,
-	_3,
-	_4		
-} _Footsw;
-//_____________________________________________________________________
-typedef enum {
 	_SPRAY_NOT_READY,
 	_SPRAY_READY,
 	_VIBRATE
@@ -128,6 +120,7 @@ class _IOC : public _ADC {
 		_SPRAY 					*spray;
 		_WS 						*ws2812;
 		_LED 						led;
+		_FOOTSW					footsw;
 
 		_IOC();
 		~_IOC();

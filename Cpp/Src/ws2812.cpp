@@ -17,17 +17,22 @@
 #include	"math.h"
 #include	"string.h"
 #include	"ctype.h"
+#define		_PI 3.14159265358979323846
 
-_WS	*_WS::instance=NULL;
-HSV	_WS::HSVbuf[__LEDS];
-
-ws2812 _WS::ws[] = 
+_WS			*_WS::instance=NULL;
+HSV			_WS::HSVbuf[__LEDS];
+uint8_t	_WS::modh, 
+				_WS::mods,
+				_WS::modv,
+				_WS::modt;
+ws2812	_WS::ws[] = 
 			{{8,{0,255,50},  NULL,noCOMM},
 			{24,{60,255,50}, NULL,noCOMM},
 			{8,{120,255,50}, NULL,noCOMM},
 			{8,{180,255,50}, NULL,noCOMM},
 			{24,{240,255,50},NULL,noCOMM},
 			{8,{300,255,50}, NULL,noCOMM}};
+
 /*******************************************************************************/
 /**
 	* @brief	_WS class constructor
@@ -129,6 +134,17 @@ ws2812	*w=ws;
 								w->hsvp[j].h = color.h;
 								w->hsvp[j].s = color.s;
 								w->hsvp[j].v = color.v;
+							}
+							k=w->size;
+						break;
+//------------------------------------------------------------------------------
+						case MOD_OFF:
+							color.v=0;
+						case MOD_ON:
+							for(j=k=0; j<w->size;++j) {
+								w->hsvp[j].h = color.h + modh*cos(_PI * 2.0 * (double)j / (double)w->size);
+								w->hsvp[j].s = color.s + mods*cos(_PI * 2.0 * (double)j / (double)w->size);
+								w->hsvp[j].v = color.v + modv*cos(_PI * 2.0 * (double)j / (double)w->size);
 							}
 							k=w->size;
 						break;
@@ -246,16 +262,19 @@ char		*c=strchr(p,'+');
 						return FR_INVALID_PARAMETER;
 					switch(*c) {
 						case 0:
-							ws[atoi(p)].mode=SWITCH_ON;
+							ws[atoi(p)].mode = SWITCH_ON;
+						break;
+						case 'm':
+							ws[atoi(p)].mode = MOD_ON;
 						break;
 						case 'f':
-							ws[atoi(p)].mode=FILL_ON;
+							ws[atoi(p)].mode = FILL_ON;
 						break;
 						case 'l':
-							ws[atoi(p)].mode=RUN_LEFT_ON;
+							ws[atoi(p)].mode = RUN_LEFT_ON;
 						break;
 						case 'r':
-							ws[atoi(p)].mode=RUN_RIGHT_ON;
+							ws[atoi(p)].mode = RUN_RIGHT_ON;
 						break;
 						default:
 							return FR_INVALID_PARAMETER;
@@ -281,6 +300,9 @@ char		*c=strchr(p,'-');
 					switch(*c) {
 						case 0:
 							ws[atoi(p)].mode=SWITCH_OFF;
+						break;
+						case 'm':
+							ws[atoi(p)].mode=MOD_OFF;
 						break;
 						case 'f':
 							ws[atoi(p)].mode=FILL_OFF;
@@ -313,6 +335,9 @@ char		*c=strchr(p,'=');
 					case 't':
 						_proc_find((void *)proc_WS2812,this)->dt=atoi(c);	
 					break;
+					case 'm':
+						sscanf(c,"%hhu,%hhu,%hhu,%hhu",&modh, &mods,&modv,&modt);
+					break;
 					default:
 						while(p) {
 							if(!isdigit(*p))
@@ -321,7 +346,8 @@ char		*c=strchr(p,'=');
 							if(sscanf(c,"%hu,%hhu,%hhu",&ws[i].color.h, &ws[i].color.s, &ws[i].color.v) != 3)
 								return FR_INVALID_PARAMETER;
 							p=strtok(NULL,",");
-						}				}
+						}				
+				}
 			return FR_OK;
 }
 /*******************************************************************************/

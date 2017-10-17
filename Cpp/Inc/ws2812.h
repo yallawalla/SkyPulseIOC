@@ -15,6 +15,7 @@ inline bool operator != (HSV &a, HSV &b) {
 
 typedef enum		{ noCOMM,
 										SWITCH_ON, SWITCH_OFF, 
+										MOD_ON, MOD_OFF, 
 										FILL_ON, FILL_OFF, 
 										FILL_LEFT_ON, FILL_RIGHT_ON, 
 										FILL_LEFT_OFF, FILL_RIGHT_OFF,
@@ -23,10 +24,10 @@ typedef enum		{ noCOMM,
 								}	wsCmd;
 
 typedef	struct	{
-	int		size;						// N of leds in element				
-	HSV		color;					// base color of element
-	HSV		*hsvp;					// color buffer, size of elemnt
-	wsCmd	mode;						// mode of animation
+	uint8_t	size;						// N of leds in element				
+	HSV			color;					// base color of element
+	HSV			*hsvp;					// color buffer, size of elemnt
+	wsCmd		mode;						// mode of animation
 } ws2812;
 
 class	_WS : public _TERM {
@@ -37,6 +38,7 @@ class	_WS : public _TERM {
 		void		trigger(void);
 		static 	ws2812 	ws[];
 		static	HSV	HSVbuf[];
+		static	uint8_t	modh, mods,modv,modt;
 		_WS(void);
 		~_WS(void);
 	public:
