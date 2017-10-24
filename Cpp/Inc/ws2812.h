@@ -28,6 +28,8 @@ typedef	struct	{
 	HSV			color;					// base color of element
 	HSV			*hsvp;					// color buffer, size of elemnt
 	wsCmd		mode;						// mode of animation
+	HSV			mod;						// modulation hsv components
+	int			shift;					// phase shift
 } ws2812;
 
 class	_WS : public _TERM {

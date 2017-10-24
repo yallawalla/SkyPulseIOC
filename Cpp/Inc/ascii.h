@@ -55,6 +55,11 @@
 #define	__Delete		0x1B5B337E
 #define	__PageDown	0x1B5B367E
 #define	__Up				0x001B5B41
-#define	__Left			0x001B5B44
 #define	__Down			0x001B5B42
+#define	__Left			0x001B5B44
 #define	__Right			0x001B5B43
+#define	__CtrlUp		0x001B4F41
+#define	__CtrlDown	0x001B4F42
+#define	__CtrlLeft	0x001B4F44
+#define	__CtrlRight	0x001B4F43
+

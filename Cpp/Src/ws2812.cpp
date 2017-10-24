@@ -21,17 +21,13 @@
 
 _WS			*_WS::instance=NULL;
 HSV			_WS::HSVbuf[__LEDS];
-uint8_t	_WS::modh, 
-				_WS::mods,
-				_WS::modv,
-				_WS::modt;
 ws2812	_WS::ws[] = 
-			{{8,{0,255,50},  NULL,noCOMM},
-			{24,{60,255,50}, NULL,noCOMM},
-			{8,{120,255,50}, NULL,noCOMM},
-			{8,{180,255,50}, NULL,noCOMM},
-			{24,{240,255,50},NULL,noCOMM},
-			{8,{300,255,50}, NULL,noCOMM}};
+			{{8,{0,255,50},  NULL,noCOMM,{0,0,0},0},
+			{24,{60,255,50}, NULL,noCOMM,{0,0,0},0},
+			{8,{120,255,50}, NULL,noCOMM,{0,0,0},0},
+			{8,{180,255,50}, NULL,noCOMM,{0,0,0},0},
+			{24,{240,255,50},NULL,noCOMM,{0,0,0},0},
+			{8,{300,255,50}, NULL,noCOMM,{0,0,0},0}};
 
 /*******************************************************************************/
 /**
@@ -142,9 +138,9 @@ ws2812	*w=ws;
 							color.v=0;
 						case MOD_ON:
 							for(j=k=0; j<w->size;++j) {
-								w->hsvp[j].h = color.h + modh*cos(_PI * 2.0 * (double)j / (double)w->size);
-								w->hsvp[j].s = color.s + mods*cos(_PI * 2.0 * (double)j / (double)w->size);
-								w->hsvp[j].v = color.v + modv*cos(_PI * 2.0 * (double)j / (double)w->size);
+								w->hsvp[j].h = (color.h + (int)(w->mod.h * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size))) % 360;
+								w->hsvp[j].s = color.s + w->mod.s * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size);
+								w->hsvp[j].v = color.v + w->mod.v * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size);
 							}
 							k=w->size;
 						break;
@@ -335,9 +331,6 @@ char		*c=strchr(p,'=');
 					case 't':
 						_proc_find((void *)proc_WS2812,this)->dt=atoi(c);	
 					break;
-					case 'm':
-						sscanf(c,"%hhu,%hhu,%hhu,%hhu",&modh, &mods,&modv,&modt);
-					break;
 					default:
 						while(p) {
 							if(!isdigit(*p))
@@ -496,10 +489,11 @@ void 		_WS::HSV2RGB(HSV HSV, RGB *RGB){
 	*/
 /*******************************************************************************/
 void		_WS::Newline(void) {
-				printf("\r:color n,HSV %4d,%3d,%3d,%3d",idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v);
-					for(int i=1+4*(3-idx); i--; printf("\b"));
-				for(int i=0; i<ws[idxled].size; ++i)
-					ws[idxled].hsvp[i] = ws[idxled].color;
+				printf("\r:color n,HSV %4d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
+					idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v,
+						ws[idxled].mod.h,ws[idxled].mod.s,ws[idxled].mod.v,ws[idxled].shift);
+					for(int i=1+4*(7-idx); i--; printf("\b"));
+				ws[idxled].mode = MOD_ON;
 				trigger();
 }
 /*******************************************************************************/
@@ -553,19 +547,33 @@ FRESULT	_WS::Decode(char *c) {
 	*/ 
 /*******************************************************************************/
 void		_WS::Increment(int a, int b) {
-				idx= std::min(std::max(idx+b,0),3);
+				idx= std::min(std::max(idx+b,0),7);
 				switch(idx) {
 					case 0:
 						idxled= std::min(std::max(idxled+a,0),5);
 						break;
 					case 1:
-						ws[idxled].color.h=std::min(std::max(ws[idxled].color.h+a,0),359);
+						ws[idxled].color.h = (ws[idxled].color.h+a) % 360;
+						if(ws[idxled].color.h < 0)
+							ws[idxled].color.h=359;
 						break;
 					case 2:
 						ws[idxled].color.s=std::min(std::max(ws[idxled].color.s+a,0),255);
 						break;
 					case 3:
 						ws[idxled].color.v=std::min(std::max(ws[idxled].color.v+a,0),255);
+						break;
+					case 4:
+						ws[idxled].mod.h=std::min(std::max(ws[idxled].mod.h+a,0),180);
+						break;
+					case 5:
+						ws[idxled].mod.s=std::min(std::max(ws[idxled].mod.s+a,0),180);
+						break;
+					case 6:
+						ws[idxled].mod.v=std::min(std::max(ws[idxled].mod.v+a,0),180);
+						break;
+					case 7:
+						ws[idxled].shift=std::min(std::max(ws[idxled].shift+a,0),100);
 						break;
 				}
 				Newline();
