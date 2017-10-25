@@ -11,9 +11,7 @@
 /** @addtogroup
 * @{
 */
-#include	"spray.h"
 #include	"ioc.h"
-_SPRAY		*_SPRAY::instance=NULL;
 /*******************************************************************************
 * Function Name				:
 * Description					: 
@@ -70,7 +68,7 @@ _SPRAY::_SPRAY() {
 #define		_A_THRESHOLD	0x2000
 
 _Error	_SPRAY::Status(void *v) {
-	_IOC *parent=static_cast<_IOC *>(v);
+	_IOC *ioc=static_cast<_IOC *>(v);
 
 _Error	e=_NOERR;
 
@@ -99,15 +97,15 @@ _Error	e=_NOERR;
 		Bottle_ref	= offset.bottle + AirLevel*gain.bottle*(100+4*WaterLevel)/100/10;		
 
 		if(count == 5) {
-			parent->IOC_SprayAck.Status = _SPRAY_NOT_READY;
-			parent->IOC_SprayAck.Send();
+			ioc->IOC_SprayAck.Status = _SPRAY_NOT_READY;
+			ioc->IOC_SprayAck.Send();
 			++count;
 		}
 		
 		if(HAL_GetTick() > timeout) {
 			if(count > 5) {
-				parent->IOC_SprayAck.Status = _SPRAY_READY;
-				parent->IOC_SprayAck.Send();
+				ioc->IOC_SprayAck.Status = _SPRAY_READY;
+				ioc->IOC_SprayAck.Send();
 			}
 			count=0;
 		}						

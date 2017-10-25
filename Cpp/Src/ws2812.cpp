@@ -19,7 +19,6 @@
 #include	"ctype.h"
 #define		_PI 3.14159265358979323846
 
-_WS			*_WS::instance=NULL;
 HSV			_WS::HSVbuf[__LEDS];
 ws2812	_WS::ws[] = 
 			{{8,{0,255,50},  NULL,noCOMM,{0,0,0},0},

@@ -1,6 +1,4 @@
-#include	"can.h"
 #include	"ioc.h"
-_CAN	*_CAN::instance=NULL;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -16,6 +14,13 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 	filter_count=0;
 	io=NULL;
+
+	canFilterCfg(idIOC_State,	0x780);
+	canFilterCfg(idEC20_req,	0x780);
+	canFilterCfg(idEM_ack,		0x7ff);
+	canFilterCfg(idBOOT,			0x7ff);
+	
+	_proc_add((void *)task,this,(char *)"can task",0);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -141,9 +146,8 @@ FRESULT _CAN::Decode(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	*_CAN::Task(void *v) {
-	_IOC *parent=static_cast<_IOC *>(v);
-	
+void	_CAN::Poll() {
+	_IOC *ioc=_IOC::instanceOf();
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
 	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
 	_io* temp=_stdio(io);										//remote console printout !!!
@@ -170,8 +174,8 @@ void	*_CAN::Task(void *v) {
 		switch(rx->StdId) {
 			case idIOC_State:
 				if(rx->DLC)
-					parent->SetState((_State)rx->Data[0]);
-				parent->IOC_State.Send();
+					ioc->SetState((_State)rx->Data[0]);
+				ioc->IOC_State.Send();
 				break;
 			case idCAN2COM:
 				if(remote)
@@ -190,7 +194,6 @@ void	*_CAN::Task(void *v) {
 		}
 	}
 	_stdio(temp);
-	return NULL;
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize
@@ -216,30 +219,5 @@ CAN_FilterConfTypeDef  sFilterConfig;
 	}
 	sFilterConfig.FilterNumber = sFilterConfig.BankNumber + filter_count++;
 	HAL_CAN_ConfigFilter(hcan, &sFilterConfig);
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-extern "C" {
-	
-void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(_CAN::instance->canBuffer)
-		_buffer_push(_CAN::instance->canBuffer->rx,hcan->pRxMsg,sizeof(CanRxMsgTypeDef));
-	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
-}
-
-void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(_CAN::instance->canBuffer)
-		if(_buffer_pull(_CAN::instance->canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
-			HAL_CAN_Transmit_IT(hcan);
-}
-
-void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
-		HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
-}
-
 }
 

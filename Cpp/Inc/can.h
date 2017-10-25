@@ -11,31 +11,25 @@
 * Return				:
 *******************************************************************************/
 class _CAN : public _TERM {
-
 private:
-  _CAN(CAN_HandleTypeDef *);
-	_CLI	*remote;
 	int		SendRemote(void);
 	int		filter_count;
 	CAN_HandleTypeDef *hcan;
+	_CLI	*remote;
 
-	
 public:
-	virtual void			Newline(void);
-	virtual FRESULT		Decode(char *);
-	virtual int				Fkey(int);
-	static _CAN*			instance;
+  _CAN(CAN_HandleTypeDef *handle);
+	virtual	void		Newline(void);
+	virtual int			Fkey(int);
+	virtual FRESULT	Decode(char *);
 
-	_io								*io,*canBuffer;	
-	void 							*Task(void *),
-										canFilterCfg(int, int),
-										Send(CanTxMsgTypeDef *);
-	
-	
-	static _CAN				*InstanceOf(CAN_HandleTypeDef *hcan) {
-										if(instance==NULL)
-											instance=new _CAN(hcan);
-										return instance;
+	_io		*io;	
+	void	Poll(void),
+				canFilterCfg(int, int),
+				Send(CanTxMsgTypeDef *);
+				
+	static void	task(_CAN *me) {
+		me->Poll();
 	}
 };
 #endif

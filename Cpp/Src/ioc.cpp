@@ -2,13 +2,13 @@
 #include "ioc.h"
 
 extern "C" {
-
 void ioc(void) {
-	_IOC ioc;
+	_IOC::parent=_IOC::instanceOf();
 	while(true)
 		_proc_loop();
 	}
 }
+_IOC*		_IOC::parent			= NULL;
 _Error 	_IOC::error_mask	=_NOERR;
 _DEBUG_	_IOC::debug				= DBG_OFF;
 /*******************************************************************************
@@ -17,34 +17,19 @@ _DEBUG_	_IOC::debug				= DBG_OFF;
 * Output				:
 * Return				:
 *******************************************************************************/
-_IOC::_IOC() {
-	SetState(_STANDBY);
-	com	=	new _CLI();
-	com1=	new _CLI(&huart1);
-	com3=	new _CLI(&huart3);
+_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 	
-	can	=_CAN::InstanceOf(&hcan2);
-	pump=_PUMP::InstanceOf();
-	fan=_FAN::InstanceOf();
-	spray=_SPRAY::InstanceOf();
-	ws2812=_WS::InstanceOf();
-	
-	can->canFilterCfg(idIOC_State,	0x780);
-	can->canFilterCfg(idEC20_req,		0x780);
-	can->canFilterCfg(idEM_ack,			0x7ff);
-	can->canFilterCfg(idBOOT,				0x7ff);
-	
+	SetState(_STANDBY);	
 	error_mask = _NOERR;
 	
-	_proc_add((void *)task,this,(char *)"can task",0);
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	
 	FIL f;
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
-		pump->LoadSettings((FILE *)&f);
-		fan->LoadSettings((FILE *)&f);
-		spray->LoadSettings((FILE *)&f);
-		ws2812->LoadSettings((FILE *)&f);
+		pump.LoadSettings((FILE *)&f);
+		fan.LoadSettings((FILE *)&f);
+		spray.LoadSettings((FILE *)&f);
+		ws2812.LoadSettings((FILE *)&f);
 		f_close(&f);
 	}	else
 		printf("... error settings file");
@@ -68,9 +53,9 @@ _IOC::~_IOC() {
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
 			me->adcSmooth();
-			me->SetError(me->pump->Status());
-			me->SetError(me->fan->Status());
-			me->SetError(me->spray->Status(me));
+			me->SetError(me->pump.Status());
+			me->SetError(me->fan.Status());
+			me->SetError(me->spray.Status(me));
 			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {

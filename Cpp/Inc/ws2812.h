@@ -41,10 +41,9 @@ class	_WS : public _TERM {
 		static 	ws2812 	ws[];
 		static	HSV	HSVbuf[];
 		static	uint8_t	modh, mods,modv,modt;
+	public:
 		_WS(void);
 		~_WS(void);
-	public:
-		static _WS*			instance;
 		virtual void		Newline(void);
 		virtual int			Fkey(int);
 		virtual	FRESULT	Decode(char *);
@@ -57,12 +56,6 @@ class	_WS : public _TERM {
 		FRESULT					ColorSet(char *);
 		void						Cmd(int,wsCmd);
 		static void			*proc_WS2812(_WS *);
-	
-		static _WS			*InstanceOf() {
-										if(instance==NULL)
-											instance=new _WS();
-										return instance;
-		}
 };
 
 

@@ -12,7 +12,6 @@
 */
 #include	"pump.h"
 #include	"misc.h"
-_PUMP	*_PUMP::instance=NULL;
 /*******************************************************************************/
 /**
 	* @brief	TIM3 IC2 ISR

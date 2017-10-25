@@ -42,13 +42,12 @@ class	_VALVE {
 
 class	_SPRAY : public _TERM, public _ADC {
 	private:
-		_SPRAY();
 		int	Bottle_ref, Bottle_P;
 		int	Air_ref, Air_P;
 		int	idx,simrate,timeout,count;
 
 	public:
-		static _SPRAY* instance;
+		_SPRAY();
 		void		LoadSettings(FILE *);
 		void		SaveSettings(FILE *);
 		virtual void		Newline(void);
@@ -60,16 +59,11 @@ class	_SPRAY : public _TERM, public _ADC {
 		mode		mode;
 
 		int			AirLevel, WaterLevel;
-		static _SPRAY	*InstanceOf(void) {
-									if(instance==NULL)
-										instance=new _SPRAY;
-									return instance;
-	}	
-	_LCD						*lcd;
+		_LCD		*lcd;
 	
 	
-	bool		Simulator(void);
-	double	pComp,pBott,pNozz,Pin,Pout;
+		bool		Simulator(void);
+		double	pComp,pBott,pNozz,Pin,Pout;
 };
 
 #endif

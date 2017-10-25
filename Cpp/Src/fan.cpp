@@ -12,7 +12,6 @@
 */
 #include	"fan.h"
 #include	"misc.h"
-_FAN	*_FAN::instance=NULL;
 /*******************************************************************************/
 /**
 	* @brief	TIM3 IC2 ISR

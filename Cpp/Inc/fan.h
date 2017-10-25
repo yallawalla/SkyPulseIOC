@@ -13,9 +13,8 @@ extern TIM_HandleTypeDef htim10;
 class	_FAN : public _TERM, public _ADC {
 	private:
 		int fpl,fph,ftl,fth,idx;
-		_FAN();
 	public:
-		static _FAN*	instance;
+		_FAN();
 		void	LoadSettings(FILE *);
 		void	SaveSettings(FILE *);
 
@@ -24,11 +23,6 @@ class	_FAN : public _TERM, public _ADC {
 		void		Increment(int, int);
 		int			Rpm(int);
 		_Error	Status(void);
-		static _FAN	*InstanceOf() {
-									if(instance==NULL)
-										instance=new _FAN();
-									return instance;
-	}
 };
 
 #endif

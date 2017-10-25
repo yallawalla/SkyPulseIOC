@@ -1,12 +1,12 @@
 #ifndef IOC_H
 #define IOC_H
 #include "stm32f4xx_hal.h"
+#include "can.h"
 #include "cli.h"
 #include "adc.h"
 #include "leds.h"
 #include "misc.h"
 #include "err.h"
-#include "can.h"
 #include "fan.h"
 #include "pump.h"
 #include "spray.h"
@@ -15,7 +15,6 @@
 
 #include <string>
 #include <ctype.h>
-using namespace std;
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)
@@ -79,7 +78,7 @@ typedef __packed struct _IOC_State {
 	void	Send() {
 		CanTxMsgTypeDef	m={idIOC_State_Ack,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_State),0,0,0,0,0,0,0,0};
 		memcpy(m.Data,(const void *)&State,sizeof(_IOC_State));
-		_CAN::instance->Send(&m);
+		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
 	}
 } IOC_State;
 //_____________________________________________________________________
@@ -89,7 +88,7 @@ typedef __packed struct _IOC_FootAck {
 	void	Send() {
 		CanTxMsgTypeDef	m={idIOC_FootAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_FootAck),0,0,0,0,0,0,0,0};
 		memcpy(m.Data,(const void *)&State,sizeof(_IOC_FootAck));
-		_CAN::instance->Send(&m);
+		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
 	}
 } IOC_FootAck;
 //_____________________________________________________________________
@@ -99,7 +98,7 @@ typedef __packed struct _IOC_SprayAck {
 	void	Send() {
 		CanTxMsgTypeDef	m={idIOC_SprayAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_SprayAck),0,0,0,0,0,0,0,0};
 		memcpy(m.Data,(const void *)&Status,sizeof(_IOC_SprayAck));
-		_CAN::instance->Send(&m);
+		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
@@ -108,27 +107,30 @@ class _IOC : public _ADC {
 		static _Error 	error_mask;
 		static _DEBUG_	debug;
 		static string		ErrMsg[];
+		_IOC();
 
 	public:
+		static _IOC			*parent;
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
-		_CLI						*com,*com1,*com3;
-		_CAN						*can;
-		_PUMP 					*pump;
-		_FAN 						*fan;
-		_SPRAY 					*spray;
-		_WS 						*ws2812;
+		_CAN						can;
+		_SPRAY 					spray;
+		_WS 						ws2812;
+		_PUMP 					pump;
+		_FAN 						fan;
 		_LED 						led;
 		_FOOTSW					footsw;
+		_CLI						com,com1,com3;
 
-		_IOC();
 		~_IOC();
-			
-		static void	*task(_IOC *v) {
-			return v->can->Task(v);
+					
+		static _IOC	*instanceOf(void) {
+			if(!parent)
+				parent=new _IOC;
+			return parent;
 		}
-		
+				
 		static void	*pollStatus(void *);
 		void SetState(_State);
 		void SetError(_Error);

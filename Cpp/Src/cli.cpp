@@ -18,45 +18,34 @@ void _CLI::Newline(void) {
 }
 //_________________________________________________________________________________
 int	_CLI::Fkey(int t) {
+	_IOC	*ioc=_IOC::instanceOf();
 		switch(t) {
 			case __f5:
 			case __F5:
-			{
-				_PUMP	*p=_PUMP::InstanceOf();
-				p->Newline();
-				while(p->Parse())
+				ioc->pump.Newline();
+				while(ioc->pump.Parse())
 					_wait(2,_proc_loop);
 				return __F12;
-			}
 			case __f6:
 			case __F6:
-			{
-				_FAN	*p=_FAN::InstanceOf();
-				p->Newline();
-				while(p->Parse())
+				ioc->fan.Newline();
+				while(ioc->fan.Parse())
 					_wait(2,_proc_loop);
 				return __F12;
-			}
 			case __f7:
 			case __F7:
-			{
-				_SPRAY	*p=_SPRAY::InstanceOf();
-				p->Newline();
-				while(p->Parse())
+				ioc->spray.Newline();
+				while(ioc->spray.Parse())
 					_wait(2,_proc_loop);
 				return __F12;
-			}
 			case __f8:
 			case __F8:
-			{
-				_CAN	*c=_CAN::InstanceOf(&hcan2);
-				c->Newline();
-				c->io=io;
-				while(c->Parse())
+				ioc->can.Newline();
+				ioc->can.io=io;
+				while(ioc->can.Parse())
 					_wait(2,_proc_loop);
-				c->io=NULL;
+				ioc->can.io=NULL;
 				return __F12;
-			}
 			case __f9:
 			case __F9:
 			{
@@ -68,29 +57,24 @@ int	_CLI::Fkey(int t) {
 			}
 			case __f10:
 			case __F10:
-			{
-				_WS	*t=_WS::InstanceOf();
-				t->Newline();
-				while(t->Parse())
+				ioc->ws2812.Newline();
+				while(ioc->ws2812.Parse())
 					_wait(2,_proc_loop);
 				return __F12;
-			}
 			case __f11:
 			case __F11:
-			{
 				FIL f;
 				if(f_open(&f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
-					_PUMP:: InstanceOf()->SaveSettings((FILE *)&f);
-					_FAN::  InstanceOf()->SaveSettings((FILE *)&f);
-					_SPRAY::InstanceOf()->SaveSettings((FILE *)&f);
-					_WS::   InstanceOf()->SaveSettings((FILE *)&f);
+					ioc->pump.SaveSettings((FILE *)&f);
+					ioc->fan.SaveSettings((FILE *)&f);
+					ioc->spray.SaveSettings((FILE *)&f);
+					ioc->ws2812.SaveSettings((FILE *)&f);
 					printf("... saved");
 					f_close(&f);
 				}	else
 					printf("... error settings file");		
 				Newline();
 				break;
-			}
 			case __f1:
 			case __F1:
 				SetTimeDate();
@@ -104,6 +88,7 @@ int	_CLI::Fkey(int t) {
 typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
 FRESULT _CLI::Decode(char *p) {
+	_IOC	*ioc=_IOC::instanceOf();
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
 
@@ -237,7 +222,7 @@ FRESULT _CLI::Decode(char *p) {
 	}
 //__set timee______________________________________________________________________
 	else if(!strncmp("color",sc[0],len)) {
-		return _WS::InstanceOf()->Decode(sc[1]);
+		return ioc->ws2812.Decode(sc[1]);
 	}
 //__copy file______________________________________________________________________
 	else if(!strncmp("copy",sc[0],len)) {

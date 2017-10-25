@@ -121,6 +121,37 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 * Output				:
 * Return				:
 *******************************************************************************/
+void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
+	if(canBuffer)
+		_buffer_push(canBuffer->rx,hcan->pRxMsg,sizeof(CanRxMsgTypeDef));
+	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
+	if(canBuffer)
+		if(_buffer_pull(canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
+			HAL_CAN_Transmit_IT(hcan);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
+		HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void HAL_SYSTICK_Callback(void) {
 		TIM10->CCR1=fan_drive;
 		for(int i=0; i<__VALVES; ++i)
@@ -143,7 +174,7 @@ void	date_time(uint32_t d,uint32_t t) {
 	int month=(d>>5) % 16;
 	int year=(d>>9) + 2000;
 	
-	printf("%4d-%d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
+	printf("%4d-%02d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
 }
 /*******************************************************************************
 * Function Name	: 
