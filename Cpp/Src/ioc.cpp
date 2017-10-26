@@ -8,9 +8,7 @@ void ioc(void) {
 		_proc_loop();
 	}
 }
-_IOC*		_IOC::parent			= NULL;
-_Error 	_IOC::error_mask	=_NOERR;
-_DEBUG_	_IOC::debug				= DBG_OFF;
+_IOC*	_IOC::parent			= NULL;
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -55,7 +53,7 @@ _IOC *me=static_cast<_IOC *>(v);
 			me->adcSmooth();
 			me->SetError(me->pump.Status());
 			me->SetError(me->fan.Status());
-			me->SetError(me->spray.Status(me));
+			me->SetError(me->spray.Status());
 			me->SetError(me->adcError());
 	
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
@@ -116,13 +114,13 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::SetError(_Error e) {
+void	_IOC::SetError(_err e) {
 
-			e = (_Error)(e & ~error_mask);
+			e = (_err)(e & ~error_mask);
 			e ? led.RED1(3000): led.GREEN1(20);
-			e = (_Error)((e ^ IOC_State.Error) & e);
+			e = (_err)((e ^ IOC_State.Error) & e);
 	
-			IOC_State.Error = (_Error)(IOC_State.Error | e);
+			IOC_State.Error = (_err)(IOC_State.Error | e);
 
 			if(e) {
 				_SYS_SHG_DISABLE;
@@ -132,7 +130,7 @@ void	_IOC::SetError(_Error e) {
 					//Submit("@error.led");
 			}
 
-			for(int n=0; e && debug & (1<<DBG_ERR); e = (_Error)(e>>1), ++n)
+			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
 				if(e & (1<<0))
 					printf("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
 }
@@ -151,10 +149,11 @@ string _IOC::ErrMsg[] = {
 	"pump stall",
 	"pump pressure out of range",
 	"pump current out of range",
-	"fan1 stall",
-	"fan2 stall",
+	"fan 1 stall",
 	"emergency button pressed",
 	"handpiece ejected",
 	"illegal status request",
-	"energy report timeout"
+	"energy report timeout",
+	"spray not ready",
+	"fan 2 stall"
 };

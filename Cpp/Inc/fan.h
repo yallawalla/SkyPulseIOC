@@ -22,7 +22,7 @@ class	_FAN : public _TERM, public _ADC {
 		virtual int			Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
-		_Error	Status(void);
+		_err	Status(void);
 };
 
 #endif

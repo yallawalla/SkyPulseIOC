@@ -87,11 +87,12 @@ int	_CLI::Fkey(int t) {
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
+    using namespace std;
 FRESULT _CLI::Decode(char *p) {
 	_IOC	*ioc=_IOC::instanceOf();
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
-
+		
 	while (p[i]) {
 		while(p[i] && p[i]==' ')
 			p[i++]=0;
@@ -292,7 +293,7 @@ FRESULT _CLI::Decode(char *p) {
 	else if(!strncmp("wait",sc[0],len)) {
 		_wait(atoi(sc[1]),_proc_loop);
 	}
-//__dump memory contents___________________________________________________________
+//__file line edit/add ___________________________________________________________
 	else if(!strncmp("file",sc[0],len)) {
 		class _ENTERFILE : public _TERM, public _FAT {
 			private:
@@ -367,11 +368,13 @@ FRESULT _CLI::Decode(char *p) {
 		if(f_open(&f,++sc[0],FA_READ) != FR_OK)
 			return FR_INVALID_PARAMETER;
 		Newline();
-//		_io* temp=_stdio(NULL);
 		while(Parse(&f) && !f_eof(&f))
 			_wait(2,_proc_loop);	
-		f_close(&f);	
-//		_stdio(temp);
+		f_close(&f);
+	} else if(!strncmp("+D",sc[0],2)) {
+	} else if(!strncmp("-D",sc[0],2)) {
+	} else if(!strncmp("+E",sc[0],2)) {
+	} else if(!strncmp("-E",sc[0],2)) {
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)

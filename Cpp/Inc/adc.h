@@ -42,7 +42,7 @@ class	_ADC {
 	public:
 	_ADC();
 	void		adcSmooth(void);
-	_Error	adcError(void);
+	_err		adcError(void);
 	
 	static adc val, fval, gain, offset;
 	static int Th2o(void);

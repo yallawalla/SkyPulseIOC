@@ -78,7 +78,7 @@ int		_PUMP::Rpm(int fsc) {
 			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
 }
 /*******************************************************************************/
-_Error _PUMP::Status(void) {	
+_err _PUMP::Status(void) {	
 			pump_drive =Rpm(1<<12);
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
 				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)

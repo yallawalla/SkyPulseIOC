@@ -78,7 +78,7 @@ int		_FAN::Rpm(int fsc) {
 			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
 }
 /*******************************************************************************/
-_Error _FAN::Status(void) {	
+_err _FAN::Status(void) {	
 			fan_drive  =Rpm(__PWMRATE);
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
 				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)

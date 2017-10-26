@@ -29,127 +29,115 @@ void	_VALVE::Set(int i, int t) {
 		valve_timeout[n]=HAL_GetTick()+t;
 };
 _SPRAY::_SPRAY() {	
-		BottleOut=	new _VALVE(0,false);
-		BottleIn=		new _VALVE(1,true);
-		Air=				new _VALVE(2,true);
-		Water=			new _VALVE(3,true);
+			BottleOut=	new _VALVE(0,false);
+			BottleIn=		new _VALVE(1,true);
+			Air=				new _VALVE(2,true);
+			Water=			new _VALVE(3,true);
 
-		BottleIn->Close();
-		BottleOut->Close();
-		Air->Close();
-		Water->Close();
-	
-		offset.air=offset.bottle=offset.compressor=	_BAR(1);
-		gain.air=																		_BAR(2);
-		gain.bottle=																_BAR(1.3);
-		gain.compressor=														_BAR(1);
+			BottleIn->Close();
+			BottleOut->Close();
+			Air->Close();
+			Water->Close();
+		
+			offset.air=offset.bottle=offset.compressor=	_BAR(1);
+			gain.air=																		_BAR(2);
+			gain.bottle=																_BAR(1.3);
+			gain.compressor=														_BAR(1);
 
-		Air_P=Bottle_P=0;
-		AirLevel=WaterLevel=0;
-		Bottle_ref=Air_ref=													_BAR(1);
+			Air_P=Bottle_P=0;
+			AirLevel=WaterLevel=0;
+			Bottle_ref=Air_ref=													_BAR(1);
 
-		mode.Simulator=false;
-		mode.Vibrate=false;
-		mode.On=false;
-		idx=0;
+			mode.Simulator=false;
+			mode.Vibrate=false;
+			mode.On=false;
+			idx=0;
 
-		simrate=timeout=count=0;
-		lcd=NULL;
-		Pin=4.0;
-		pComp= pBott=pNozz=Pout=1.0;
+			simrate=timeout=0;
+			lcd=NULL;
+			Pin=4.0;
+			pComp= pBott=pNozz=Pout=1.0;
 }
 /*******************************************************************************
-* Function Name				:
-* Description					: 
-* Output							:
-* Return							: None
+* Function Name :
+* Description       : 
+* Output                :
+* Return                : None
 *******************************************************************************/
-#define   _P_THRESHOLD  0x8000
-#define		_A_THRESHOLD	0x2000
+#define	_P_THRESHOLD  0x8000
+#define	_A_THRESHOLD	0x2000
 
-_Error	_SPRAY::Status(void *v) {
-	_IOC *ioc=static_cast<_IOC *>(v);
-
-_Error	e=_NOERR;
-
-		if(AirLevel) {
-			Bottle_P += (Bottle_ref - (int)val.bottle)/16;
-			if(Bottle_P < -_P_THRESHOLD) {
-				Bottle_P=0;
-				BottleIn->Close();
-				BottleOut->Open(150);
-				timeout = HAL_GetTick() + 500;
-				++count;
+_err	_SPRAY::Status() {
+_err	e=_NOERR;
+			if(AirLevel) {
+				Bottle_P += (Bottle_ref - (int)val.bottle)/16;
+				if(Bottle_P < -_P_THRESHOLD) {
+					Bottle_P=0;
+					BottleIn->Close();
+					BottleOut->Open(150);
+					if(timeout)
+						timeout = HAL_GetTick() + _SPRAY_READY_T;
+				}
+				if(Bottle_P > _P_THRESHOLD) {
+					Bottle_P=0;
+					BottleIn->Open(150);
+					BottleOut->Close();
+					if(timeout)
+						timeout = HAL_GetTick() + _SPRAY_READY_T;
+				}
+			} else {
+					BottleIn->Close();
+					BottleOut->Open();
 			}
-			if(Bottle_P > _P_THRESHOLD) {
-				Bottle_P=0;
-				BottleIn->Open(150);
-				BottleOut->Close();
-				timeout = HAL_GetTick() + 500;
-				++count;
-			}
-		} else {
-				BottleIn->Close();
-				BottleOut->Open();
-		}
-		
-		Air_ref			= offset.air + AirLevel*gain.air/10;
-		Bottle_ref	= offset.bottle + AirLevel*gain.bottle*(100+4*WaterLevel)/100/10;		
 
-		if(count == 5) {
-			ioc->IOC_SprayAck.Status = _SPRAY_NOT_READY;
-			ioc->IOC_SprayAck.Send();
-			++count;
-		}
-		
-		if(HAL_GetTick() > timeout) {
-			if(count > 5) {
-				ioc->IOC_SprayAck.Status = _SPRAY_READY;
-				ioc->IOC_SprayAck.Send();
-			}
-			count=0;
-		}						
+			Air_ref			= offset.air + AirLevel*gain.air/10;
+			Bottle_ref	= offset.bottle + AirLevel*gain.bottle*(100+4*WaterLevel)/100/10;		
 
-		if(WaterLevel && mode.On)
-			Water->Open();
-		else
-			Water->Close();	
-
-		if(AirLevel && mode.On) {
-			Air_P += (Air_ref-(int)val.air);
-			Air_P=std::max(0,std::min(_A_THRESHOLD*__PWMRATE, Air_P));
-			if(mode.Vibrate && HAL_GetTick() % 50 < 10)
-				Air->Open();
+			if(10*(fval.compressor-offset.compressor)/gain.compressor < 25)
+				e = (_err)(e | _sprayInPressure);		
+			if(timeout && HAL_GetTick() < timeout)
+				e = (_err)(e | _sprayNotReady);
 			else
-				Air->Set(Air_P/_A_THRESHOLD);
+				timeout=0;
+
+			if(WaterLevel && mode.On)
+				Water->Open();
+			else
+				Water->Close();	
+
+			if(AirLevel && mode.On) {
+				Air_P += (Air_ref-(int)val.air);
+				Air_P=std::max(0,std::min(_A_THRESHOLD * __PWMRATE, Air_P));
+				if(mode.Vibrate && HAL_GetTick() % 50 < 10)
+					Air->Open();
+				else
+					Air->Set(Air_P/_A_THRESHOLD);						
+			}
+			else
+				Air->Close();
 			
-			if(abs(fval.compressor - 4*offset.compressor) > offset.compressor/2)
-				e = _sprayInPressure;
-		}
-		else
-			Air->Close();
-		
-		if(mode.Simulator && Simulator()) {
-
-		if(lcd->Refresh())
-			lcd->Grid();
-
-		}		
-		return e;
+			
+			if(mode.Simulator && Simulator()) {
+#ifdef USE_LCD
+						if(lcd && plot.Refresh())
+							lcd->Grid();
+#endif
+					}		
+					return e;
 }
 //_________________________________________________________________________________
 void _SPRAY::Newline(void) {
-		if(mode.Simulator) {
-			printf("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
-				AirLevel,WaterLevel,
-					Pin,Pout);
-			for(int i=1+4*(3-idx);i--;printf("\b"));							
-		} else {
-			printf("\r:air/water    %3d,%3d,%3.1lf",
-				AirLevel,WaterLevel,
-					(double)(fval.compressor-offset.compressor)/gain.compressor);
-			for(int i=1+4*(2-idx);i--;printf("\b"));							
-		}	
+			if(mode.Simulator) {
+				printf("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
+					AirLevel,WaterLevel,
+						Pin,Pout);
+				for(int i=1+4*(3-idx);i--;printf("\b"));							
+			} else {
+				printf("\r:air/water    %3d,%3d,%3.1lf",
+					AirLevel,WaterLevel,
+						(double)(fval.compressor-offset.compressor)/gain.compressor);
+				for(int i=1+4*(2-idx);i--;printf("\b"));							
+			}	
 }
 //_________________________________________________________________________________
 int		_SPRAY::Fkey(int t) {

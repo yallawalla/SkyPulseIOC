@@ -46,18 +46,18 @@ void	_ADC::adcSmooth() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-_Error _ADC::adcError() {
-_Error e=_NOERR;
+_err _ADC::adcError() {
+_err e=_NOERR;
 				
 		if(HAL_GetTick() > _ADC_ERR_DELAY) {
 			if(abs(fval.V5  - _V5to16X)	> _V5to16X/10)
-				e = (_Error)(e | _V5);
+				e = (_err)(e | _V5);
 			if(abs(fval.V12 - _V12to16X) > _V12to16X/5)
-				e = (_Error)(e | _V12);
+				e = (_err)(e | _V12);
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
-				e = (_Error)(e | _V24);
+				e = (_err)(e | _V24);
 			if(Th2o() > 50*100)
-				e = (_Error)(e | _sysOverheat);
+				e = (_err)(e | _sysOverheat);
 			}		
 		return e;
 	}

@@ -34,7 +34,7 @@ typedef enum {
 	DBG_CAN_COM	=1<<21,
 	DBG_EC_SIM	=1<<22,
 	DBG_ENRG		=1<<23
-}	_DEBUG_;
+}	_dbg;
 
 /*******************************************************************************
 * Function Name	: 
@@ -73,7 +73,7 @@ typedef enum {
 //_____________________________________________________________________
 typedef __packed struct _IOC_State {
 	_State 	State;
-	_Error	Error;	
+	_err	Error;	
 	_IOC_State() : State(_STANDBY),Error(_NOERR)	{}
 	void	Send() {
 		CanTxMsgTypeDef	m={idIOC_State_Ack,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_State),0,0,0,0,0,0,0,0};
@@ -104,13 +104,12 @@ typedef __packed struct _IOC_SprayAck {
 //_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
-		static _Error 	error_mask;
-		static _DEBUG_	debug;
-		static string		ErrMsg[];
 		_IOC();
-
+		static string		ErrMsg[];
 	public:
 		static _IOC			*parent;
+		_err 						error_mask;
+		_dbg						debug;
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
@@ -133,6 +132,6 @@ class _IOC : public _ADC {
 				
 		static void	*pollStatus(void *);
 		void SetState(_State);
-		void SetError(_Error);
+		void SetError(_err);
 };
 #endif

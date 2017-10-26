@@ -18,11 +18,11 @@ class	_PUMP : public _TERM, public _ADC {
 		void	LoadSettings(FILE *);
 		void	SaveSettings(FILE *);
 
-		virtual void		Newline(void);
-		virtual int			Fkey(int);
+		virtual void	Newline(void);
+		virtual int		Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
-		_Error	Status(void);
+		_err		Status(void);
 };
 
 #endif

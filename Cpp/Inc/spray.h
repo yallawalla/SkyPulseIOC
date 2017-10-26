@@ -10,6 +10,7 @@
 #include	"lcd.h"
 
 #define		_BAR(a) ((a)*16384.0)
+#define		_SPRAY_READY_T	500
 				
 typedef	struct {
 	bool	On:1;
@@ -44,7 +45,7 @@ class	_SPRAY : public _TERM, public _ADC {
 	private:
 		int	Bottle_ref, Bottle_P;
 		int	Air_ref, Air_P;
-		int	idx,simrate,timeout,count;
+		int	idx,simrate,timeout;
 
 	public:
 		_SPRAY();
@@ -55,7 +56,7 @@ class	_SPRAY : public _TERM, public _ADC {
 		void		Increment(int, int);
 
 		_VALVE	*BottleIn,*BottleOut,*Air,*Water;
-		_Error	Status(void *);
+		_err		Status();
 		mode		mode;
 
 		int			AirLevel, WaterLevel;
