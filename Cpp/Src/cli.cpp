@@ -49,7 +49,8 @@ int	_CLI::Fkey(int t) {
 			case __f9:
 			case __F9:
 			{
-				_TIME	t;
+				_RTC	t;
+				t.io=io;
 				t.Newline();
 				while(t.Parse())
 					_wait(2,_proc_loop);
@@ -275,15 +276,16 @@ FRESULT _CLI::Decode(char *p) {
 //						}
 //__entering new file______________________________________________________________
 	else if(!strncmp("format",sc[0],len)) {
+		int	wbuf[SECTOR_SIZE];
 		if(n < 2)
 			return FR_NO_FILE;
 		if(!strncmp("0:",sc[1],len)) {
 			FLASH_Erase(FLASH_SECTOR_6,2);printf(".");_wait(10,_proc_loop);
-			FLASH_Erase(FLASH_SECTOR_8,2);printf(".");;_wait(10,_proc_loop);
+			FLASH_Erase(FLASH_SECTOR_8,2);printf(".");_wait(10,_proc_loop);
 			FLASH_Erase(FLASH_SECTOR_10,2);printf(".\r\n");;_wait(10,_proc_loop);
 		}		
 		FRESULT err=f_mount(&fatfs,sc[1],1);
-		if(FRESULT err=f_mkfs(sc[1],0,CLUSTER_SIZE))
+		if(FRESULT err=f_mkfs(sc[1],1,CLUSTER_SIZE,wbuf,SECTOR_SIZE*sizeof(int)))
 			return err;	
 	}
 //__dump memory contents___________________________________________________________

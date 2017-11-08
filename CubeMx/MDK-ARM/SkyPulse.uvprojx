@@ -335,7 +335,7 @@
               <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                     ../Drivers/STM32F4xx_HAL_Driver/Inc;                     ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                     ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                     ../Middlewares/Third_Party/FatFs/src;                     ../Drivers/CMSIS/Include;                     ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                     ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                     ..\..\C\Inc;                     ..\..\Cpp\Inc;                     ..\..\lcd\src</IncludePath>
+              <IncludePath>../Inc;                                 ../Drivers/STM32F4xx_HAL_Driver/Inc;                                 ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                 ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                 ../Middlewares/Third_Party/FatFs/src;                                 ../Drivers/CMSIS/Include;                                 ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                 ..\..\C\Inc;                                 ..\..\Cpp\Inc;                                 ..\..\lcd\src</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -537,56 +537,6 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Application/User</GroupName>
-          <Files>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/main.c</FilePath>
-            </File>
-            <File>
-              <FileName>user_diskio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/user_diskio.c</FilePath>
-            </File>
-            <File>
-              <FileName>fatfs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/fatfs.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_it.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/stm32f4xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_msp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/stm32f4xx_hal_msp.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_desc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usbd_desc.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_cdc_if.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usbd_cdc_if.c</FilePath>
-            </File>
-            <File>
-              <FileName>usb_device.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usb_device.c</FilePath>
-            </File>
-            <File>
-              <FileName>usbd_conf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usbd_conf.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Drivers/CMSIS</GroupName>
           <Files>
             <File>
@@ -710,14 +660,64 @@
               <FilePath>..\..\Cpp\Src\spray.cpp</FilePath>
             </File>
             <File>
-              <FileName>time.cpp</FileName>
-              <FileType>8</FileType>
-              <FilePath>..\..\Cpp\Src\time.cpp</FilePath>
-            </File>
-            <File>
               <FileName>ws2812.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\..\Cpp\Src\ws2812.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>rtc.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\Cpp\Src\rtc.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Application/User</GroupName>
+          <Files>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/main.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_desc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usbd_desc.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_cdc_if.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usbd_cdc_if.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_diskio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/user_diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>usb_device.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usb_device.c</FilePath>
+            </File>
+            <File>
+              <FileName>fatfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/fatfs.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_msp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/stm32f4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usbd_conf.c</FilePath>
             </File>
           </Files>
         </Group>

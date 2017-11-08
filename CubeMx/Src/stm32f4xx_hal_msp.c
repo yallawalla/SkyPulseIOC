@@ -67,7 +67,6 @@ extern DMA_HandleTypeDef hdma_usart3_tx;
 
 extern void _Error_Handler(char *, int);
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 /**
   * Initializes the Global MSP.

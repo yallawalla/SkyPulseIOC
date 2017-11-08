@@ -38,6 +38,9 @@ extern _io	*_VCP,*canBuffer;
 
 extern void	date_time(uint32_t, uint32_t);
 extern void SetTimeDate(void);
+extern	RTC_TimeTypeDef sTime;
+extern	RTC_DateTypeDef sDate;
+
 #ifdef __cplusplus
 }
 #endif

@@ -45,6 +45,7 @@
   *
   ******************************************************************************
   */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
@@ -65,6 +66,8 @@ DAC_HandleTypeDef hdac;
 DMA_HandleTypeDef hdma_dac1;
 
 RTC_HandleTypeDef hrtc;
+RTC_TimeTypeDef sTime;
+RTC_DateTypeDef sDate;
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
@@ -97,9 +100,9 @@ static void MX_CAN2_Init(void);
 static void MX_TIM10_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_TIM3_Init(void);
-static void MX_RTC_Init(void);
 static void MX_TIM8_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_RTC_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                 
@@ -154,9 +157,9 @@ int main(void)
   MX_TIM10_Init();
   MX_TIM9_Init();
   MX_TIM3_Init();
-  MX_RTC_Init();
   MX_TIM8_Init();
   MX_TIM4_Init();
+  MX_RTC_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -208,13 +211,12 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE
-                              |RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 240;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 5;
@@ -444,9 +446,6 @@ static void MX_DAC_Init(void)
 static void MX_RTC_Init(void)
 {
 
-  RTC_TimeTypeDef sTime;
-  RTC_DateTypeDef sDate;
-
     /**Initialize RTC Only 
     */
   hrtc.Instance = RTC;
@@ -464,20 +463,10 @@ static void MX_RTC_Init(void)
     /**Initialize RTC and set the Time and Date 
     */
   if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
-  sTime.Hours = 9;
-  sTime.Minutes = 30;
-  sTime.Seconds = 0;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
   if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
-  sDate.WeekDay = RTC_WEEKDAY_TUESDAY;
-  sDate.Month = RTC_MONTH_OCTOBER;
-  sDate.Date = 3;
-  sDate.Year = 17;
 
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN) != HAL_OK)
   {
@@ -720,7 +709,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 921600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
