@@ -11,6 +11,26 @@
 <filestoremove>
 	<file>
 	   		<name>..\Drivers\CMSIS\Device\ST\STM32F4xx\Source\Templates\arm\startup_stm32f405xx.s</name>
+	   		<name>..\Src\freertos.c</name>
+	   		<name>..\Src\stm32f4xx_hal_timebase_TIM.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F\port.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\MemMang\heap_4.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F\port.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\croutine.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\event_groups.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\list.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\queue.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\timers.c</name>
+	   		<name>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS\cmsis_os.c</name>
 	</file>
 </filestoremove>
 
@@ -19,6 +39,9 @@
 	   <include></include>
     </Aincludes>
 	<Cincludes>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\portable\RVDS\ARM_CM4F</include>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\include</include>
+	   		<include>..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS</include>
     </Cincludes>
 </inctoremove>
 

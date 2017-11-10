@@ -18,12 +18,12 @@ void _CLI::Newline(void) {
 }
 //_________________________________________________________________________________
 int	_CLI::Fkey(int t) {
-	_IOC	*ioc=_IOC::instanceOf();
+		_IOC	*ioc=_IOC::instanceOf();
 		switch(t) {
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
-				while(ioc->pump.Parse())
+				while(ioc->pump.Parse()) 
 					_wait(2,_proc_loop);
 				return __F12;
 			case __f6:

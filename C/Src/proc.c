@@ -21,7 +21,7 @@ _proc	*p=NULL;
 			if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
 				if(HAL_GetTick() >= p->t) {
 					p->to = HAL_GetTick() - p->t;
-					p->f(p->arg); // (p->arg);
+					p->f(p->arg);
 					p->t = HAL_GetTick() + p->dt;
 				}
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));

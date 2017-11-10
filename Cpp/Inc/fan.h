@@ -15,14 +15,14 @@ class	_FAN : public _TERM, public _ADC {
 		int fpl,fph,ftl,fth,idx;
 	public:
 		_FAN();
-		void	LoadSettings(FILE *);
-		void	SaveSettings(FILE *);
+		void		LoadSettings(FILE *);
+		void		SaveSettings(FILE *);
 
-		virtual void		Newline(void);
-		virtual int			Fkey(int);
+		virtual void	Newline(void);
+		virtual int		Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
-		_err	Status(void);
+		_err		Status(void);
 };
 
 #endif

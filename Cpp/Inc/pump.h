@@ -15,8 +15,8 @@ class	_PUMP : public _TERM, public _ADC {
 		int fpl,fph,ftl,fth,idx;
 	public:
 		_PUMP();
-		void	LoadSettings(FILE *);
-		void	SaveSettings(FILE *);
+		void		LoadSettings(FILE *);
+		void		SaveSettings(FILE *);
 
 		virtual void	Newline(void);
 		virtual int		Fkey(int);

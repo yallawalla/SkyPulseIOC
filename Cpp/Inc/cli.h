@@ -28,9 +28,7 @@ class _CLI : public _TERM, public _FAT {
 		static void			parseUsart(_CLI *me) {
 			me->Parse(me->io);
 		}
-
 		static void			parseUsb(_CLI *me) {
-			me->io=_VCP;
 			me->Parse(_VCP);
 		}
 
@@ -53,5 +51,4 @@ class _CLI : public _TERM, public _FAT {
 
 		~_CLI(void)	{};
 };
-
 #endif
