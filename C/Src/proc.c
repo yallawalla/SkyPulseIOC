@@ -64,7 +64,7 @@ int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
 			}
 }
 //___________________________________________________________________________
-void	_waitt(int t,void *(*f)(void)) {
+void	_wait(int t,void *(*f)(void)) {
 int		to=HAL_GetTick()+t;
 			while(to > HAL_GetTick()) {
 				if(f)
@@ -83,23 +83,34 @@ int		to=HAL_GetTick()+t;
 //___________________________________________________________________________
 //___________________________________________________________________________
 //___________________________________________________________________________
-struct {
-	osThreadId threadId;
+struct task {
+	osThreadId id;
+	SemaphoreHandle_t s;
+	void *(*f)(void);
 } task;
 //___________________________________________________________________________
-void loopTask(void const * arg)
+void loop(void const * arg)
 {
- 
+	struct task *t=(struct task *)arg;
   for(;;)
   {
-    osDelay(1);
+		if(t->s && xSemaphoreTake(t->s,0)) {
+			t->f();
+			xSemaphoreGive(t->s);
+		}
+		osDelay(1);
   }
 }
 //___________________________________________________________________________
-void	_wait(int t,void *(*f)(void)) {
-  osThreadDef(loop, loopTask, osPriorityNormal, 0, 128);
-  task.threadId = osThreadCreate(osThread(loop), &task); 
-	
-	
-	
+void	_waitt(int t,void *(*f)(void)) {
+	if(!task.id) {
+		task.s = xSemaphoreCreateBinary();
+		task.f=f;	
+		xTaskCreate((TaskFunction_t)loop,"loop",128,&task,0,&task.id);
+	}
+	xSemaphoreGive(task.s);
+	osDelay(t);
+	while(!xSemaphoreTake(task.s,0))
+		osDelay(1);
 }
+
