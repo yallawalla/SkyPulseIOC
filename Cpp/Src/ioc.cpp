@@ -4,8 +4,9 @@
 extern "C" {
 void ioc(void) {
 	_IOC::parent=_IOC::instanceOf();
-	while(true)
-		_proc_loop();
+	while(true) {
+		_wait(10,_proc_loop);
+	}
 	}
 }
 _IOC*	_IOC::parent			= NULL;

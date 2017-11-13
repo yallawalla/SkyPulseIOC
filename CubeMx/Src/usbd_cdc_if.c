@@ -106,7 +106,6 @@ uint8_t UserRxBufferFS[APP_RX_DATA_SIZE];
 uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-_io*	CDC_Poll_FS(_io *);
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -162,7 +161,6 @@ static int8_t CDC_Init_FS(void)
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
 	_VCP=_io_init(__RXLEN,__TXLEN);
-	_proc_add(CDC_Poll_FS,_VCP,"vcp",0);
   return (USBD_OK);
   /* USER CODE END 3 */ 
 }
@@ -176,7 +174,6 @@ static int8_t CDC_Init_FS(void)
 static int8_t CDC_DeInit_FS(void)
 {
   /* USER CODE BEGIN 4 */ 
-	_proc_remove(CDC_Poll_FS,_VCP);
 	_VCP=_io_close(_VCP);
   return (USBD_OK);
   /* USER CODE END 4 */ 
@@ -314,14 +311,14 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 * Output				:
 * Return				:
 *******************************************************************************/
-_io*	CDC_Poll_FS(_io *io) {
+void	*CDC_Poll_FS(void *v) {
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-	if(io && hcdc->TxState ==  0) {
-		int len=_buffer_pull(io->tx, UserTxBufferFS, CDC_DATA_FS_IN_PACKET_SIZE);
+	if(_VCP && hcdc->TxState ==  0) {
+		int len=_buffer_pull(_VCP->tx, UserTxBufferFS, CDC_DATA_FS_IN_PACKET_SIZE);
 		if(len)
 			CDC_Transmit_FS(UserTxBufferFS, len);
 	}
-	return io;
+	return v;
 }
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

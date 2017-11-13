@@ -29,7 +29,8 @@ class _CLI : public _TERM, public _FAT {
 			me->Parse(me->io);
 		}
 		static void			parseUsb(_CLI *me) {
-			me->Parse(_VCP);
+			me->io = _VCP;
+			me->Parse(me->io);
 		}
 
 		_CLI(UART_HandleTypeDef *huart)	{
@@ -38,7 +39,7 @@ class _CLI : public _TERM, public _FAT {
 				f_opendir(&dir,"/");
 			}
 			io=init_uart(huart,__RXLEN,__TXLEN);
-			_proc_add((void *)parseUsart,this,(char *)"parseUsart",0);
+			_proc_add((void *)parseUsart,this,(char *)"Usart Cli",0);
 		};
 		
 		_CLI() {
@@ -46,7 +47,8 @@ class _CLI : public _TERM, public _FAT {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
 			}
-			_proc_add((void *)parseUsb,this,(char *)"FS",0);
+			_proc_add((void *)parseUsb,this,(char *)"Usb Cli",0);
+			_proc_add((void *)CDC_Poll_FS,NULL,(char *)"Tx VCP",0);
 		};
 
 		~_CLI(void)	{};

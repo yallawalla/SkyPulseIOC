@@ -35,6 +35,7 @@ extern	uint32_t pump_cbk, fan1_cbk, fan2_cbk,valve_timeout[];
 extern	uint16_t pump_drive, fan_drive, valve_drive[], led_drive[];
 
 extern _io	*_VCP,*canBuffer;
+extern void	*CDC_Poll_FS(void *);
 
 extern void	date_time(uint32_t, uint32_t);
 extern void SetTimeDate(void);
