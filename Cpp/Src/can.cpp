@@ -57,7 +57,7 @@ void _CAN::Send(CanTxMsgTypeDef *msg) {
 * Return				:
 *******************************************************************************/
 void _CAN::Newline(void) {
-	printf("\r\ncan>");
+	__print("\r\ncan>");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -68,10 +68,10 @@ void _CAN::Newline(void) {
 int	_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
-			printf("remote desktop...\r\n");
+			__print("remote desktop...\r\n");
 			while(SendRemote() != __CtrlE)
 				_wait(10,_proc_loop);
-			printf("close...");
+			__print("close...");
 			Newline();
 			break;
 		case __f8:
@@ -127,9 +127,9 @@ FRESULT _CAN::Decode(char *c) {
 			for(int i=0; i<28; ++i)
 				if(CAN1->FA1R & (1<<i)) {
 					if(i % 2)
-						printf("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR2 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR2) >> 21);
+						__print("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR2 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR2) >> 21);
 					else
-						printf("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR1 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR1) >> 21);
+						__print("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR1 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR1) >> 21);
 				}
 
 			break;
@@ -182,13 +182,13 @@ void	_CAN::Poll() {
 					_buffer_push(remote->io->rx,rx->Data,rx->DLC);
 			break;
 			case idCOM2CAN:
-				printf("%.*s",rx->DLC,rx->Data);
+				__print("%.*s",rx->DLC,rx->Data);
 			break;
 			default:
 				Newline();
-				printf(" < %02X ",rx->StdId);
+				__print(" < %02X ",rx->StdId);
 				for(int i=0;i < rx->DLC;++i)
-					printf(" %02X",rx->Data[i]);
+					__print(" %02X",rx->Data[i]);
 				Newline();	
 			break;
 		}

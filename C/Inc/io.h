@@ -11,8 +11,6 @@
 #include		<stdarg.h>
 #include		"ffconf.h"
 #include		"ff.h"
-
-int			__print(char *format, ...);
 //______________________________________________________________________________________
 typedef struct _buffer
 {
@@ -55,8 +53,8 @@ struct	__FILE
 { 
 				_io		*io;
 };
-
-#ifdef __cplusplus
+int			__print(const char *format, ...);
+#ifdef	__cplusplus
 }
 #endif
 

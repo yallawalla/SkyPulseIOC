@@ -43,7 +43,7 @@ bool	_TERM::Cmd(int c) {
 				case __DELETE:
 					if(cmdp != cmdbuf) {
 						--cmdp;
-					printf("\b \b");
+					__print("\b \b");
 					}
 					break;
 
@@ -56,9 +56,9 @@ bool	_TERM::Cmd(int c) {
 
 				default:
 					if(c < ' ' || c > 127)
-						printf("<%02X>",c);
+						__print("<%02X>",c);
 					else {
-						printf("%c",c);
+						__print("%c",c);
 						*cmdp++=c;
 					}
 				}
@@ -131,7 +131,7 @@ void 	*v=this;
 					if(Cmd(i)) {
 						error=Decode(Cmd());
 						if(error != 0)
-							printf("... WTF(%d)",error);
+							__print("... WTF(%d)",error);
 						Newline();
 					}
 			}

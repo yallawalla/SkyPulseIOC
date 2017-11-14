@@ -4,9 +4,8 @@
 extern "C" {
 void ioc(void) {
 	_IOC::parent=_IOC::instanceOf();
-	while(true) {
-		_wait(10,_proc_loop);
-	}
+//	while(true)
+//		_proc_loop();
 	}
 }
 _IOC*	_IOC::parent			= NULL;
@@ -31,7 +30,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 		ws2812.LoadSettings((FILE *)&f);
 		f_close(&f);
 	}	else
-		printf("... error settings file");
+		__print("... error settings file");
 }
 /*******************************************************************************
 * Function Name	:
@@ -133,7 +132,7 @@ void	_IOC::SetError(_err e) {
 
 			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
 				if(e & (1<<0))
-					printf("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+					__print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
 }
 /*******************************************************************************
 * Function Name	:

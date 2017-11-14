@@ -49,22 +49,22 @@ uint32_t	SectorError;
 #define _MAXBYTESLINE 16
 void	dumpHex(int a, int n) {
 	unsigned int k;
-	printf("\r\n:02000004%04X%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+	__print("\r\n:02000004%04X%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
 	while(n) {
 		int	sum = _MAXBYTESLINE+(a & 0xffff)/256+(a & 0xff);
-		printf(":%02X%04X00",_MAXBYTESLINE,(a & 0xffff));
+		__print(":%02X%04X00",_MAXBYTESLINE,(a & 0xffff));
 		for(k = 0; k<_MAXBYTESLINE; ++k) {
-			printf("%02X",(*(unsigned char *)a & 0xff));
+			__print("%02X",(*(unsigned char *)a & 0xff));
 			sum += *(unsigned char *)a;
 			if(((++a) & 0xffff) == 0 || --n == 0)
 				break;
 		}
-		printf("%02X\r\n",-sum & 0xff);
+		__print("%02X\r\n",-sum & 0xff);
 		if(n && (a & 0xffff) == 0) {
-			printf(":02000004%04X,%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+			__print(":02000004%04X,%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
 		}
 	}
-	printf(":00000001FF\r\n");
+	__print(":00000001FF\r\n");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -174,7 +174,7 @@ void	date_time(uint32_t d,uint32_t t) {
 	int month=(d>>5) % 16;
 	int year=(d>>9) + 2000;
 	
-	printf("%4d-%02d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
+	__print("%4d-%02d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -209,3 +209,23 @@ RTC_DateTypeDef sDate;
     HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
 //  }
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+int			__print(const char *format, ...) {
+				char 		buf[128],*p;
+				va_list	aptr;
+				int			ret;
+	
+				va_start(aptr, format);
+				ret = vsnprintf(buf, sizeof(buf), format, aptr);
+				va_end(aptr);
+				for(p=buf; *p; ++p)
+					while(fputc(*p,&__stdout)==EOF)
+						_wait(2,_proc_loop);
+				return(ret);
+}
+

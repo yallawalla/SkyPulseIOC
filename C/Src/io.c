@@ -195,6 +195,17 @@ int			f_getc (FIL* fil) {						/* Pointer to the file object */
 				f_read(fil, s, 1, &br);				/* Write the char to the file */
 				return (br == 1) ? s[0] : EOF;/* Return the result */
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+__weak 	int	__print(const char *format, ...) {
+				va_list	aptr;
+				va_start(aptr, format);
+				return printf(format, aptr);
+}
 /**
 * @}
 */ 

@@ -47,10 +47,10 @@ void	_PUMP::SaveSettings(FILE *f) {
 }
 //_________________________________________________________________________________
 void	_PUMP::Newline(void) {
-				printf("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
+				__print("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
 				if(idx>0)
-					printf("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
-				for(int i=4*(5-idx)+6;idx && i--;printf("\b"));
+					__print("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
+				for(int i=4*(5-idx)+6;idx && i--;__print("\b"));
 }
 //_________________________________________________________________________________
 int		_PUMP::Fkey(int t) {

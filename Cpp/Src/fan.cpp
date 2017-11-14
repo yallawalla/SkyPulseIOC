@@ -47,10 +47,10 @@ void	_FAN::SaveSettings(FILE *f) {
 }
 //_________________________________________________________________________________
 void	_FAN::Newline(void) {
-				printf("\r:fan       %5d%c,%4.1lf'C",Rpm(100),'%',(double)Th2o()/100);
+				__print("\r:fan       %5d%c,%4.1lf'C",Rpm(100),'%',(double)Th2o()/100);
 				if(idx>0)
-					printf("        %2d%c-%2d%c,%2d'C-%2d'C",fpl,'%',fph,'%',ftl,fth);		
-				for(int i=4*(5-idx)+1;idx && i--;printf("\b"));
+					__print("        %2d%c-%2d%c,%2d'C-%2d'C",fpl,'%',fph,'%',ftl,fth);		
+				for(int i=4*(5-idx)+1;idx && i--;__print("\b"));
 }
 //_________________________________________________________________________________
 int		_FAN::Fkey(int t) {

@@ -1,6 +1,18 @@
 #include "proc.h"
 _buffer 	*_proc_buf=NULL;
 //______________________________________________________________________________
+void 	_proc_code(void *arg) {
+_proc *p=(_proc *)arg;
+			while(1) {
+				if(HAL_GetTick() >= p->t) {
+					p->to = HAL_GetTick() - p->t;
+					p->f(p->arg);
+					p->t = HAL_GetTick() + p->dt;
+				}
+				vTaskDelay(1);	
+			}
+}
+//______________________________________________________________________________
 _proc	*_proc_add(void *f,void *arg,char *name, int dt) {
 _proc	*p=malloc(sizeof(_proc));
 			if(p != NULL) {
@@ -9,6 +21,7 @@ _proc	*p=malloc(sizeof(_proc));
 				p->name=name;
 				p->t=HAL_GetTick();
 				p->dt=dt;
+				xTaskCreate(_proc_code,name,128,p,0,p->task);
 				if(!_proc_buf)
 					_proc_buf=_buffer_init(_PROC_BUFFER_SIZE*sizeof(_proc));
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
@@ -56,61 +69,20 @@ int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
 void	_proc_list(void) {
 _proc	*p;	
 int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
-			printf("...\r\n");
+			__print("...\r\n");
 			while(i--) {
 				_buffer_pull(_proc_buf,&p,sizeof(_proc *));
-				printf("%08X,%08X,%s,%d\r\n",(int)p->f,(int)p->arg,p->name,p->to);
+				__print("%08X,%08X,%s,%d\r\n",(int)p->f,(int)p->arg,p->name,p->to);
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
 }
 //___________________________________________________________________________
 void	_wait(int t,void *(*f)(void)) {
-int		to=HAL_GetTick()+t;
-			while(to > HAL_GetTick()) {
-				if(f)
-					f();
-			}
-}
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-//___________________________________________________________________________
-struct task {
-	osThreadId id;
-	SemaphoreHandle_t s;
-	void *(*f)(void);
-} task;
-//___________________________________________________________________________
-void loop(void const * arg)
-{
-	struct task *t=(struct task *)arg;
-  for(;;)
-  {
-		if(t->s && xSemaphoreTake(t->s,0)) {
-			t->f();
-			xSemaphoreGive(t->s);
-		}
-		osDelay(1);
-  }
-}
-//___________________________________________________________________________
-void	_waitt(int t,void *(*f)(void)) {
-	if(!task.id) {
-		task.s = xSemaphoreCreateBinary();
-		task.f=f;	
-		xTaskCreate((TaskFunction_t)loop,"loop",128,&task,0,&task.id);
-	}
-	xSemaphoreGive(task.s);
-	osDelay(t);
-	while(!xSemaphoreTake(task.s,0))
-		osDelay(1);
+//int		to=HAL_GetTick()+t;
+//			while(to > HAL_GetTick()) {
+//				if(f)
+//					f();
+//			}
+			vTaskDelay(t);
 }
 
