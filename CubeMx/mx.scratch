@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-<ProjectName>C:\Users\Mocnik\Desktop\skyCube\CubeMx\\SkyPulse</ProjectName>
+<ProjectName>C:\Users\Matjaz\Documents\skyCube\CubeMx\\SkyPulse</ProjectName>
 <CMSIS>..\Drivers\CMSIS</CMSIS>
-<HAL_Driver>C:\Users\Mocnik\STM32Cube\Repository\STM32Cube_FW_F4_V1.17.0\Drivers\CMSIS</HAL_Driver>
+<HAL_Driver>C:\Users\Matjaz\STM32Cube\Repository\STM32Cube_FW_F4_V1.17.0\Drivers\CMSIS</HAL_Driver>
 
 <Toolchain>MDK-ARM</Toolchain>
 	<Toolversion>5</Toolversion>
@@ -26,8 +26,8 @@
   <config>
     <name>SkyPulse</name>				
     <device>STM32F405VGTx</device>		 
-    <heapSize>0x4000</heapSize>
-    <stackSize>0x4000</stackSize>
+    <heapSize>0x8000</heapSize>
+    <stackSize>0x8000</stackSize>
     
     	<cpuclock>120</cpuclock>
     	<board>custom</board>

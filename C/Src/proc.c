@@ -1,13 +1,17 @@
 #include "proc.h"
-_buffer 	*_proc_buf=NULL;
+_buffer				*_proc_buf=NULL;
+SemaphoreHandle_t sobj=NULL;
 //______________________________________________________________________________
 void 	_proc_code(void *arg) {
 _proc *p=(_proc *)arg;
 			while(1) {
 				if(HAL_GetTick() >= p->t) {
-					p->to = HAL_GetTick() - p->t;
-					p->f(p->arg);
-					p->t = HAL_GetTick() + p->dt;
+					if(xSemaphoreTake(sobj,5)) {
+						p->to = HAL_GetTick() - p->t;
+						p->f(p->arg);
+						xSemaphoreGive(sobj);
+						p->t = HAL_GetTick() + p->dt;
+					}
 				}
 				vTaskDelay(1);	
 			}
@@ -21,10 +25,12 @@ _proc	*p=malloc(sizeof(_proc));
 				p->name=name;
 				p->t=HAL_GetTick();
 				p->dt=dt;
-				xTaskCreate(_proc_code,name,128,p,0,p->task);
-				if(!_proc_buf)
+				if(!_proc_buf) {
 					_proc_buf=_buffer_init(_PROC_BUFFER_SIZE*sizeof(_proc));
+					sobj = xSemaphoreCreateMutex();					
+				}
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
+				xTaskCreate(_proc_code,name,512,p,0,p->task);
 			}
 			return p;
 }
@@ -83,6 +89,9 @@ void	_wait(int t,void *(*f)(void)) {
 //				if(f)
 //					f();
 //			}
+			xSemaphoreGive(sobj);
 			vTaskDelay(t);
+			while(!xSemaphoreTake(sobj,5))
+				osDelay(1);
 }
 

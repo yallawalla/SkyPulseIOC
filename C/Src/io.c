@@ -202,10 +202,31 @@ int			f_getc (FIL* fil) {						/* Pointer to the file object */
 * Return				:
 *******************************************************************************/
 __weak 	int	__print(const char *format, ...) {
+static	osSemaphoreId *sobj=NULL;
 				va_list	aptr;
 				va_start(aptr, format);
-				return printf(format, aptr);
+				
+				if(sobj==NULL) {
+					osSemaphoreDef(SEM);
+					sobj = osSemaphoreCreate(osSemaphore(SEM), 1);					
+				}
+				while(!xSemaphoreTake(sobj,5)) {
+						osDelay(1);
+					}						
+				int ret=printf(format, aptr);
+				va_end(aptr);
+				xSemaphoreGive(sobj);
+				return ret;
 }
+
+void vApplicationMallocFailedHook( void ) {
+	printf("malloc...");
+}
+
+void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
+	printf("stack ...%s",pcTaskName);
+}
+
 /**
 * @}
 */ 
