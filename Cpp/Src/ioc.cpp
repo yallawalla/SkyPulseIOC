@@ -2,9 +2,16 @@
 #include "ioc.h"
 
 extern "C" {
+	
+void _p_loop(void);
+	
 void ioc(void) {
 	_IOC::parent=_IOC::instanceOf();
-//	while(true)
+	
+	while(true) {
+		_p_loop();
+		vTaskDelay(1);
+	}
 //		_proc_loop();
 	}
 }

@@ -2,6 +2,7 @@
 #include 	"io.h"
 #include 	"proc.h"
 #include 	"misc.h"
+#include 	"ff.h"
 #include 	"usbd_cdc_if.h"
 /*******************************************************************************
 * Function Name	: 
@@ -194,8 +195,6 @@ RTC_DateTypeDef sDate;
 		if(!strcmp(months[i],month))
 			break;
 		
-		
-	
   sDate.WeekDay = d;
   sDate.Month = m;
   sDate.Date = 0x24;
@@ -205,8 +204,8 @@ RTC_DateTypeDef sDate;
   {
  //   _Error_Handler(__FILE__, __LINE__);
   }
-
-    HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
+	
+	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
 //  }
 }
 /*******************************************************************************
@@ -215,17 +214,35 @@ RTC_DateTypeDef sDate;
 * Output				:
 * Return				:
 *******************************************************************************/
-int			__print(const char *format, ...) {
-				char 		buf[128],*p;
-				va_list	aptr;
-				int			ret;
-	
-				va_start(aptr, format);
-				ret = vsnprintf(buf, sizeof(buf), format, aptr);
-				va_end(aptr);
-				for(p=buf; *p; ++p)
-					while(fputc(*p,&__stdout)==EOF)
-						_wait(2,_proc_loop);
-				return(ret);
+void vApplicationMallocFailedHook( void ) {
+	printf("memory error...");
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
+	printf("stack error in...%s",pcTaskName);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+__weak 	void	__print(const char *format, ...) {
+				va_list	aptr;
+				va_start(aptr, format);			
+static	SemaphoreHandle_t xMtx=NULL;
+				if(xMtx==NULL)
+					 xMtx=xSemaphoreCreateMutex();
+				if(xSemaphoreTake(xMtx, portMAX_DELAY)) {
+					vprintf(format, aptr);
+					xSemaphoreGive(xMtx);
+				}
+				va_end(aptr);
+}
+
 

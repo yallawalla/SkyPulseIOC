@@ -14,8 +14,17 @@
 #include 	"io.h"
 //_________________________________________________________________________________
 _io			*_stdio(_io	*p) {
+static	osSemaphoreId *sobj=NULL;
+				if(sobj==NULL) {
+					osSemaphoreDef(SEM);
+					sobj = osSemaphoreCreate(osSemaphore(SEM), 1);					
+				}
+				while(!xSemaphoreTake(sobj,5)) {
+						osDelay(1);
+				}
 _io			*io=stdin->io;
 				stdin->io=stdout->io=p;
+				xSemaphoreGive(sobj);
 				return(io);
 }
 //______________________________________________________________________________________
@@ -195,38 +204,6 @@ int			f_getc (FIL* fil) {						/* Pointer to the file object */
 				f_read(fil, s, 1, &br);				/* Write the char to the file */
 				return (br == 1) ? s[0] : EOF;/* Return the result */
 }
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-__weak 	int	__print(const char *format, ...) {
-static	osSemaphoreId *sobj=NULL;
-				va_list	aptr;
-				va_start(aptr, format);
-				
-				if(sobj==NULL) {
-					osSemaphoreDef(SEM);
-					sobj = osSemaphoreCreate(osSemaphore(SEM), 1);					
-				}
-				while(!xSemaphoreTake(sobj,5)) {
-						osDelay(1);
-					}						
-				int ret=printf(format, aptr);
-				va_end(aptr);
-				xSemaphoreGive(sobj);
-				return ret;
-}
-
-void vApplicationMallocFailedHook( void ) {
-	printf("malloc...");
-}
-
-void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
-	printf("stack ...%s",pcTaskName);
-}
-
 /**
 * @}
 */ 
