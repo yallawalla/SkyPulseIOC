@@ -119,6 +119,7 @@ class _IOC : public _ADC {
 		_PUMP 					pump;
 		_FAN 						fan;
 		_LED 						led;
+		_RTC						rtc;
 		_FOOTSW					footsw;
 		_CLI						com,com1,com3;
 

@@ -14,17 +14,17 @@
 #include 	"io.h"
 //_________________________________________________________________________________
 _io			*_stdio(_io	*p) {
-static	osSemaphoreId *sobj=NULL;
-				if(sobj==NULL) {
-					osSemaphoreDef(SEM);
-					sobj = osSemaphoreCreate(osSemaphore(SEM), 1);					
-				}
-				while(!xSemaphoreTake(sobj,5)) {
-						osDelay(1);
-				}
+//static	osSemaphoreId *sobj=NULL;
+//				if(sobj==NULL) {
+//					osSemaphoreDef(SEM);
+//					sobj = osSemaphoreCreate(osSemaphore(SEM), 1);					
+//				}
+//				while(!xSemaphoreTake(sobj,5)) {
+//						osDelay(1);
+//				}
 _io			*io=stdin->io;
 				stdin->io=stdout->io=p;
-				xSemaphoreGive(sobj);
+//				xSemaphoreGive(sobj);
 				return(io);
 }
 //______________________________________________________________________________________

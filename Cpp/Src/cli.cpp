@@ -41,18 +41,14 @@ int	_CLI::Fkey(int t) {
 			case __f8:
 			case __F8:
 				ioc->can.Newline();
-				ioc->can.io=io;
-				while(ioc->can.Parse())
+				while(ioc->can.Parse(io))
 					_wait(2,_proc_loop);
-				ioc->can.io=NULL;
 				return __F12;
 			case __f9:
 			case __F9:
 			{
-				_RTC	t;
-				t.io=io;
-				t.Newline();
-				while(t.Parse())
+				ioc->rtc.Newline();
+				while(ioc->rtc.Parse(io))
 					_wait(2,_proc_loop);
 				return __F12;
 			}

@@ -110,6 +110,7 @@ void	_wait(int t,void *(*f)(void)) {
 //				if(f)
 //					f();
 //			}
+			_io *temp=_stdio(NULL);
 			if(*_tWait==NULL)
 				xTaskCreate((TaskFunction_t)_task, "---", 1024, NULL, 0, _tWait);
 			++_tWait;
@@ -118,4 +119,5 @@ void	_wait(int t,void *(*f)(void)) {
 			vTaskDelay(t);
 			xSemaphoreTake(_sWait,portMAX_DELAY);
 			--_tWait;
+			_stdio(temp);
 }

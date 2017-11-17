@@ -57,7 +57,9 @@ void _CAN::Send(CanTxMsgTypeDef *msg) {
 * Return				:
 *******************************************************************************/
 void _CAN::Newline(void) {
-	__print("\r\ncan>");
+			io=_stdio(NULL);
+			_stdio(io);
+		__print("\r\ncan>");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -69,13 +71,14 @@ int	_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
 			__print("remote desktop...\r\n");
-			while(SendRemote() != __CtrlE)
+			while(SendRemote() != __CtrlE) 
 				_wait(10,_proc_loop);
 			__print("close...");
 			Newline();
 			break;
 		case __f8:
 		case __F8:
+			io=_stdio(NULL);
 			return __F12;			
 		default:
 			return t;

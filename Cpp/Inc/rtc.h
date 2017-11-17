@@ -17,7 +17,9 @@ class	_RTC : public _TERM {
 		virtual int		Fkey(int);
 		void					Increment(int, int);
 		static void		Refresh(_RTC *v) {
+			_io *temp=_stdio(v->io);
 			v->Newline();
+			_stdio(temp);
 		}
 };
 

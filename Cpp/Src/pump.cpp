@@ -1,10 +1,10 @@
 /**
   ******************************************************************************
-  * @file    dac.cpp
-  * @author  Fotona d.d.
-  * @version V1
-  * @date    30-Sept-2013
-  * @brief	 DA & DMA converters initialization
+  * @file 
+  * @author 
+  * @version  
+  * @date 
+  * @brief 
   *
   */
 /** @addtogroup
