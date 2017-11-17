@@ -7,17 +7,20 @@
 
 #include 	"stm32f4xx_hal.h"
 #include 	"io.h"
-HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
-HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
-void	poll_uart(_io *);
-_io* init_uart(UART_HandleTypeDef *, int, int);
-	 
+#define FATFS_SECTOR	FLASH_SECTOR_6
 #define	FATFS_ADDRESS 0x08040000
-#define	PAGE_SIZE			0x40000
-#define	PAGE_COUNT		3
+#define	PAGE_SIZE			0x20000
+#define	PAGE_COUNT		5
 #define	SECTOR_SIZE		512
 #define	CLUSTER_SIZE	4*SECTOR_SIZE
+
 #define	SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + sizeof(uint32_t)))
+HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
+HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
+int								ff_pack(int );
+
+void	poll_uart(_io *);
+_io* init_uart(UART_HandleTypeDef *, int, int);
 
 void	dumpHex(int, int);
 void	flushVCP(const void *);

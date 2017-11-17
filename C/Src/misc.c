@@ -3,6 +3,7 @@
 #include 	"proc.h"
 #include 	"misc.h"
 #include 	"ff.h"
+#include 	"diskio.h"
 #include 	"usbd_cdc_if.h"
 /*******************************************************************************
 * Function Name	: 
@@ -214,8 +215,57 @@ RTC_DateTypeDef sDate;
 * Output				:
 * Return				:
 *******************************************************************************/
+__weak	void	Watchdog() {
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+int		ff_pack(int mode) {
+int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];
+int		c0=0,c1=0;
+
+			f=FATFS_SECTOR;																															// f=koda prvega 128k sektorja
+			e=PAGE_SIZE;																																// e=velikost sektorja
+			p=(int *)FATFS_ADDRESS;																											// p=hw adresa sektorja
+			do {
+				do {
+					++c0;
+					Watchdog();																															//jk822iohfw
+					q=&p[SECTOR_SIZE/4+1];																									
+					while(p[SECTOR_SIZE/4] != q[SECTOR_SIZE/4] && q[SECTOR_SIZE/4] != -1)		// iskanje ze prepisanih sektorjev
+						q=&q[SECTOR_SIZE/4+1];
+					if(q[SECTOR_SIZE/4] == -1) {																						// ce ni kopija, se ga prepise na konec fs
+						for(i=0; i<SECTOR_SIZE/4;++i)
+							buf[i]=~p[i];
+						Watchdog();
+						if(mode)
+							disk_write (0,(uint8_t *)buf,p[SECTOR_SIZE/4],1);										// STORAGE_Write bo po prvem brisanju zacel na
+					} else																																	// zacetku !!!
+						++c1;
+					p=&p[SECTOR_SIZE/4+1]; 
+				} while(((int)p)-FATFS_ADDRESS <  e && p[SECTOR_SIZE/4] != -1);						// prepisana cela stran...
+				if(mode)
+					FLASH_Erase(f,1);																												// brisi !
+				f+=FLASH_SECTOR_1; 
+				e+=PAGE_SIZE;
+			} while(p[SECTOR_SIZE/4] != -1);	
+			if(mode) {
+				FLASH_Erase(f,1);																													// se zadnja !
+				return 0;
+			} else 
+				return(100*c1/c0);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void vApplicationMallocFailedHook( void ) {
-	printf("memory error...");
+	__print("memory error...");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -224,25 +274,26 @@ void vApplicationMallocFailedHook( void ) {
 * Return				:
 *******************************************************************************/
 void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
-	printf("stack error in...%s",pcTaskName);
+	__print("stack error in...%s",pcTaskName);
 }
 /*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
+* Function Name : batch
+* Description   :	ADP1047 output voltage setup, using the default format
+* Input         :
+* Output        :
+* Return        :
 *******************************************************************************/
-__weak 	void	__print(const char *format, ...) {
-				va_list	aptr;
-				va_start(aptr, format);			
-static	SemaphoreHandle_t xMtx=NULL;
-				if(xMtx==NULL)
-					 xMtx=xSemaphoreCreateMutex();
-				if(xSemaphoreTake(xMtx, portMAX_DELAY)) {
-					vprintf(format, aptr);
-					xSemaphoreGive(xMtx);
-				}
-				va_end(aptr);
+__weak 	int	__print(const char *format, ...) {
+
+			char 		buf[128],*p;
+			va_list	aptr;
+			int			ret;
+			
+			va_start(aptr, format);
+			ret = vsnprintf(buf, sizeof(buf), format, aptr);
+			va_end(aptr);
+			for(p=buf; *p; ++p)
+				while(fputc(*p,&__stdout)==EOF)
+					_wait(2,_proc_loop);
+			return(ret);
 }
-
-
