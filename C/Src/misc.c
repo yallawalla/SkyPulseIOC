@@ -285,12 +285,13 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName 
 *******************************************************************************/
 __weak 	int	__print(const char *format, ...) {
 
-			char 		buf[128],*p;
+			static char *buf=NULL,*p;
 			va_list	aptr;
 			int			ret;
-			
+			if(!buf)
+				buf=malloc(__TXLEN);
 			va_start(aptr, format);
-			ret = vsnprintf(buf, sizeof(buf), format, aptr);
+			ret = vsnprintf(buf, __TXLEN, format, aptr);
 			va_end(aptr);
 			for(p=buf; *p; ++p)
 				while(fputc(*p,&__stdout)==EOF)

@@ -43,12 +43,14 @@ string Months[]	= { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct",
 void	_RTC::Newline(void) {
 			io=_stdio(NULL);
 			_stdio(io);
-			HAL_RTC_GetTime(&hrtc,&time,RTC_FORMAT_BIN);
-			HAL_RTC_GetDate(&hrtc,&date,RTC_FORMAT_BIN);
-			__print("\r:time        %4s,%3d-%3s-%3d,%3d::%02d::%02d",
-				Days[date.WeekDay-1].c_str(),date.Date,Months[date.Month-1].c_str(),date.Year,
-					time.Hours,time.Minutes,time.Seconds);
-			for(int i=1+4*(6-idx); i--; __print("\b"));
+			if(io) {
+				HAL_RTC_GetTime(&hrtc,&time,RTC_FORMAT_BIN);
+				HAL_RTC_GetDate(&hrtc,&date,RTC_FORMAT_BIN);
+				__print("\r:time        %4s,%3d-%3s-%3d,%3d::%02d::%02d",
+					Days[date.WeekDay-1].c_str(),date.Date,Months[date.Month-1].c_str(),date.Year,
+						time.Hours,time.Minutes,time.Seconds);
+				for(int i=1+4*(6-idx); i--; __print("\b"));
+			}
 }
 //_________________________________________________________________________________
 int		_RTC::Fkey(int t) {

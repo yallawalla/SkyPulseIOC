@@ -488,7 +488,7 @@ void 		_WS::HSV2RGB(HSV HSV, RGB *RGB){
 	*/
 /*******************************************************************************/
 void		_WS::Newline(void) {
-				printf("\r:color n,HSV %4d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
+				__print("\r:color n,HSV %4d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
 					idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v,
 						ws[idxled].mod.h,ws[idxled].mod.s,ws[idxled].mod.v,ws[idxled].shift);
 					for(int i=1+4*(7-idx); i--; __print("\b"));

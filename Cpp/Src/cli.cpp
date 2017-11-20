@@ -164,8 +164,7 @@ FRESULT _CLI::Decode(char *p) {
 				return err;	
 			if(dir.sect) {
 				char *p=fno.fname;
-				if(wcard(sc[1],p)) {
-					f_unlink(p);			
+				if(wcard(sc[1],p)) {		
 				if(FRESULT err=f_unlink(p))
 					return err;	
 				}

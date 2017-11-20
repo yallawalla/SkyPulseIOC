@@ -10,12 +10,13 @@
       <TargetName>SkyPulse</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F405VGTx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F4xx_DFP.2.9.0</PackID>
+          <PackID>Keil.STM32F4xx_DFP.2.11.0</PackID>
           <PackURL>http://www.keil.com/pack</PackURL>
           <Cpu>IRAM(0x20000000-0x2001FFFF) IRAM2(0x10000000-0x1000FFFF) IROM(0x8000000-0x80FFFFF) CLOCK(25000000) FPU2 CPUTYPE("Cortex-M4")</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -335,7 +336,7 @@
               <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx, __REENT=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                                            ../Drivers/STM32F4xx_HAL_Driver/Inc;                                            ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                            ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                            ../Middlewares/Third_Party/FatFs/src;                                            ../Drivers/CMSIS/Include;                                            ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                            ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                            ..\..\C\Inc;                                            ..\..\Cpp\Inc;                                            ..\..\lcd\src;       ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;       ../Middlewares/Third_Party/FreeRTOS/Source/include;       ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
+              <IncludePath>../Inc;                                                ../Drivers/STM32F4xx_HAL_Driver/Inc;                                                ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                                ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                                ../Middlewares/Third_Party/FatFs/src;                                                ../Drivers/CMSIS/Include;                                                ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                                ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                                ..\..\C\Inc;                                                ..\..\Cpp\Inc;                                                ..\..\lcd\src;           ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;           ../Middlewares/Third_Party/FreeRTOS/Source/include;           ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
