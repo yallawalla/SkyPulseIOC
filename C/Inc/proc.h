@@ -18,7 +18,7 @@ int						t,dt,to;
 TaskHandle_t	*task;
 } _proc;
 
-void					_wait(int,void *(*)(void));
+void					_wait(int);
 extern				_buffer 	*_proc_buf;
 void					_proc_list(void),
 							_proc_remove(void *,void *),

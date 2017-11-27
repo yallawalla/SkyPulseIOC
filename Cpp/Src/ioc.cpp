@@ -2,18 +2,16 @@
 #include "ioc.h"
 
 extern "C" {
-	
-void _p_loop(void);
-	
-void ioc(void) {
-	_IOC::parent=_IOC::instanceOf();
-	
-	while(true) {
-		_p_loop();
-		vTaskDelay(1);
-	}
-//		_proc_loop();
-	}
+	void _p_loop(void);
+		
+	void ioc(void) {
+		_IOC::parent=new _IOC;
+		
+		while(true) {
+			_p_loop();
+			vTaskDelay(1);
+		}
+		}
 }
 _IOC*	_IOC::parent			= NULL;
 /*******************************************************************************
@@ -31,10 +29,10 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 	
 	FIL f;
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
-		pump.LoadSettings((FILE *)&f);
-		fan.LoadSettings((FILE *)&f);
-		spray.LoadSettings((FILE *)&f);
-		ws2812.LoadSettings((FILE *)&f);
+		pump.LoadSettings(&f);
+		fan.LoadSettings(&f);
+		spray.LoadSettings(&f);
+		ws2812.LoadSettings(&f);
 		f_close(&f);
 	}	else
 		__print("... error settings file");
@@ -121,10 +119,11 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
+extern int ttt;
 void	_IOC::SetError(_err e) {
 
 			e = (_err)(e & ~error_mask);
-			e ? led.RED1(3000): led.GREEN1(20);
+			ttt ? led.RED1(3000): led.GREEN1(20);
 			e = (_err)((e ^ IOC_State.Error) & e);
 	
 			IOC_State.Error = (_err)(IOC_State.Error | e);
@@ -147,7 +146,7 @@ void	_IOC::SetError(_err e) {
 * Output				:
 * Return				:
 *******************************************************************************/
-string _IOC::ErrMsg[] = {
+const string _IOC::ErrMsg[] = {
 	"5V  supply",
 	"12V supply",
 	"24V supply",

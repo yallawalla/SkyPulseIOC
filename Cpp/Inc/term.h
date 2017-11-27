@@ -1,8 +1,7 @@
 #ifndef TERM_H
 #define TERM_H
-#include "stdio.h"
-#include "ascii.h"
 #include "io.h"
+#include "ascii.h"
 /*******************************************************************************
 * Function Name	: 
 * Description		: 

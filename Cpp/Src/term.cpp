@@ -85,7 +85,7 @@ int		i=getchar();
 					return seq;
 				}
 			} else if(i==__Esc) {
-				timeout=HAL_GetTick()+5;
+				timeout=HAL_GetTick()+10;
 				seq=i;
 			} else {
 				timeout=0;
@@ -137,7 +137,6 @@ void 	*v=this;
 			}
 		return v;
 }
-
 /**
 * @}
 */

@@ -104,10 +104,10 @@ typedef __packed struct _IOC_SprayAck {
 //_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
-		_IOC();
-		static string		ErrMsg[];
+		static const string	ErrMsg[];
 	public:
 		static _IOC			*parent;
+		_IOC();
 		_err 						error_mask;
 		_dbg						debug;
 		_IOC_State 			IOC_State;
@@ -124,13 +124,7 @@ class _IOC : public _ADC {
 		_CLI						com,com1,com3;
 
 		~_IOC();
-					
-		static _IOC	*instanceOf(void) {
-			if(!parent)
-				parent=new _IOC;
-			return parent;
-		}
-				
+
 		static void	*pollStatus(void *);
 		void SetState(_State);
 		void SetError(_err);

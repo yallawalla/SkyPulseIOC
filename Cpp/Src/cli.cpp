@@ -18,63 +18,62 @@ void _CLI::Newline(void) {
 }
 //_________________________________________________________________________________
 int	_CLI::Fkey(int t) {
-		_IOC	*ioc=_IOC::instanceOf();
+		_IOC	*ioc=_IOC::parent;
 		switch(t) {
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
 				while(ioc->pump.Parse()) 
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			case __f6:
 			case __F6:
 				ioc->fan.Newline();
 				while(ioc->fan.Parse())
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			case __f7:
 			case __F7:
 				ioc->spray.Newline();
 				while(ioc->spray.Parse())
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			case __f8:
 			case __F8:
 				ioc->can.Newline();
 				while(ioc->can.Parse(io))
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			case __f9:
 			case __F9:
 			{
 				ioc->rtc.Newline();
 				while(ioc->rtc.Parse(io))
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			}
 			case __f10:
 			case __F10:
 				ioc->ws2812.Newline();
 				while(ioc->ws2812.Parse())
-					_wait(2,_proc_loop);
+					_wait(2);
 				return __F12;
 			case __f11:
 			case __F11:
-				FIL f;
-				if(f_open(&f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
-					ioc->pump.SaveSettings((FILE *)&f);
-					ioc->fan.SaveSettings((FILE *)&f);
-					ioc->spray.SaveSettings((FILE *)&f);
-					ioc->ws2812.SaveSettings((FILE *)&f);
+			{
+				FIL *f=new FIL;
+				if(f_open(f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
+					ioc->pump.SaveSettings(f);
+					ioc->fan.SaveSettings(f);
+					ioc->spray.SaveSettings(f);
+					ioc->ws2812.SaveSettings(f);
 					__print("... saved");
-					f_close(&f);
+					f_close(f);
+					delete f;
 				}	else
 					__print("... error settings file");		
 				Newline();
-				break;
-			case __f1:
-			case __F1:
-				SetTimeDate();
+			}
 				break;
 			default:
 				return t;
@@ -86,7 +85,7 @@ typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
     using namespace std;
 FRESULT _CLI::Decode(char *p) {
-	_IOC	*ioc=_IOC::instanceOf();
+//	_IOC	*ioc=_IOC::parent;
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
 		
@@ -184,13 +183,14 @@ FRESULT _CLI::Decode(char *p) {
 
 		return FR_NO_FILE;
 		else {
-			FIL	f;
-			if(FRESULT err=f_open(&f,sc[1],FA_READ))
+			FIL	*f=new FIL;
+			if(FRESULT err=f_open(f,sc[1],FA_READ))
 				return err;	
 			__print("\r\n");
-			while(!f_eof(&f)) 
-				__print("%c",f_getc(&f));
-			f_close(&f);
+			while(!f_eof(f)) 
+				__print("%c",f_getc(f));
+			f_close(f);
+			delete f;
 		}
 	}
 //__make directory_________________________________________________________________
@@ -200,31 +200,15 @@ FRESULT _CLI::Decode(char *p) {
 		if(FRESULT err=f_mkdir(sc[1]))
 			return err;	
 	}
-//__set timee______________________________________________________________________
-	else if(!strncmp("time",sc[0],len)) {
-		int h, m;
-		if(sscanf(sc[1],"%d:%d",&h,&m)==2) {
-			RTC_TimeTypeDef sTime;
-			sTime.Hours = h;
-			sTime.Minutes =m;
-			sTime.Seconds = 0;
-			sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-			sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-			if(HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN) != HAL_OK)
-				return FR_NOT_READY;
-			__HAL_RTC_TAMPER1_DISABLE(&hrtc);
-			__HAL_RTC_TAMPER2_DISABLE(&hrtc);
-		} else
-			printRtc();
-	}
-//__set timee______________________________________________________________________
+//__color menu_____________________________________________________________________
 	else if(!strncmp("color",sc[0],len)) {
-		return ioc->ws2812.Decode(sc[1]);
+		return _IOC::parent->ws2812.Decode(sc[1]);
 	}
 //__copy file______________________________________________________________________
 	else if(!strncmp("copy",sc[0],len)) {
 		char f[256];
-		FIL f1,f2;
+		FIL	*f1=new FIL,
+				*f2=new FIL;
 		if(n == 2) {
 			p=strchr(sc[1],':');
 			if(p++) {
@@ -245,23 +229,18 @@ FRESULT _CLI::Decode(char *p) {
 	
 		if(f[strlen(f)-1]==':')
 			strcat(f,sc[1]);
-		if(FRESULT err=f_open(&f1,sc[1],FA_READ))
-			return err;	
-		if(FRESULT err=f_open(&f2,f,FA_CREATE_ALWAYS | FA_WRITE)) {
-			f_close(&f1);
-			return err;	
+		if(f_open(f1,sc[1],FA_READ)==FR_OK && f_open(f2,f,FA_CREATE_ALWAYS | FA_WRITE)==FR_OK) {
+			while(!f_eof(f1))
+				if(fputc(fgetc((FILE *)&f1),(FILE *)&f2)==EOF)
+					break;
 		}
-		while(!f_eof(&f1))
-			if(fputc(fgetc((FILE *)&f1),(FILE *)&f2)==EOF)
-				break;
-		if(!f_eof(&f1)) {
-			f_close(&f1);
-			f_close(&f2);
-			return FR_NO_FILE;
-		}
-		f_close(&f1);
-		f_close(&f2);
+		f_close(f1);
+		f_close(f2);
+		delete f1;
+		delete f2;
+		return FR_OK;
 	}
+//
 ////__entering new file____________________________________________________________
 //						if(!strncmp("file",sc[0],len)) {
 //							if(n == 2)
@@ -270,17 +249,27 @@ FRESULT _CLI::Decode(char *p) {
 //								return _PARSE_ERR_SYNTAX;
 //						}
 //__format flash drive_____________________________________________________________
+//
 	else if(!strncmp("format",sc[0],len)) {
-		int	wbuf[SECTOR_SIZE];
+		uint8_t	*workbuf;
 		if(n < 2)
 			return FR_NO_FILE;
+		
 		if(!strncmp("0:",sc[1],len)) {
-			for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1)
-				FLASH_Erase(i,1);__print(".");_wait(10,_proc_loop);
+			for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
+				FLASH_Erase(i,1);
+				__print(".");
+				_wait(100);
+			}
 		}		
 		FRESULT err=f_mount(&fatfs,sc[1],1);
-		if(FRESULT err=f_mkfs(sc[1],1,CLUSTER_SIZE,wbuf,SECTOR_SIZE*sizeof(int)))
-			return err;	
+		if(err==FR_NO_FILESYSTEM)
+			err=f_mkfs(sc[1],1,CLUSTER_SIZE,workbuf=new uint8_t[SECTOR_SIZE],SECTOR_SIZE*sizeof(int));
+		else
+			return err;
+		delete workbuf;
+		if(err!=FR_OK)
+			return err;
 	}
 //__repack flash drive____________________________________________________________
 	else if(!strncmp("pack",sc[0],len)) {
@@ -291,24 +280,25 @@ FRESULT _CLI::Decode(char *p) {
 		dumpHex(strtoul( sc[1],NULL,0),strtoul( sc[2],NULL,0));
 	}
 	else if(!strncmp("wait",sc[0],len)) {
-		_wait(atoi(sc[1]),_proc_loop);
+		_wait(atoi(sc[1]));
 	}
 //__file line edit/add ___________________________________________________________
 	else if(!strncmp("file",sc[0],len)) {
 		class _ENTERFILE : public _TERM, public _FAT {
 			private:
-				FIL f;
+				FIL *f;
 			public:
 				FRESULT err;
 				_ENTERFILE(char *filename) {
-					err=f_open(&f,filename,FA_CREATE_ALWAYS | FA_WRITE);
+					err=f_open(f=new FIL, filename, FA_CREATE_ALWAYS | FA_WRITE);
 					Newline();
 				};
 				~_ENTERFILE(void) {
-					f_close(&f);
+					f_close(f);
+					delete f;
 				};
 				virtual FRESULT Decode(char *c) {
-					f_printf(&f,"%s\r\n",c);
+					f_printf(f,"%s\r\n",c);
 					return FR_OK;
 				};
 				virtual void Newline(void) {
@@ -317,7 +307,7 @@ FRESULT _CLI::Decode(char *p) {
 		} efile(sc[1]);
 		
 		while(efile.Parse() && efile.err == FR_OK) {
-			_wait(2,_proc_loop);
+			_wait(2);
 		}
 		return efile.err;
 	}
@@ -361,16 +351,21 @@ FRESULT _CLI::Decode(char *p) {
 //			USBD_RegisterClass(&USBD_Device, USBD_CDC_CLASS);
 //			USBD_CDC_RegisterInterface(&USBD_Device, &USBD_CDC_fops);
 //			USBD_Start(&USBD_Device);
-//		} else
+//		} else 
 				return FR_NOT_READY;
 	} else if(!strncmp("@",sc[0],1)) {
-		FIL f;
-		if(f_open(&f,++sc[0],FA_READ) != FR_OK)
-			return FR_INVALID_PARAMETER;
-		Newline();
-		while(Parse(&f) && !f_eof(&f))
-			_wait(2,_proc_loop);	
-		f_close(&f);
+		FIL *f=new FIL;
+		if(f_open(f,++sc[0],FA_READ) == FR_OK) {
+			io->file=f;
+			Newline();
+			while(!f_eof(f))
+				Parse();
+//				_wait(2);
+			f_close(f);
+			delete f;
+			io->file=NULL;
+			Newline();
+		}
 	} else if(!strncmp("+D",sc[0],2)) {
 	} else if(!strncmp("-D",sc[0],2)) {
 	} else if(!strncmp("+E",sc[0],2)) {
@@ -386,9 +381,7 @@ FRESULT _CLI::Decode(char *p) {
 }
 //_________________________________________________________________________________
 int	_CLI::wcard(char *t, char *s) {
-			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : 
-				!*t : 
-					wcard(t+1,s) || (*s && wcard(t,s+1));
+			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : !*t : wcard(t+1,s) || (*s && wcard(t,s+1));
 }
 //_________________________________________________________________________________
 string days[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};

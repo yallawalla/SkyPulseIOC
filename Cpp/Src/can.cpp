@@ -72,7 +72,7 @@ int	_CAN::Fkey(int t) {
 		case __CtrlE:
 			__print("remote desktop...\r\n");
 			while(SendRemote() != __CtrlE) 
-				_wait(10,_proc_loop);
+				_wait(2);
 			__print("close...");
 			Newline();
 			break;
@@ -150,7 +150,7 @@ FRESULT _CAN::Decode(char *c) {
 * Return				:
 *******************************************************************************/
 void	_CAN::Poll() {
-	_IOC *ioc=_IOC::instanceOf();
+	_IOC *ioc=_IOC::parent;
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
 	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
 	_io* temp=_stdio(io);										//remote console printout !!!
@@ -185,12 +185,13 @@ void	_CAN::Poll() {
 					_buffer_push(remote->io->rx,rx->Data,rx->DLC);
 			break;
 			case idCOM2CAN:
-				__print("%.*s",rx->DLC,rx->Data);
+				for(int i=0; i < rx->DLC;++i)
+					__print("%c",rx->Data[i]);
 			break;
 			default:
 				Newline();
 				__print(" < %02X ",rx->StdId);
-				for(int i=0;i < rx->DLC;++i)
+				for(int i=0; i < rx->DLC;++i)
 					__print(" %02X",rx->Data[i]);
 				Newline();	
 			break;

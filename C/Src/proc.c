@@ -104,7 +104,7 @@ void	_task(const void *t) {
 			}
 }
 //___________________________________________________________________________
-void	_wait(int t,void *(*f)(void)) {
+void	_wait(int t) {
 			_io *temp=_stdio(NULL);
 			if(*_tWait==NULL)
 				xTaskCreate((TaskFunction_t)_task, "---", 1024, NULL, 0, _tWait);

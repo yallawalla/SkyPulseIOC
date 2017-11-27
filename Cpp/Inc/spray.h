@@ -1,7 +1,6 @@
 #ifndef		SPRAY_H
 #define		SPRAY_H
 
-#include	<stdio.h>
 #include	"term.h"
 #include	"adc.h"
 #include	"err.h"
@@ -49,8 +48,8 @@ class	_SPRAY : public _TERM, public _ADC {
 
 	public:
 		_SPRAY();
-		void		LoadSettings(FILE *);
-		void		SaveSettings(FILE *);
+		void		LoadSettings(FIL *);
+		void		SaveSettings(FIL *);
 		virtual void		Newline(void);
 		virtual int			Fkey(int);
 		void		Increment(int, int);

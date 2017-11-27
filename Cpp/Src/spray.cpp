@@ -177,13 +177,13 @@ int		_SPRAY::Fkey(int t) {
 	* @param	: None
 	* @retval : None
 	*/
-void	_SPRAY::LoadSettings(FILE *f) {
+void	_SPRAY::LoadSettings(FIL *f) {
 char	c[128];
-			fgets(c,sizeof(c),f);
+			f_gets(c,sizeof(c),f);
 			sscanf(c,"%hu,%hu,%hu,%hu",&offset.cooler,&offset.bottle,&offset.compressor,&offset.air);
-			fgets(c,sizeof(c),f);
+			f_gets(c,sizeof(c),f);
 			sscanf(c,"%hu,%hu,%hu,%hu",&gain.cooler,&gain.bottle,&gain.compressor,&gain.air);
-			fgets(c,sizeof(c),f);
+			f_gets(c,sizeof(c),f);
 			sscanf(c,"%d,%d",&AirLevel,&WaterLevel);
 }
 /*******************************************************************************/
@@ -192,10 +192,10 @@ char	c[128];
 	* @param	: None
 	* @retval : None
 	*/
-void	_SPRAY::SaveSettings(FILE *f) {
-			fprintf(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
-			fprintf(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler, gain.bottle, gain.compressor, gain.air);
-			fprintf(f,"%5d,%5d                             /.. air, H2O\r\n", AirLevel, WaterLevel);
+void	_SPRAY::SaveSettings(FIL *f) {
+			__fprint(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
+			__fprint(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler, gain.bottle, gain.compressor, gain.air);
+			__fprint(f,"%5d,%5d                             /.. air, H2O\r\n", AirLevel, WaterLevel);
 }
 /*******************************************************************************/
 /**

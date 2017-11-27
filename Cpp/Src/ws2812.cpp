@@ -349,9 +349,9 @@ char		*c=strchr(p,'=');
 	* @retval : None
 	*/
 /*******************************************************************************/
-void		_WS::SaveSettings(FILE *f){
+void		_WS::SaveSettings(FIL *f){
 				for(int i=0; i < __IMAX; ++i)
-					fprintf(f,"color %d,%d,%d,%d\r\n",i,ws[i].color.h,ws[i].color.s,ws[i].color.v);
+					__fprint(f,"color %d,%d,%d,%d\r\n",ws[i].color.h,ws[i].color.s,ws[i].color.v);
 }
 /*******************************************************************************/
 /**
@@ -360,12 +360,10 @@ void		_WS::SaveSettings(FILE *f){
 	* @retval : None
 	*/
 /*******************************************************************************/
-void		_WS::LoadSettings(FILE *f){
-char		c[128],k;
-				for(int i=0; i < __IMAX; ++i) {
-					fgets(c,sizeof(c),f);
-					sscanf(c,"color %hhu,%hu,%hhu,%hhu",&k, &ws[i].color.h, &ws[i].color.s, &ws[i].color.v);
-				}
+void		_WS::LoadSettings(FIL *f){
+char		c[128];
+				for(int i=0; i < __IMAX; ++i)
+					f_gets(c,sizeof(c),f);
 }
 /*******************************************************************************
  * Function RGB2HSV
@@ -580,138 +578,41 @@ void		_WS::Increment(int a, int b) {
 
 /**
 * @}
+fil inserted.led
+col 0,5,-r
+col 0,5=180,180,50
+col 0,5,+r
 
-.c 0,120,255,50 
-.c 5,120,255,50 
-.c 1,180,180,50
-.c 4,180,180,50
-.c 2,7,255,50
-.c 3,7,255,50
+fil ejected.led
+col 0,5,-r
+col 0,5=1,255,50
+col 0,5,+r
 
-.t 30
-.c 2,7,255,50 
-.c 3,7,255,50
-.l 2,2
-.r 3,2
-.c 1,180,180,50 
-.c 4,180,180,50
-.r 1,2
-.r 4,2
-.d 3000
-.c 2,7,255,0 
-.c 3,7,255,0
-.r 2,2
-.l 3,2
-.c 1,180,180,0 
-.c 4,180,180,0
-.l 1,2
-.l 4,2
-.d 3000
+fil onoff.led
+col t=20
+col 0,1,4,5=180,180,50
+col 2,3=1,255,50
+col 0,1,4,5,+r
+col 2,+r
+col 3,+l
+w 1000
+col 2,-l
+col 3,-r
 
-.c 2,7,255,50 
-.c 3,7,255,50
-.f 2,0
-.f 3,0
-.d 100
-.c 2,7,255,0 
-.c 3,7,255,0
-.f 2,0
-.f 3,0
-.d 100
-.c 2,7,255,50 
-.c 3,7,255,50
-.f 2,0
-.f 3,0
-.d 100
-.c 2,7,255,0 
-.c 3,7,255,0
-.f 2,0
-.f 3,0
-.d 100
-.c 2,7,255,50 
-.c 3,7,255,50
-.f 2,0
-.f 3,0
-.d 100
-.c 2,7,255,0 
-.c 3,7,255,0
-.f 2,0
-.f 3,0
+fil standby.led
+col 2,-l
+col 3,-r
 
+fil ready.led
+col 2,+r
+col 3,+l
 
-.c 2,7,255,50 
-.c 3,7,255,50
-.f 2,2
-.f 3,2
-.c 1,180,180,50 
-.c 4,180,180,50
-.l 1,2
-.l 4,2
-.d 25
-.c 1,180,180,0 
-.c 4,180,180,0
-.l 1,2
-.l 4,2
-.c 2,7,255,0 
-.c 3,7,255,0
-.f 2,2
-.f 3,2
-
-=color 0,180,180,95
-=color 1,180,180,95
-=color 2,7,255,95
-=color 3,7,255,95
-=color 4,180,180,95
-=color 5,180,180,95
-
-=color 0,180,180,50
-=color 1,180,180,50
-=color 2,7,255,50
-=color 3,7,255,50
-=color 4,180,180,50
-=color 5,180,180,50
-
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
-+c f,2
--c f,3
-w 100
--c f,2
-+c f,3
-w 100
--c f,2
--c f,3
-
--c r,4
-+c r,4
+fil error.led
+col 0,5,-r
+col 0,5=1,255,50
+col 0,5,+r
+col 2,-l
+col 3,-r
 
 */
 

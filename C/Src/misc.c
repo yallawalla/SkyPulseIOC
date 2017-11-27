@@ -184,37 +184,6 @@ void	date_time(uint32_t d,uint32_t t) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void SetTimeDate() {
-extern RTC_HandleTypeDef hrtc;
-RTC_DateTypeDef sDate;
-	int d,m;
-	char month[4];
-	char *months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-
-	sscanf(__DATE__,"%s %d %d",month,&d,&m);
-	for(int i=0; i<6;++i)
-		if(!strcmp(months[i],month))
-			break;
-		
-  sDate.WeekDay = d;
-  sDate.Month = m;
-  sDate.Date = 0x24;
-  sDate.Year = 0x17;
-
-  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
-  {
- //   _Error_Handler(__FILE__, __LINE__);
-  }
-	
-	HAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
-//  }
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 __weak	void	Watchdog() {
 }
 /*******************************************************************************
@@ -275,26 +244,4 @@ void vApplicationMallocFailedHook( void ) {
 *******************************************************************************/
 void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
 	__print("stack error in...%s",pcTaskName);
-}
-/*******************************************************************************
-* Function Name : batch
-* Description   :	ADP1047 output voltage setup, using the default format
-* Input         :
-* Output        :
-* Return        :
-*******************************************************************************/
-__weak 	int	__print(const char *format, ...) {
-
-			static char *buf=NULL,*p;
-			va_list	aptr;
-			int			ret;
-			if(!buf)
-				buf=malloc(__TXLEN);
-			va_start(aptr, format);
-			ret = vsnprintf(buf, __TXLEN, format, aptr);
-			va_end(aptr);
-			for(p=buf; *p; ++p)
-				while(fputc(*p,&__stdout)==EOF)
-					_wait(2,_proc_loop);
-			return(ret);
 }

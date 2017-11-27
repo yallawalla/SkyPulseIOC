@@ -1,6 +1,6 @@
 #ifndef		FAN_H
 #define		FAN_H
-#include	<stdio.h>
+
 #include	"term.h"
 #include	"adc.h"
 #include	"err.h"
@@ -15,8 +15,8 @@ class	_FAN : public _TERM, public _ADC {
 		int fpl,fph,ftl,fth,idx;
 	public:
 		_FAN();
-		void		LoadSettings(FILE *);
-		void		SaveSettings(FILE *);
+		void		LoadSettings(FIL *);
+		void		SaveSettings(FIL *);
 
 		virtual void	Newline(void);
 		virtual int		Fkey(int);

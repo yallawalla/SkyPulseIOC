@@ -48,8 +48,8 @@ class	_WS : public _TERM {
 		virtual int			Fkey(int);
 		virtual	FRESULT	Decode(char *);
 		void						Increment(int, int);
-		void						LoadSettings(FILE *);
-		void						SaveSettings(FILE *);
+		void						LoadSettings(FIL *);
+		void						SaveSettings(FIL *);
 	
 		FRESULT					ColorOn(char *);
 		FRESULT					ColorOff(char *);

@@ -31,9 +31,9 @@ _FAN::_FAN()  {
 	* @param	: None
 	* @retval : None
 	*/
-void	_FAN::LoadSettings(FILE *f) {
+void	_FAN::LoadSettings(FIL *f) {
 char	c[128];
-			fgets(c,sizeof(c),f);
+			f_gets(c,sizeof(c),f);
 			sscanf(c,"%d,%d,%d,%d",&fpl,&fph,&ftl,&fth);
 }
 /*******************************************************************************/
@@ -42,8 +42,8 @@ char	c[128];
 	* @param	: None
 	* @retval : None
 	*/
-void	_FAN::SaveSettings(FILE *f) {
-			fprintf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+void	_FAN::SaveSettings(FIL *f) {
+			__fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
 //_________________________________________________________________________________
 void	_FAN::Newline(void) {

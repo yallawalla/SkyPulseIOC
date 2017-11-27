@@ -24,7 +24,7 @@ int 		fputc(int c, FILE *f) {
 				if(f==stdout) {
 					if(f->io) {
 						while(f->io->put(f->io->tx,c) == EOF)
-							_wait(2,_proc_loop);
+							_wait(2);
 						if(f->io->file)
 							f_putc(c,f->io->file);
 					}

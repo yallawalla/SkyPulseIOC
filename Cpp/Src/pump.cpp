@@ -31,9 +31,9 @@ _PUMP::_PUMP()  {
 	* @param	: None
 	* @retval : None
 	*/
-void	_PUMP::LoadSettings(FILE *f) {
+void	_PUMP::LoadSettings(FIL *f) {
 char	c[128];
-			fgets(c,sizeof(c),f);
+			f_gets(c,sizeof(c),f);
 			sscanf(c,"%d,%d,%d,%d",&fpl,&fph,&ftl,&fth);
 }
 /*******************************************************************************/
@@ -42,8 +42,8 @@ char	c[128];
 	* @param	: None
 	* @retval : None
 	*/
-void	_PUMP::SaveSettings(FILE *f) {
-			fprintf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+void	_PUMP::SaveSettings(FIL *f) {
+			__fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
 //_________________________________________________________________________________
 void	_PUMP::Newline(void) {
