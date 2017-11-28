@@ -332,7 +332,7 @@ char		*c=strchr(p,'=');
 					break;
 					default:
 						while(p) {
-							if(!isdigit(*p))
+							if(!isdigit(*p) && !isspace(*p))
 								return FR_INVALID_PARAMETER;
 							int i=atoi(p);
 							if(sscanf(c,"%hu,%hhu,%hhu",&ws[i].color.h, &ws[i].color.s, &ws[i].color.v) != 3)
@@ -351,7 +351,7 @@ char		*c=strchr(p,'=');
 /*******************************************************************************/
 void		_WS::SaveSettings(FIL *f){
 				for(int i=0; i < __IMAX; ++i)
-					_fprint(f,"color %d,%d,%d,%d\r\n",ws[i].color.h,ws[i].color.s,ws[i].color.v);
+					f_printf(f,"color %d=%d,%d,%d\r\n",i,ws[i].color.h,ws[i].color.s,ws[i].color.v);
 }
 /*******************************************************************************/
 /**
@@ -361,9 +361,11 @@ void		_WS::SaveSettings(FIL *f){
 	*/
 /*******************************************************************************/
 void		_WS::LoadSettings(FIL *f){
-char		c[128];
-				for(int i=0; i < __IMAX; ++i)
+char		c[32];
+				for(int i=0; i < __IMAX; ++i) {
 					f_gets(c,sizeof(c),f);
+					ColorSet(strchr(c,' '));
+				}
 }
 /*******************************************************************************
  * Function RGB2HSV

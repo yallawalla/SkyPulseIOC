@@ -1,8 +1,8 @@
 #include "proc.h"
-_buffer						*_proc_buf=NULL;
 SemaphoreHandle_t _sWait=NULL;
-TaskHandle_t 			__tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-TaskHandle_t 			*_tWait=__tWait;
+TaskHandle_t 			_tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+TaskHandle_t 			*tWait=_tWait;
+_buffer						*_proc_buf=NULL;
 //______________________________________________________________________________
 void 	_proc_code(void *arg) {
 _proc *p=(_proc *)arg;
@@ -106,13 +106,13 @@ void	_task(const void *t) {
 //___________________________________________________________________________
 void	_wait(int t) {
 			_io *temp=_stdio(NULL);
-			if(*_tWait==NULL)
-				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, _tWait);
-			++_tWait;
+			if(*tWait==NULL)
+				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait);
+			++tWait;
 			xSemaphoreGive(_sWait);
 			taskYIELD();
 			vTaskDelay(t);
 			xSemaphoreTake(_sWait,portMAX_DELAY);
-			--_tWait;
+			--tWait;
 			_stdio(temp);
 }

@@ -44,7 +44,7 @@ class	_SPRAY : public _TERM, public _ADC {
 	private:
 		int	Bottle_ref, Bottle_P;
 		int	Air_ref, Air_P;
-		int	idx,simrate,timeout;
+		int	idx,simrate;
 
 	public:
 		_SPRAY();
@@ -58,7 +58,7 @@ class	_SPRAY : public _TERM, public _ADC {
 		_err		Status();
 		mode		mode;
 
-		int			AirLevel, WaterLevel;
+		int			AirLevel, WaterLevel,timeout;
 		_LCD		*lcd;
 	
 	

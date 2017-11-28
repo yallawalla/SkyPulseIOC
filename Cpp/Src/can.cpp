@@ -176,10 +176,94 @@ void	_CAN::Poll() {
 	if(_buffer_pull(canBuffer->rx,rx,sizeof(CanRxMsgTypeDef))) {
 		switch(rx->StdId) {
 			case idIOC_State:
-				if(rx->DLC)
-					ioc->SetState((_State)rx->Data[0]);
+				if(rx->DLC) {
+					switch((_State)rx->Data[0]) {
+						case	_STANDBY:
+							ioc->IOC_State.State = _STANDBY;
+							ioc->IOC_State.Error = _NOERR;
+//							ioc->Submit("@standby.led");
+							_SYS_SHG_ENABLE;
+							break;
+						case	_READY:
+							if(ioc->IOC_State.State == _STANDBY || ioc->IOC_State.State == _ACTIVE) {
+								ioc->IOC_State.State = _READY;
+//								ioc->Submit("@ready.led");
+							} else
+								ioc->SetError(_illstatereq);
+							break;
+						case	_ACTIVE:
+							if(ioc->IOC_State.State == _READY) {
+								ioc->IOC_State.State = _ACTIVE;
+//								ioc->Submit("@active.led");
+							} else
+								ioc->SetError(_illstatereq);
+							break;
+						case	_ERROR:
+							ioc->IOC_State.State = _ERROR;
+//							ioc->Submit("@error.led");
+							_SYS_SHG_DISABLE;
+							break;
+						default:
+							ioc->SetError(_illstatereq);
+							break;
+					}
+				}
 				ioc->IOC_State.Send();
 				break;
+			case idIOC_SprayParm:
+				ioc->spray.AirLevel		= std::min(10,(int)rx->Data[0]);
+				ioc->spray.WaterLevel	= std::min(10,(int)rx->Data[1]);
+				if(rx->Data[2])
+					ioc->spray.mode.On=true;
+				else {
+					if(ioc->spray.mode.On==false)
+						ioc->spray.timeout=HAL_GetTick() + _SPRAY_READY_T;
+					ioc->spray.mode.On=false;
+				}
+			break;
+//______________________________________________________________________________________							
+			case idCAN2FOOT:
+extern _io*		__com3;
+							{
+_io*						io=_stdio(__com3);
+								for(int i=0; i<rxm.DLC; ++i)
+									while(putchar(rxm.Data[i]) == EOF)
+										_wait(10,_thread_loop);
+								_stdio(io);
+							}								
+							break;
+//______________________________________________________________________________________							
+							case idEC20_req:
+								timeout=__time__+_EC20_EM_DELAY;			
+							break;
+//______________________________________________________________________________________							
+							case idEM_ack:
+								timeout=0;
+								lm->IOC_FootAck.Send();	
+							break;
+//______________________________________________________________________________________							
+							case idBOOT:
+								if(rxm.Data[0]==0xAA)
+									while(1);
+							break;
+
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				
 			case idCAN2COM:
 				if(remote)
 					_buffer_push(remote->io->rx,rx->Data,rx->DLC);

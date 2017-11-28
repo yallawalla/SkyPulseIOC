@@ -43,7 +43,7 @@ char	c[128];
 	* @retval : None
 	*/
 void	_PUMP::SaveSettings(FIL *f) {
-			_fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+			f_printf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
 //_________________________________________________________________________________
 void	_PUMP::Newline(void) {

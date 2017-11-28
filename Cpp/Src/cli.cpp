@@ -62,7 +62,7 @@ int	_CLI::Fkey(int t) {
 			case __F11:
 			{
 				FIL *f=new FIL;
-				if(f_open(f,"0:/lm.ini",FA_WRITE | FA_OPEN_ALWAYS) == FR_OK) {
+				if(f_open(f,"0:/lm.ini",FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
 					ioc->pump.SaveSettings(f);
 					ioc->fan.SaveSettings(f);
 					ioc->spray.SaveSettings(f);

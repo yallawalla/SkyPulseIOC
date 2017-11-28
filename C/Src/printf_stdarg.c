@@ -348,17 +348,17 @@ __weak 	int	_print(const char *format, ...) {
 * Output        :
 * Return        :
 *******************************************************************************/
-__weak 	int	_fprint(FIL *f,const char *format, ...) {
-	char	buf[__TXLEN],*b=buf;	
-				va_list	aptr;
-				int			ret;
-				va_start(aptr, format);
-				ret = printk_va(&b, format, aptr );
-				while(b)
-					f_putc(*b++,f);
-				va_end(aptr);
-				return(ret);
-}
+//__weak 	int	f_printf(FIL *f,const char *format, ...) {
+//	char	buf[__TXLEN],*b=buf;	
+//				va_list	aptr;
+//				int			ret;
+//				va_start(aptr, format);
+//				ret = printk_va(&b, format, aptr );
+//				while(b)
+//					f_putc(*b++,f);
+//				va_end(aptr);
+//				return(ret);
+//}
 /*******************************************************************************
 * Function Name : batch
 * Description   :	ADP1047 output voltage setup, using the default format
