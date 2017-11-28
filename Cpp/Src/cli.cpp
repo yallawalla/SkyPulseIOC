@@ -7,14 +7,14 @@ TCHAR		_FAT::lfn[_MAX_LFN + 1];
 FILINFO	_FAT::fno;
 //_________________________________________________________________________________
 void _CLI::Newline(void) {
-		__print("\r\n");
+		_print("\r\n");
 		if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
 			if(lfn[strlen(lfn)-1]=='/')
-				__print("%s",lfn);
+				_print("%s",lfn);
 					else
-						__print("%s/",lfn);
+						_print("%s/",lfn);
 		} else
-		__print("?:/"); 		
+		_print("?:/"); 		
 }
 //_________________________________________________________________________________
 int	_CLI::Fkey(int t) {
@@ -67,11 +67,11 @@ int	_CLI::Fkey(int t) {
 					ioc->fan.SaveSettings(f);
 					ioc->spray.SaveSettings(f);
 					ioc->ws2812.SaveSettings(f);
-					__print("... saved");
+					_print("... saved");
 					f_close(f);
 					delete f;
 				}	else
-					__print("... error settings file");		
+					_print("... error settings file");		
 				Newline();
 			}
 				break;
@@ -138,11 +138,11 @@ FRESULT _CLI::Decode(char *p) {
 				char *p=fno.fname;
 					p=fno.fname;
 				if(wcard(sc[1],p)) {
-					__print("\r\n%-16s",p);
+					_print("\r\n%-16s",p);
 					if (fno.fattrib & AM_DIR)
-						__print("%-8s","/");
+						_print("%-8s","/");
 					else
-						__print("%-8d",(int)fno.fsize);	
+						_print("%-8d",(int)fno.fsize);	
 					date_time(fno.fdate,fno.ftime);
 				}
 			}
@@ -186,9 +186,9 @@ FRESULT _CLI::Decode(char *p) {
 			FIL	*f=new FIL;
 			if(FRESULT err=f_open(f,sc[1],FA_READ))
 				return err;	
-			__print("\r\n");
+			_print("\r\n");
 			while(!f_eof(f)) 
-				__print("%c",f_getc(f));
+				_print("%c",f_getc(f));
 			f_close(f);
 			delete f;
 		}
@@ -258,7 +258,7 @@ FRESULT _CLI::Decode(char *p) {
 		if(!strncmp("0:",sc[1],len)) {
 			for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
 				FLASH_Erase(i,1);
-				__print(".");
+				_print(".");
 				_wait(100);
 			}
 		}		
@@ -290,8 +290,11 @@ FRESULT _CLI::Decode(char *p) {
 			public:
 				FRESULT err;
 				_ENTERFILE(char *filename) {
-					err=f_open(f=new FIL, filename, FA_CREATE_ALWAYS | FA_WRITE);
-					Newline();
+					err=f_open(f=new FIL, filename, FA_OPEN_ALWAYS | FA_WRITE);
+					if(err==FR_OK) {
+						f_lseek(f,f_size(f));
+						Newline();
+					}
 				};
 				~_ENTERFILE(void) {
 					f_close(f);
@@ -302,7 +305,7 @@ FRESULT _CLI::Decode(char *p) {
 					return FR_OK;
 				};
 				virtual void Newline(void) {
-					__print("\r\n");
+					_print("\r\n");
 				};	
 		} efile(sc[1]);
 		
@@ -373,7 +376,7 @@ FRESULT _CLI::Decode(char *p) {
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)
-				__print(" %s",sc[i]);
+				_print(" %s",sc[i]);
 			return FR_INVALID_NAME;
 		}
 	}
@@ -391,7 +394,7 @@ RTC_TimeTypeDef t;
 RTC_DateTypeDef d;
 		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
 		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
-		__print("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
+		_print("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
 }
 //_________________________________________________________________________________
 int	_CLI::find_recurse (char * dir_name, char *w, int fact) {
@@ -416,11 +419,11 @@ FILINFO	fno;
 						if(wcard(w,p)) {
 							char *q=strchr(dir_name,'/');
 							++q;
-							__print("\r\n%s",lfn);
+							_print("\r\n%s",lfn);
 							if (fno.fattrib & AM_DIR)
-								__print("/");
+								_print("/");
 							else
-								__print("%*d",32-strlen(lfn),(int)fno.fsize);
+								_print("%*d",32-strlen(lfn),(int)fno.fsize);
 						}
 					break;
 					case _ERASE:

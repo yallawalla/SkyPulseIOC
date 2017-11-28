@@ -333,7 +333,7 @@ void		_wait(int,void *(*)(void));
 * Output        :
 * Return        :
 *******************************************************************************/
-__weak 	int	__print(const char *format, ...) {
+__weak 	int	_print(const char *format, ...) {
 				va_list	aptr;
 				int			ret;
 				va_start(aptr, format);
@@ -348,7 +348,7 @@ __weak 	int	__print(const char *format, ...) {
 * Output        :
 * Return        :
 *******************************************************************************/
-__weak 	int	__fprint(FIL *f,const char *format, ...) {
+__weak 	int	_fprint(FIL *f,const char *format, ...) {
 	char	buf[__TXLEN],*b=buf;	
 				va_list	aptr;
 				int			ret;

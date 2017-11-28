@@ -51,22 +51,22 @@ uint32_t	SectorError;
 #define _MAXBYTESLINE 16
 void	dumpHex(int a, int n) {
 	unsigned int k;
-	__print("\r\n:02000004%04X%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+	_print("\r\n:02000004%04X%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
 	while(n) {
 		int	sum = _MAXBYTESLINE+(a & 0xffff)/256+(a & 0xff);
-		__print(":%02X%04X00",_MAXBYTESLINE,(a & 0xffff));
+		_print(":%02X%04X00",_MAXBYTESLINE,(a & 0xffff));
 		for(k = 0; k<_MAXBYTESLINE; ++k) {
-			__print("%02X",(*(unsigned char *)a & 0xff));
+			_print("%02X",(*(unsigned char *)a & 0xff));
 			sum += *(unsigned char *)a;
 			if(((++a) & 0xffff) == 0 || --n == 0)
 				break;
 		}
-		__print("%02X\r\n",-sum & 0xff);
+		_print("%02X\r\n",-sum & 0xff);
 		if(n && (a & 0xffff) == 0) {
-			__print(":02000004%04X,%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
+			_print(":02000004%04X,%02X\r\n",(a>>16),-(2+4+((a>>16)/256)+((a>>16) % 256)) & 255);
 		}
 	}
-	__print(":00000001FF\r\n");
+	_print(":00000001FF\r\n");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -176,7 +176,7 @@ void	date_time(uint32_t d,uint32_t t) {
 	int month=(d>>5) % 16;
 	int year=(d>>9) + 2000;
 	
-	__print("%4d-%02d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
+	_print("%4d-%02d-%d%5d:%02d",day,month,year,t/3600,(t/60)%60);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -216,12 +216,17 @@ int		c0=0,c1=0;
 						++c1;
 					p=&p[SECTOR_SIZE/4+1]; 
 				} while(((int)p)-FATFS_ADDRESS <  e && p[SECTOR_SIZE/4] != -1);						// prepisana cela stran...
-				if(mode)
+				if(mode) {
+					_print(".");
+					_wait(2);
 					FLASH_Erase(f,1);																												// brisi !
+				}
 				f+=FLASH_SECTOR_1; 
 				e+=PAGE_SIZE;
 			} while(p[SECTOR_SIZE/4] != -1);	
 			if(mode) {
+				_print(". OK");
+				_wait(2);
 				FLASH_Erase(f,1);																													// se zadnja !
 				return 0;
 			} else 
@@ -234,7 +239,7 @@ int		c0=0,c1=0;
 * Return				:
 *******************************************************************************/
 void vApplicationMallocFailedHook( void ) {
-	__print("memory error...");
+	_print("memory error...");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -243,5 +248,5 @@ void vApplicationMallocFailedHook( void ) {
 * Return				:
 *******************************************************************************/
 void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
-	__print("stack error in...%s",pcTaskName);
+	_print("stack error in...%s",pcTaskName);
 }

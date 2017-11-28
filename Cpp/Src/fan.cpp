@@ -43,14 +43,14 @@ char	c[128];
 	* @retval : None
 	*/
 void	_FAN::SaveSettings(FIL *f) {
-			__fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+			_fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
 //_________________________________________________________________________________
 void	_FAN::Newline(void) {
-				__print("\r:fan       %5d%c,%4.1lf'C",Rpm(100),'%',(double)Th2o()/100);
+				_print("\r:fan       %5d%c,%4.1lf'C",Rpm(100),'%',(double)Th2o()/100);
 				if(idx>0)
-					__print("        %2d%c-%2d%c,%2d'C-%2d'C",fpl,'%',fph,'%',ftl,fth);		
-				for(int i=4*(5-idx)+1;idx && i--;__print("\b"));
+					_print("        %2d%c-%2d%c,%2d'C-%2d'C",fpl,'%',fph,'%',ftl,fth);		
+				for(int i=4*(5-idx)+1;idx && i--;_print("\b"));
 }
 //_________________________________________________________________________________
 int		_FAN::Fkey(int t) {

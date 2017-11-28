@@ -43,14 +43,14 @@ char	c[128];
 	* @retval : None
 	*/
 void	_PUMP::SaveSettings(FIL *f) {
-			__fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+			_fprint(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
 //_________________________________________________________________________________
 void	_PUMP::Newline(void) {
-				__print("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
+				_print("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
 				if(idx>0)
-					__print("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
-				for(int i=4*(5-idx)+6;idx && i--;__print("\b"));
+					_print("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
+				for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
 }
 //_________________________________________________________________________________
 int		_PUMP::Fkey(int t) {

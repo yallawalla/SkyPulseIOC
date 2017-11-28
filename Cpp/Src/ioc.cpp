@@ -35,7 +35,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 		ws2812.LoadSettings(&f);
 		f_close(&f);
 	}	else
-		__print("... error settings file");
+		_print("... error settings file");
 }
 /*******************************************************************************
 * Function Name	:
@@ -138,7 +138,7 @@ void	_IOC::SetError(_err e) {
 
 			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
 				if(e & (1<<0))
-					__print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+					_print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
 }
 /*******************************************************************************
 * Function Name	:

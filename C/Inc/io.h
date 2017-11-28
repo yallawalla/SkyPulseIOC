@@ -53,8 +53,8 @@ struct	__FILE
 				_io		*io;
 };
 //______________________________________________________________________________________
-int		__print(const char *format, ...);
-int		__fprint(FIL *, const char *format, ...);
+int		_print(const char *format, ...);
+int		_fprint(FIL *, const char *format, ...);
 #ifdef	__cplusplus
 }
 #endif

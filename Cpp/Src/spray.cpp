@@ -128,15 +128,15 @@ _err	e=_NOERR;
 //_________________________________________________________________________________
 void _SPRAY::Newline(void) {
 			if(mode.Simulator) {
-				__print("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
+				_print("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
 					AirLevel,WaterLevel,
 						Pin,Pout);
-				for(int i=1+4*(3-idx);i--;__print("\b"));							
+				for(int i=1+4*(3-idx);i--;_print("\b"));							
 			} else {
-				__print("\r:air/water    %3d,%3d,%3.1lf",
+				_print("\r:air/water    %3d,%3d,%3.1lf",
 					AirLevel,WaterLevel,
 						(double)(fval.compressor-offset.compressor)/gain.compressor);
-				for(int i=1+4*(2-idx);i--;__print("\b"));							
+				for(int i=1+4*(2-idx);i--;_print("\b"));							
 			}	
 }
 //_________________________________________________________________________________
@@ -193,9 +193,9 @@ char	c[128];
 	* @retval : None
 	*/
 void	_SPRAY::SaveSettings(FIL *f) {
-			__fprint(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
-			__fprint(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler, gain.bottle, gain.compressor, gain.air);
-			__fprint(f,"%5d,%5d                             /.. air, H2O\r\n", AirLevel, WaterLevel);
+			_fprint(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
+			_fprint(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler, gain.bottle, gain.compressor, gain.air);
+			_fprint(f,"%5d,%5d                             /.. air, H2O\r\n", AirLevel, WaterLevel);
 }
 /*******************************************************************************/
 /**

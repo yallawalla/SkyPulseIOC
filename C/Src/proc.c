@@ -71,10 +71,10 @@ int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
 void	_proc_list(void) {
 _proc	*p;	
 int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
-			__print("...\r\n");
+			_print("...\r\n");
 			while(i--) {
 				_buffer_pull(_proc_buf,&p,sizeof(_proc *));
-				__print("%08X,%08X,%s,%d\r\n",(int)p->f,(int)p->arg,p->name,p->to);
+				_print("%08X,%08X,%s,%d\r\n",(int)p->f,(int)p->arg,p->name,p->to);
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
 }
@@ -107,7 +107,7 @@ void	_task(const void *t) {
 void	_wait(int t) {
 			_io *temp=_stdio(NULL);
 			if(*_tWait==NULL)
-				xTaskCreate((TaskFunction_t)_task, "---", 1024, NULL, 0, _tWait);
+				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, _tWait);
 			++_tWait;
 			xSemaphoreGive(_sWait);
 			taskYIELD();

@@ -28,7 +28,7 @@ class _TERM {
 	void *Parse(_io *);
 	void *Parse(FIL *);
 		
-	virtual	void		Newline(void)			{ __print("\r\n>");	}
+	virtual	void		Newline(void)			{ _print("\r\n>");	}
 	virtual int			Fkey(int fkey)		{	return fkey;			};
 	virtual FRESULT	Decode(char *)		{	return FR_OK;			};
 };
