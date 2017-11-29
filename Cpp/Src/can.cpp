@@ -12,8 +12,8 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	hcan->pTxMsg=new CanTxMsgTypeDef;
 	canBuffer	=	_io_init(100*sizeof(CanRxMsgTypeDef), 100*sizeof(CanTxMsgTypeDef));
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
-	filter_count=0;
-	io=NULL;
+	filter_count=timeout=0;
+	io=ioFsw=NULL;
 
 	canFilterCfg(idIOC_State,	0x780);
 	canFilterCfg(idEC20_req,	0x780);
@@ -28,9 +28,10 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 * Output				:
 * Return				:
 *******************************************************************************/
-int _CAN::SendRemote() {
-	CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};	
+int _CAN::SendRemote(int stdid) {
+	CanTxMsgTypeDef	tx={0,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};	
 	int i;	
+	tx.StdId=stdid;
 	while(tx.DLC  < 8) {
 		i=getchar();
 		if(i==EOF || i==__CtrlE)
@@ -71,7 +72,7 @@ int	_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
 			_print("remote desktop...\r\n");
-			while(SendRemote() != __CtrlE) 
+			while(SendRemote(idCOM2CAN) != __CtrlE) 
 				_wait(2);
 			_print("close...");
 			Newline();
@@ -154,7 +155,12 @@ void	_CAN::Poll() {
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
 	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
 	_io* temp=_stdio(io);										//remote console printout !!!
-
+//______________________________________________________________________________________					
+	if(timeout && HAL_GetTick() > timeout) {
+		timeout=0;
+		ioc->SetError(_energy_missing);	
+	}
+//______________________________________________________________________________________					
 	while(1) {
 		if(((hcan->Instance->TSR&CAN_TSR_TME0) != CAN_TSR_TME0) && \
 			 ((hcan->Instance->TSR&CAN_TSR_TME1) != CAN_TSR_TME1) && \
@@ -164,7 +170,7 @@ void	_CAN::Poll() {
 			HAL_CAN_Transmit_IT(hcan);
 		else if(remote) {
 			tx->DLC=_buffer_pull(remote->io->tx,tx->Data,8);
-			tx->StdId=idCOM2CAN;
+			tx->StdId=idCAN2COM;
 			if(tx->DLC)
 				HAL_CAN_Transmit_IT(hcan);
 			else
@@ -221,57 +227,45 @@ void	_CAN::Poll() {
 					ioc->spray.mode.On=false;
 				}
 			break;
-//______________________________________________________________________________________							
-			case idCAN2FOOT:
-extern _io*		__com3;
-							{
-_io*						io=_stdio(__com3);
-								for(int i=0; i<rxm.DLC; ++i)
-									while(putchar(rxm.Data[i]) == EOF)
-										_wait(10,_thread_loop);
-								_stdio(io);
-							}								
-							break;
-//______________________________________________________________________________________							
-							case idEC20_req:
-								timeout=__time__+_EC20_EM_DELAY;			
-							break;
-//______________________________________________________________________________________							
-							case idEM_ack:
-								timeout=0;
-								lm->IOC_FootAck.Send();	
-							break;
-//______________________________________________________________________________________							
-							case idBOOT:
-								if(rxm.Data[0]==0xAA)
-									while(1);
-							break;
-
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-			case idCAN2COM:
-				if(remote)
-					_buffer_push(remote->io->rx,rx->Data,rx->DLC);
+//______________________________________________________________________________________
+			case idEC20_req:
+				timeout=HAL_GetTick()+_EC20_EM_DELAY;
 			break;
+//______________________________________________________________________________________
+			case idEM_ack:
+				timeout=0;
+				ioc->IOC_FootAck.Send();
+			break;
+//______________________________________________________________________________________
+			case idBOOT:
+				if(rx->Data[0]==0xAA)
+					while(1);
+				break;
+//______________________________________________________________________________________							
+			case idFOOT2CAN:
+				rx->StdId=idCAN2FOOT;
+				Send((CanTxMsgTypeDef *)rx);
+			break;
+//______________________________________________________________________________________							
+			case idCAN2FOOT: {
+				_io*	io=_stdio(ioFsw);
+				for(int i=0; i<rx->DLC; ++i)
+					putchar(rx->Data[i]);
+				_stdio(io);
+			} break;
+//______________________________________________________________________________________
 			case idCOM2CAN:
-				for(int i=0; i < rx->DLC;++i)
-					_print("%c",rx->Data[i]);
+				if(remote)
+					for(int i=0; i<rx->DLC; ++i)
+						while(!_buffer_push(remote->io->rx,&rx->Data[i],1))
+							_wait(2);
 			break;
+//______________________________________________________________________________________
+			case idCAN2COM:
+				for(int i=0; i < rx->DLC;++i)
+					putchar(rx->Data[i]);
+			break;
+//______________________________________________________________________________________
 			default:
 				Newline();
 				_print(" < %02X ",rx->StdId);

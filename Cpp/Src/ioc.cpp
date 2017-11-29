@@ -119,11 +119,10 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
-extern int ttt;
 void	_IOC::SetError(_err e) {
 
 			e = (_err)(e & ~error_mask);
-			ttt ? led.RED1(3000): led.GREEN1(20);
+			e ? led.RED1(3000): led.GREEN1(20);
 			e = (_err)((e ^ IOC_State.Error) & e);
 	
 			IOC_State.Error = (_err)(IOC_State.Error | e);

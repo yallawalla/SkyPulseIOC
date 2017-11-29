@@ -20,6 +20,14 @@ void _CLI::Newline(void) {
 int	_CLI::Fkey(int t) {
 		_IOC	*ioc=_IOC::parent;
 		switch(t) {
+		case __CtrlE: {
+			_io *temp=ioc->can.ioFsw;
+			ioc->can.ioFsw=io;
+			while(ioc->can.SendRemote(idFOOT2CAN) != __CtrlE) 
+				_wait(2);
+			ioc->can.ioFsw=temp;
+			Newline();
+		} break;
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
