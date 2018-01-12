@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -248,9 +248,9 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 8;
@@ -277,7 +277,7 @@ void SystemClock_Config(void)
   }
 
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
@@ -841,7 +841,10 @@ static void MX_GPIO_Init(void)
                           |_RED2_Pin|_GREEN2_Pin|_YELLOW2_Pin|_BLUE2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SYS_SHG_GPIO_Port, SYS_SHG_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(_12Voff_GPIO_Port, _12Voff_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port, _SYS_SHG_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : FSW2_Pin FSW3_Pin FSW0_Pin FSW1_Pin */
   GPIO_InitStruct.Pin = FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin;
@@ -852,7 +855,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : cwbBUTTON_Pin cwbDOOR_Pin cwbENGM_Pin */
   GPIO_InitStruct.Pin = cwbBUTTON_Pin|cwbDOOR_Pin|cwbENGM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pins : _RED1_Pin _GREEN1_Pin _YELLOW1_Pin _BLUE1_Pin 
@@ -864,12 +867,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SYS_SHG_Pin */
-  GPIO_InitStruct.Pin = SYS_SHG_Pin;
+  /*Configure GPIO pin : _12Voff_Pin */
+  GPIO_InitStruct.Pin = _12Voff_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(_12Voff_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : _SYS_SHG_Pin */
+  GPIO_InitStruct.Pin = _SYS_SHG_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SYS_SHG_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(_SYS_SHG_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -913,7 +923,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
 /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM2) {
+		TIM10->CCR1=fan_drive;
+		for(int i=0; i<__VALVES; ++i)
+			if(valve_timeout[i] && HAL_GetTick() > valve_timeout[i]) {
+				valve_timeout[i]=0;
+				if(valve_drive[i])
+					valve_drive[i]=0;
+				else
+					valve_drive[i]=__PWMRATE;
+			}
+	}
 /* USER CODE END Callback 1 */
 }
 

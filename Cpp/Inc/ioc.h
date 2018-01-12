@@ -1,5 +1,6 @@
 #ifndef IOC_H
 #define IOC_H
+
 #include "stm32f4xx_hal.h"
 #include "can.h"
 #include "cli.h"
@@ -15,15 +16,6 @@
 
 #include <string>
 #include <ctype.h>
-
-#define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
-#define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)
-
-#define	_SYS_SHG_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4, GPIO_PIN_SET)
-#define	_SYS_SHG_DISABLE	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4, GPIO_PIN_RESET)
-#define	_SYS_SHG_ENABLED	HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4)
-
-#define	_EMG_DISABLED			HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_8)
 
 typedef enum {
 	DBG_OFF			=0,

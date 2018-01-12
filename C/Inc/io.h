@@ -54,6 +54,7 @@ struct	__FILE
 };
 //______________________________________________________________________________________
 int		_print(const char *format, ...);
+int		_printdec(int, int);
 //int		f_printf(FIL *, const char *format, ...);
 #ifdef	__cplusplus
 }

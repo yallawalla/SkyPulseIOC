@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -131,8 +131,10 @@
 #define _YELLOW2_GPIO_Port GPIOD
 #define _BLUE2_Pin GPIO_PIN_7
 #define _BLUE2_GPIO_Port GPIOD
-#define SYS_SHG_Pin GPIO_PIN_4
-#define SYS_SHG_GPIO_Port GPIOB
+#define _12Voff_Pin GPIO_PIN_3
+#define _12Voff_GPIO_Port GPIOB
+#define _SYS_SHG_Pin GPIO_PIN_4
+#define _SYS_SHG_GPIO_Port GPIOB
 #define FAN_PWM_Pin GPIO_PIN_8
 #define FAN_PWM_GPIO_Port GPIOB
 #define FSW0_Pin GPIO_PIN_0

@@ -8,14 +8,14 @@
 #include	<algorithm>
 #include	"lcd.h"
 
-#define		_BAR(a) ((a)*16384.0)
+#define		_BAR(a) ((int)((a)*16384.0))
 #define		_SPRAY_READY_T	500
 				
 typedef	struct {
-	bool	On:1;
+	bool	Air:1;
+	bool	Water:1;
 	bool	Vibrate:1;
 	bool	Simulator:1;
-	bool	Ready:1;
 }	mode;
 //________________________________________________________________________________________________
 class	_VALVE {
@@ -57,8 +57,9 @@ class	_SPRAY : public _TERM, public _ADC {
 		_VALVE	*BottleIn,*BottleOut,*Air,*Water;
 		_err		Status();
 		mode		mode;
+		int			waterGain;
 
-		int			AirLevel, WaterLevel,timeout;
+		int			AirLevel, WaterLevel, readyTimeout, offsetTimeout;
 		_LCD		*lcd;
 	
 	
@@ -67,4 +68,4 @@ class	_SPRAY : public _TERM, public _ADC {
 };
 
 #endif
-	
+

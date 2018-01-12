@@ -10,19 +10,23 @@
 *******************************************************************************/
 class _TERM {
 	private:
-		int			seq, timeout,error;
-		char 		*cmdbuf,*cmdp;
+		struct {	
+			uint32_t	seq;
+			uint32_t	timeout;
+		} esc, rpt;
+		char 		*cmdbuf,*cmdp,error;
 	public:
 		_TERM() {
 //			io=NULL;
-			seq=timeout=0;
+			esc.seq=esc.timeout=0;
+			rpt.seq=rpt.timeout=0;
 			cmdp=cmdbuf=new char[__CMDLEN];
 		};
 //	_io	*io;
 	bool	Cmd(int c);
 	char	*Cmd(void);
 	int		Escape(void);
-	void	Repeat(int);
+	void	Repeat(int,int);
 	void *Parse(void);
 	void *Parse(int);
 	void *Parse(_io *);

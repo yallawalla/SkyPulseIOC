@@ -35,7 +35,7 @@ class	_PLOT {
 			points.clear();
 		}
 //____________________________________________________________________________________
-		bool	Refresh(void) {
+		bool	Finished(void) {
 			for(int i = 0; i != points.size(); ++i)
 				points[i].Draw(x);
 			x = ++x % LCD_PIXEL_WIDTH;	

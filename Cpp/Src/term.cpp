@@ -17,8 +17,9 @@
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_TERM::Repeat(int t) {
-			timeout = -(HAL_GetTick() + t);
+void	_TERM::Repeat(int t, int ch) {
+			rpt.timeout = HAL_GetTick() + t;
+			rpt.seq=ch;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -74,21 +75,25 @@ int		_TERM::Escape(void) {
 int		i=getchar();
 
 			if(i==EOF) {
-				if(timeout && (HAL_GetTick() > abs(timeout))) {
-					timeout=0;
-					return seq;
+				if(esc.timeout && (HAL_GetTick() > esc.timeout)) {
+					esc.timeout=0;
+					return esc.seq;
 					}
-			} else if(timeout > 0) {
-				seq=(seq<<8) | i;
+				if(rpt.timeout && (HAL_GetTick() > rpt.timeout)) {
+					rpt.timeout=0;
+					return rpt.seq;
+					}
+			} else if(esc.timeout > 0) {
+				esc.seq=(esc.seq<<8) | i;
 				if(i=='~' || i=='A' || i=='B' || i=='C' || i=='D') {
-					timeout=0;
-					return seq;
+					esc.timeout=0;
+					return esc.seq;
 				}
 			} else if(i==__Esc) {
-				timeout=HAL_GetTick()+10;
-				seq=i;
+				esc.timeout=HAL_GetTick()+10;
+				esc.seq=i;
 			} else {
-				timeout=0;
+				esc.timeout=0;
 				return i;
 			}
 			return EOF;

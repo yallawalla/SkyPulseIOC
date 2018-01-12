@@ -154,23 +154,6 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void HAL_SYSTICK_Callback(void) {
-		TIM10->CCR1=fan_drive;
-		for(int i=0; i<__VALVES; ++i)
-			if(valve_timeout[i] && HAL_GetTick() > valve_timeout[i]) {
-				valve_timeout[i]=0;
-				if(valve_drive[i])
-					valve_drive[i]=0;
-				else
-					valve_drive[i]=__PWMRATE;
-			}
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 void	date_time(uint32_t d,uint32_t t) {
 	int day=d % 32;
 	int month=(d>>5) % 16;

@@ -219,13 +219,12 @@ void	_CAN::Poll() {
 			case idIOC_SprayParm:
 				ioc->spray.AirLevel		= std::min(10,(int)rx->Data[0]);
 				ioc->spray.WaterLevel	= std::min(10,(int)rx->Data[1]);
-				if(rx->Data[2])
-					ioc->spray.mode.On=true;
-				else {
-					if(ioc->spray.mode.On==false)
-						ioc->spray.timeout=HAL_GetTick() + _SPRAY_READY_T;
-					ioc->spray.mode.On=false;
+				if(rx->Data[2]==0) {
+					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
+						ioc->spray.readyTimeout=HAL_GetTick() + _SPRAY_READY_T;
 				}
+				ioc->spray.mode.Air=rx->Data[2] & 1;
+				ioc->spray.mode.Water=rx->Data[2] & 2;
 			break;
 //______________________________________________________________________________________
 			case idEC20_req:

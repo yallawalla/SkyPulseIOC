@@ -25,7 +25,6 @@ using namespace std;
 *******************************************************************************/
 _RTC::_RTC() {	
 	idx=0;
-	_proc_add((void *)Refresh,this,(char *)"Rtc",500);
 }
 /*******************************************************************************
 * Function Name				:
@@ -34,7 +33,6 @@ _RTC::_RTC() {
 * Return							: None
 *******************************************************************************/
 _RTC::~_RTC() {	
-	_proc_remove((void *)Refresh,this);
 }
 //_________________________________________________________________________________
 string Days[]		= { "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
@@ -51,6 +49,7 @@ void	_RTC::Newline(void) {
 						time.Hours,time.Minutes,time.Seconds);
 				for(int i=1+4*(6-idx); i--; _print("\b"));
 			}
+			Repeat(1000,__CtrlR);
 }
 //_________________________________________________________________________________
 int		_RTC::Fkey(int t) {
@@ -70,6 +69,9 @@ int		_RTC::Fkey(int t) {
 				break;
 				case __Right:
 					Increment(0,1);
+				break;
+				case __CtrlR:
+					Increment(0,0);
 				break;
 			}
 			return EOF;

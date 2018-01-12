@@ -14,7 +14,7 @@
 #include	"misc.h"
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief
 	* @param	: None
 	* @retval : None
 	*/
@@ -27,10 +27,11 @@ _PUMP::_PUMP()  {
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief
 	* @param	: None
 	* @retval : None
 	*/
+/*******************************************************************************/
 void	_PUMP::LoadSettings(FIL *f) {
 char	c[128];
 			f_gets(c,sizeof(c),f);
@@ -38,21 +39,39 @@ char	c[128];
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief
 	* @param	: None
 	* @retval : None
 	*/
+/*******************************************************************************/
 void	_PUMP::SaveSettings(FIL *f) {
 			f_printf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
 }
-//_________________________________________________________________________________
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
 void	_PUMP::Newline(void) {
-				_print("\r:pump      %5d%c,%4.1lf'C,%4.1lf",Rpm(100),'%',(double)Th2o()/100,(double)(fval.cooler-offset.cooler)/gain.cooler);
-				if(idx>0)
-					_print("   %2d%c-%2d%c,%2d'C-%2d'C,%4.3lf",fpl,'%',fph,'%',ftl,fth,(double)fval.Ipump/4096.0*3.3/2.1/16);		
-				for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
+			_print("\r:pump      %5d%c,",Rpm(100),'%');
+			_printdec(Th2o()/10,10);_print("'C, ");
+			_printdec(10*(fval.cooler-offset.cooler)/gain.cooler,10);
+			if(idx>0) {
+				int i=fval.Ipump*33/4096.0/2.1/16;
+				_print("   %2d%c-%2d%c,%2d'C-%2d'C, ",fpl,'%',fph,'%',ftl,fth);
+				_printdec(i,10);		
+			}
+			for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
 }
-//_________________________________________________________________________________
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
 int		_PUMP::Fkey(int t) {
 			switch(t) {
 					case __f5:
@@ -74,18 +93,37 @@ int		_PUMP::Fkey(int t) {
 			return EOF;
 }
 /*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
 int		_PUMP::Rpm(int fsc) {
 			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
 }
 /*******************************************************************************/
-_err _PUMP::Status(void) {	
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+_err	_PUMP::Status(void) {	
+_err	e=_NOERR;
 			pump_drive =Rpm(1<<12);
 			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
 				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
-					return _pumpTacho;	
+					e = e | _pumpTacho;	
 			}
-			return _NOERR;
+			return e;
 }
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
 /*******************************************************************************/
 void 	_PUMP::Increment(int a, int b)	{
 			idx= std::min(std::max(idx+b,0),4);

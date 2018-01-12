@@ -18,15 +18,15 @@
 * Output							:
 * Return							: None
 *******************************************************************************/
-int	_VALVE::Set() { 
-		return valve_drive[n];
+int		_VALVE::Set() { 
+			return valve_drive[n];
 };
 void	_VALVE::Set(int i) { 
-		valve_drive[n]=i;
+			valve_drive[n]=i;
 };
 void	_VALVE::Set(int i, int t) { 
-		valve_drive[n]=i;
-		valve_timeout[n]=HAL_GetTick()+t;
+			valve_drive[n]=i;
+			valve_timeout[n]=HAL_GetTick()+t;
 };
 _SPRAY::_SPRAY() {	
 			BottleOut=	new _VALVE(0,false);
@@ -43,71 +43,83 @@ _SPRAY::_SPRAY() {
 			gain.air=																		_BAR(2);
 			gain.bottle=																_BAR(1.3);
 			gain.compressor=														_BAR(1);
-
+			waterGain=																	_BAR(1.2);
 			Air_P=Bottle_P=0;
 			AirLevel=WaterLevel=0;
 			Bottle_ref=Air_ref=													_BAR(1);
 
 			mode.Simulator=false;
 			mode.Vibrate=false;
-			mode.On=false;
+			mode.Water=false;
+			mode.Air=false;
 			idx=0;
+			
+			readyTimeout=0;
+			offsetTimeout=HAL_GetTick() + 5000;
 
-			simrate=timeout=0;
+			simrate=0;
 			lcd=NULL;
 			Pin=4.0;
 			pComp= pBott=pNozz=Pout=1.0;
 }
 /*******************************************************************************
-* Function Name :
-* Description       : 
-* Output                :
-* Return                : None
+* Function Name				:
+* Description					: 
+* Output							:
+* Return							: None
 *******************************************************************************/
 #define	_P_THRESHOLD  0x8000
 #define	_A_THRESHOLD	0x2000
 
 _err	_SPRAY::Status() {
-_err	e=_NOERR;
-			if(AirLevel) {
+_err	_err=_NOERR;
+//------------------------------------------------------------------------------
+			if(offsetTimeout && HAL_GetTick() > offsetTimeout) {
+				offset.bottle += fval.air - offset.air;
+				offset.air = fval.air;
+				offsetTimeout=0;
+			}
+//------------------------------------------------------------------------------
+			Air_ref			= offset.air + AirLevel*gain.air/10;
+			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
+//			Bottle_ref	= offset.bottle + AirLevel*waterGain*(100+4*WaterLevel)/100/10;
+//------------------------------------------------------------------------------
+			if(AirLevel || WaterLevel) {
 				Bottle_P += (Bottle_ref - (int)val.bottle)/16;
 				if(Bottle_P < -_P_THRESHOLD) {
 					Bottle_P=0;
 					BottleIn->Close();
-					BottleOut->Open(150);
-					if(timeout)
-						timeout = HAL_GetTick() + _SPRAY_READY_T;
+					BottleOut->Open(120);
+					if(readyTimeout)
+						readyTimeout = HAL_GetTick() + _SPRAY_READY_T;
 				}
 				if(Bottle_P > _P_THRESHOLD) {
 					Bottle_P=0;
-					BottleIn->Open(150);
+					BottleIn->Open(120);
 					BottleOut->Close();
-					if(timeout)
-						timeout = HAL_GetTick() + _SPRAY_READY_T;
+					if(readyTimeout)
+						readyTimeout = HAL_GetTick() + _SPRAY_READY_T;
 				}
 			} else {
 					BottleIn->Close();
 					BottleOut->Open();
 			}
 
-			Air_ref			= offset.air + AirLevel*gain.air/10;
-			Bottle_ref	= offset.bottle + AirLevel*gain.bottle*(100+4*WaterLevel)/100/10;		
-
 			if(10*(fval.compressor-offset.compressor)/gain.compressor < 25)
-				e = (_err)(e | _sprayInPressure);		
-			if(timeout && HAL_GetTick() < timeout)
-				e = (_err)(e | _sprayNotReady);
+				_err = _err | _sprayInPressure;		
+			if(readyTimeout && HAL_GetTick() < readyTimeout)
+				_err = _err |  _sprayNotReady;
 			else
-				timeout=0;
+				readyTimeout=0;
 
-			if(WaterLevel && mode.On)
+			if(mode.Water)
 				Water->Open();
 			else
 				Water->Close();	
 
-			if(AirLevel && mode.On) {
+			if(AirLevel && mode.Air) {
 				Air_P += (Air_ref-(int)val.air);
-				Air_P=std::max(0,std::min(_A_THRESHOLD * __PWMRATE, Air_P));
+				Air_P=std::max(0,std::min(_A_THRESHOLD*__PWMRATE, Air_P));
 				if(mode.Vibrate && HAL_GetTick() % 50 < 10)
 					Air->Open();
 				else
@@ -115,31 +127,49 @@ _err	e=_NOERR;
 			}
 			else
 				Air->Close();
-			
-			
+
 			if(mode.Simulator && Simulator()) {
 #ifdef USE_LCD
-						if(lcd && plot.Refresh())
-							lcd->Grid();
+			if(lcd && plot.Refresh())
+				lcd->Grid();
 #endif
-					}		
-					return e;
+			}
+			return _err;
 }
 //_________________________________________________________________________________
-void _SPRAY::Newline(void) {
+void	_SPRAY::Newline(void) {
 			if(mode.Simulator) {
-				_print("\r:air/water    %3d,%3d,%3.1lf,%3.1lf",
+				printf("\r:spray %3d,%5d,%5.2lf,%5.2lf,%5.2lf",
 					AirLevel,WaterLevel,
-						Pin,Pout);
-				for(int i=1+4*(3-idx);i--;_print("\b"));							
+						(double)(fval.air-offset.air)/_BAR(1),
+							(double)(fval.bottle-offset.bottle)/_BAR(1),
+								Pout-1.0);
 			} else {
-				_print("\r:air/water    %3d,%3d,%3.1lf",
+				printf("\r:spray %3d,%5d,%5.2lf,%5.2lf,%5.2lf",
 					AirLevel,WaterLevel,
-						(double)(fval.compressor-offset.compressor)/gain.compressor);
-				for(int i=1+4*(2-idx);i--;_print("\b"));							
-			}	
+						(double)(fval.air-offset.air)/_BAR(1),
+							(double)(fval.bottle-offset.bottle)/_BAR(1),
+								(double)(fval.compressor-offset.compressor)/_BAR(1));
+			}
+			if(mode.Air) 
+				printf("   Air"); 
+			else 
+				printf("   ---"); 
+			if(mode.Water) 
+				printf(" Water"); 
+			else 
+				printf("   ---"); 
+			
+			for(int i=1+6*(6-idx); i--; printf("\b"));		
+			Repeat(200,__CtrlR);
 }
-//_________________________________________________________________________________
+/*******************************************************************************/
+/**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
 int		_SPRAY::Fkey(int t) {
 			switch(t) {
 					case __f7:
@@ -157,18 +187,35 @@ int		_SPRAY::Fkey(int t) {
 					case __Right:
 						Increment(0,1);
 					break;
-					case __Esc:
-						mode.On ? mode.On=false: mode.On=true;
-					break;		
-					case __CtrlS:
-						HAL_ADC_DeInit(&hadc1);
-						lcd=new _LCD;
-						lcd->Add(&_ADC::val.compressor,_BAR(1.0),_BAR(0.02), LCD_COLOR_YELLOW);
-						lcd->Add(&_ADC::val.bottle,_BAR(1.0),_BAR(0.02), LCD_COLOR_GREY);
-						lcd->Add(&_ADC::val.air,_BAR(1.0),_BAR(0.02), LCD_COLOR_MAGENTA);
-						mode.Simulator=true;
+					case __CtrlR:
+					Increment(0,0);
 					break;
-				}
+					case __PageUp:
+						waterGain=std::min(waterGain+1000,_BAR(2.5));
+						break;
+					case __PageDown:
+						waterGain=std::max(waterGain-1000,_BAR(0.5));
+						break;					
+					case __CtrlV:
+						if(mode.Vibrate)
+							mode.Vibrate=false;
+						else
+							mode.Vibrate=true;
+						break;
+					case __CtrlI:
+						_ADC::offset.air = _ADC::fval.air;
+						_ADC::offset.bottle = _ADC::fval.bottle;
+						printf("\r\n: air/water offset.... \r\n:");
+						break;
+						case __CtrlS:
+							HAL_ADC_DeInit(&hadc1);
+							lcd=new _LCD;
+							lcd->Add(&_ADC::val.compressor,_BAR(1.0),_BAR(0.02), LCD_COLOR_YELLOW);
+							lcd->Add(&_ADC::val.bottle,_BAR(1.0),_BAR(0.02), LCD_COLOR_GREY);
+							lcd->Add(&_ADC::val.air,_BAR(1.0),_BAR(0.02), LCD_COLOR_MAGENTA);
+							mode.Simulator=true;
+						break;
+					}
 			return EOF;
 }
 /*******************************************************************************/
@@ -184,7 +231,7 @@ char	c[128];
 			f_gets(c,sizeof(c),f);
 			sscanf(c,"%hu,%hu,%hu,%hu",&gain.cooler,&gain.bottle,&gain.compressor,&gain.air);
 			f_gets(c,sizeof(c),f);
-			sscanf(c,"%d,%d",&AirLevel,&WaterLevel);
+			sscanf(c,"%d",&waterGain);
 }
 /*******************************************************************************/
 /**
@@ -194,8 +241,8 @@ char	c[128];
 	*/
 void	_SPRAY::SaveSettings(FIL *f) {
 			f_printf(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
-			f_printf(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler, gain.bottle, gain.compressor, gain.air);
-			f_printf(f,"%5d,%5d                             /.. air, H2O\r\n", AirLevel, WaterLevel);
+			f_printf(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler,gain.bottle,gain.compressor, gain.air);
+			f_printf(f,"%5d                                   /.. gain\r\n", waterGain);
 }
 /*******************************************************************************/
 /**
@@ -205,27 +252,46 @@ void	_SPRAY::SaveSettings(FIL *f) {
 	*/
 /*******************************************************************************/
 void	_SPRAY::Increment(int a, int b) {
-			if(mode.Simulator)
-				idx= std::min(std::max(idx+b,0),3);
-			else
-				idx= std::min(std::max(idx+b,0),1);
-			
+			idx= std::min(std::max(idx+b,0),6);
 			switch(idx) {
 				case 0:
-					AirLevel 		= std::min(std::max(0,AirLevel+a),10);
+					AirLevel 			= std::min(std::max(0,AirLevel+a),10);
+					readyTimeout	= HAL_GetTick() + _SPRAY_READY_T;
 					break;
 				case 1:
-					WaterLevel 	= std::min(std::max(0,WaterLevel+a),10);
+					WaterLevel 		= std::min(std::max(0,WaterLevel+a),10);
+					readyTimeout	= HAL_GetTick() + _SPRAY_READY_T;
 					break;
-				case 2:
-					Pin 				= std::min(std::max(0.5,Pin+(double)a/10.0),4.5);
-					break;
+						case 2:
+							break;
 				case 3:
-					Pout 				= std::min(std::max(0.5,Pout+(double)a/10.0),1.5);
+					gain.bottle		= std::min(std::max(_BAR(0.5),gain.bottle+100*a),_BAR(2));
+					break;
+				case 4:
+					if(mode.Simulator) {
+						Pout 				= std::min(std::max(0.5,Pout+(double)a/10.0),1.5);
+						if(a) {
+							AirLevel = WaterLevel;
+							mode.Air = mode.Water = false;
+							offsetTimeout = HAL_GetTick() + 3000;
+						}
+					}
+					break;
+				case 5:
+					if(a < 0)
+						mode.Air=false;
+					else if(a > 0)
+						mode.Air=true;
+					break;
+				case 6:
+					if(a < 0)
+						mode.Water=false;
+					else if(a > 0)
+						mode.Water=true;
 					break;
 			}
 			Newline();
-}		
+}	
 /*******************************************************************************
 * Function Name	:
 * Description		: 
@@ -271,7 +337,10 @@ double	Iout=(Uc2 - Pout)/Rout;
 
 	if(BottleIn->Closed()) {
 		I12=0;
-		lcd->Colour(&_ADC::val.bottle,LCD_COLOR_GREY);
+		if(I23 < 0)
+			lcd->Colour(&_ADC::val.bottle,LCD_COLOR_GREEN);
+		else
+			lcd->Colour(&_ADC::val.bottle,LCD_COLOR_GREY);
 	} else
 		lcd->Colour(&_ADC::val.bottle,LCD_COLOR_RED);
 
