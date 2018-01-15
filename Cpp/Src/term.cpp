@@ -96,7 +96,7 @@ int		i=getchar();
 				esc.timeout=0;
 				return i;
 			}
-			return EOF;
+			return Fsw();
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(_io *io) {
@@ -141,6 +141,28 @@ void 	*v=this;
 					}
 			}
 		return v;
+}
+
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+int		_TERM::Fsw() {	
+			int i=__FSW;
+			if(i != fsw.temp) {
+				fsw.temp = i;
+				fsw.timeout = HAL_GetTick() + 10;
+			} else 
+					if(fsw.timeout && HAL_GetTick() > fsw.timeout) {
+						fsw.timeout=0;
+						if(fsw.temp != fsw.key ) {
+							fsw.key=fsw.temp ;
+							return (fsw.key);
+						}
+			}
+			return EOF;
 }
 /**
 * @}

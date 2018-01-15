@@ -58,7 +58,7 @@ _err e=_NOERR;
 			else
 				e = e | _emgDisabled;
 		}
-
+		
 		if(HAL_GetTick() > _ADC_ERR_DELAY) {
 			if(abs(fval.V5  - _V5to16X)	> _V5to16X/10)
 				e = e | _V5;

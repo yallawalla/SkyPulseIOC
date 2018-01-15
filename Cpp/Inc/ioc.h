@@ -97,6 +97,8 @@ typedef __packed struct _IOC_SprayAck {
 class _IOC : public _ADC {
 	private:
 		static const string	ErrMsg[];
+		int key, temp,timeout;
+	
 	public:
 		static _IOC			*parent;
 		_IOC();
