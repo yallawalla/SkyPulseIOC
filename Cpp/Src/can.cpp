@@ -158,7 +158,7 @@ void	_CAN::Poll() {
 //______________________________________________________________________________________					
 	if(timeout && HAL_GetTick() > timeout) {
 		timeout=0;
-		ioc->SetError(_energy_missing);	
+		ioc->SetError(_energyMissing);	
 	}
 //______________________________________________________________________________________					
 	while(1) {
@@ -191,18 +191,11 @@ void	_CAN::Poll() {
 							_SYS_SHG_ENABLE;
 							break;
 						case	_READY:
-							if(ioc->IOC_State.State == _STANDBY || ioc->IOC_State.State == _ACTIVE) {
 								ioc->IOC_State.State = _READY;
 //								ioc->Submit("@ready.led");
-							} else
-								ioc->SetError(_illstatereq);
-							break;
 						case	_ACTIVE:
-							if(ioc->IOC_State.State == _READY) {
 								ioc->IOC_State.State = _ACTIVE;
 //								ioc->Submit("@active.led");
-							} else
-								ioc->SetError(_illstatereq);
 							break;
 						case	_ERROR:
 							ioc->IOC_State.State = _ERROR;
@@ -210,7 +203,6 @@ void	_CAN::Poll() {
 							_SYS_SHG_DISABLE;
 							break;
 						default:
-							ioc->SetError(_illstatereq);
 							break;
 					}
 				}

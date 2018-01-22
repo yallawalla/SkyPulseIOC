@@ -33,35 +33,4 @@ class _LED {
 		void BLUE1(int32_t t)			{ timeout[3]=t+HAL_GetTick(); };
 		void BLUE2(int32_t t)			{ timeout[7]=t+HAL_GetTick(); };
 };
-
-//_____________________________________________________________________
-typedef enum {_OFF,_1,_2,_3,_4} _Footsw;
-#define	_FOOT_MASK 0x000f
-
-class _FOOTSW {
-	private:
-		int temp,timeout;
-	public:
-		_FOOTSW() {
-			temp=timeout=0;
-		}
-		
-	int poll(__packed _Footsw *f) {
-		_Footsw key[]={_OFF,_OFF,_OFF,_3,_OFF,_OFF,_OFF,_4,_OFF,_OFF,_1,_2,_OFF,_OFF,_OFF,_OFF};
-		
-			if(temp != (GPIOE->IDR & _FOOT_MASK)) {
-				temp = GPIOE->IDR & _FOOT_MASK;
-				timeout = HAL_GetTick() + 2;
-			} else 
-					if(timeout && HAL_GetTick() > timeout) {
-						timeout=0;
-						if(key[temp] != *f) {
-							*f=key[temp];
-							return *f;
-						}
-			}
-			return EOF;
-}
-};
-
 #endif

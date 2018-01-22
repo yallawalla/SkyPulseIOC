@@ -11,7 +11,7 @@ extern "C" {
 			_p_loop();
 			vTaskDelay(1);
 		}
-		}
+	}
 }
 _IOC*	_IOC::parent			= NULL;
 /*******************************************************************************
@@ -45,7 +45,6 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 *******************************************************************************/
 _IOC::~_IOC() {
 	
-
 }
 /*******************************************************************************
 * Function Name	:
@@ -62,8 +61,6 @@ _IOC *me=static_cast<_IOC *>(v);
 			me->SetError(me->adcError());
 			
 			me->led.poll();
-			if(me->footsw.poll(&me->IOC_FootAck.State) != EOF)
-				me->IOC_FootAck.Send();
 			return NULL;
 }
 /*******************************************************************************
@@ -81,18 +78,12 @@ void	_IOC::SetState(_State s) {
 						_SYS_SHG_ENABLE;
 						break;
 					case	_READY:
-						if(IOC_State.State == _STANDBY || IOC_State.State == _ACTIVE) {
 							IOC_State.State = _READY;
 							//Submit("@ready.led");
-						} else
-							SetError(_illstatereq);
 						break;
 					case	_ACTIVE:
-						if(IOC_State.State == _READY) {
 							IOC_State.State = _ACTIVE;
 							//Submit("@active.led");
-						} else
-							SetError(_illstatereq);
 						break;
 					case	_ERROR:
 						IOC_State.State = _ERROR;
@@ -100,7 +91,6 @@ void	_IOC::SetState(_State s) {
 						_SYS_SHG_DISABLE;
 						break;
 					default:
-						SetError(_illstatereq);
 						break;
 				}
 }
@@ -111,25 +101,59 @@ void	_IOC::SetState(_State s) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetError(_err e) {
-
-			e = e & ~error_mask;
-			e ? led.RED1(300): led.GREEN1(300);
-			e = (e ^ IOC_State.Error) & e;
 	
-			IOC_State.Error = (_err)(IOC_State.Error | e);
-
-			if(e) {
+int		ee = (e ^ IOC_State.Error) & e & ~error_mask;
+	
+			if(ee && HAL_GetTick() > 3000) {
 				_SYS_SHG_DISABLE;
+//				if(IOC_State.State != _ERROR)
+//					Submit("@error.led");
+				IOC_State.Error = (_err)(IOC_State.Error | ee);
 				IOC_State.State = _ERROR;
 				IOC_State.Send();
-//				if(IOC_State.State != _ERROR)
-					//Submit("@error.led");
-			}
+			} 
+
+//int		ww=(e ^ IOC_State.Error) & warn_mask;
+//			if(ww && HAL_GetTick() > 3000) {
+//				IOC_State.Error = (_Error)(IOC_State.Error ^ ww);
+//				IOC_State.Send();
+//			} 
+			
+			if(_SYS_SHG_ENABLED)
+				led.GREEN1(200);
+			else
+				led.RED1(200);
 
 			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
 				if(e & (1<<0))
 					_print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
 }
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+//void	_IOC::SetError(_err e) {
+
+//			e = e & ~error_mask;
+//			e ? led.RED1(300): led.GREEN1(300);
+//			e = (e ^ IOC_State.Error) & e;
+//	
+//			IOC_State.Error = (_err)(IOC_State.Error | e);
+
+//			if(e) {
+//				_SYS_SHG_DISABLE;
+//				IOC_State.State = _ERROR;
+//				IOC_State.Send();
+////				if(IOC_State.State != _ERROR)
+//					//Submit("@error.led");
+//			}
+
+//			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
+//				if(e & (1<<0))
+//					_print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+//}
 /*******************************************************************************
 * Function Name	:
 * Description		:

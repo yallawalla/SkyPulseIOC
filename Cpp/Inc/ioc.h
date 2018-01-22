@@ -18,45 +18,47 @@
 #include <ctype.h>
 
 typedef enum {
-	DBG_OFF			=0,
-	DBG_CAN_TX	=1<<0,
-	DBG_CAN_RX	=1<<1,
-	DBG_ERR			=1<<2,
-	DBG_INFO		=1<<3,
-	DBG_CAN_COM	=1<<21,
-	DBG_EC_SIM	=1<<22,
-	DBG_ENRG		=1<<23
+	DBG_OFF						=0,
+	DBG_CAN_TX				=1<<0,
+	DBG_CAN_RX				=1<<1,
+	DBG_ERR						=1<<2,
+	DBG_INFO					=1<<3,
+	DBG_CAN_COM				=1<<21,
+	DBG_EC_SIM				=1<<22,
+	DBG_ENRG					=1<<23
 }	_dbg;
 
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-typedef enum {    		  
-	idIOC_State						=0x200,
-	idIOC_SprayParm				=0x201,
-	idIOC_SprayCmd				=0x202,
-	idIOC_State_Ack				=0x240,
-	idIOC_FootAck					=0x241,
-	idIOC_SprayAck				=0x242,
-	idCOM2CAN							=0x20B,
-  idCAN2COM							=0x24B,
-	idCAN2FOOT						=0x20C,
-	idFOOT2CAN						=0x24C,
-	idEC20_req						=0x280,
-	idEM_ack							=0x0C0,
-  idBOOT								=0x20
+typedef enum {    
+	idIOC_State				=0x200,
+	idIOC_SprayParm		=0x201,
+	idIOC_Footreq			=0x202,
+	idIOC_State_Ack		=0x240,
+	idIOC_FootAck			=0x241,
+	idIOC_SprayAck		=0x242,
+	idCAN2COM					=0x20B,
+  idCOM2CAN					=0x24B,
+	idCAN2FOOT				=0x20C,
+	idFOOT2CAN				=0x24C,
+	idEC20_req				=0x280,
+	idEM_ack					=0x0C0,
+  idBOOT						=0x20
 } _StdId;
-//_____________________________________________________________________
+
 typedef enum {
 	_STANDBY,
 	_READY,
 	_ACTIVE,
 	_ERROR		
 } _State;
-//_____________________________________________________________________
+
+typedef enum {
+	_OFF,
+	_1,
+	_2,
+	_3,
+	_4		
+} _Footsw;
+
 typedef enum {
 	_SPRAY_NOT_READY,
 	_SPRAY_READY,
@@ -114,7 +116,6 @@ class _IOC : public _ADC {
 		_FAN 						fan;
 		_LED 						led;
 		_RTC						rtc;
-		_FOOTSW					footsw;
 		_CLI						com,com1,com3;
 
 		~_IOC();
