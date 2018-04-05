@@ -20,10 +20,10 @@ f standby.led
 col 2,-l
 col 5,-r
 
-f ready.led
-col 2,5,-l
-w 200
-col 2,5,+l
+fil ready.led
+col 2,5=0,255,50
+col 2,+l
+col 5,+r
 
 f error.led
 col 0,3-

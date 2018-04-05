@@ -89,10 +89,6 @@
 #define _5V_GPIO_Port GPIOA
 #define PUMP_TACHO_Pin GPIO_PIN_6
 #define PUMP_TACHO_GPIO_Port GPIOA
-#define Dsense1_Pin GPIO_PIN_4
-#define Dsense1_GPIO_Port GPIOC
-#define Dsense2_Pin GPIO_PIN_5
-#define Dsense2_GPIO_Port GPIOC
 #define _12V_Pin GPIO_PIN_0
 #define _12V_GPIO_Port GPIOB
 #define _24V_Pin GPIO_PIN_1

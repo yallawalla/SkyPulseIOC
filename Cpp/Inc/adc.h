@@ -18,6 +18,7 @@
 #define	_V5to16X					(int)(5.0/_UREF*_Rdiv(820.0,820.0)*65535.0+0.5)			
 #define	_V12to16X					(int)(12.0/_UREF*_Rdiv(820.0,3300.0)*65535.0+0.5)			
 #define	_V24to16X					(int)(24.0/_UREF*_Rdiv(820.0,6800.0)*65535.0+0.5)			
+#define	_BAR(a) ((int)((a)*16384.0))
 
 __inline 
 int			__fit(int to, const int t[], const int ft[]) {
@@ -33,19 +34,23 @@ const int Ttab[]={ 1000, 2500, 5000, 8000 };
 const	int Rtab[]={ (0xffff*_Rdiv(18813.0,5100.0)), (0xffff*_Rdiv(10000.0,5100.0)), (0xffff*_Rdiv(3894.6,5100.0)), (0xffff*_Rdiv(1462.6,5100.0))};
 
 typedef struct	{
-			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air,diode1,diode2;
+			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
+typedef struct	{
+			unsigned short	diode1,diode2;
+		} diode;
 
 class	_ADC {
 	private:
 
 	public:
 	_ADC();
-	void		adcSmooth(void);
 	_err		adcError(void);
 	
-	static adc val, fval, gain, offset;
-	static int Th2o(void);
+	static	void adcFilter(),diodeFilter(int);
+	static	adc val[], fval, gain, offset;
+	static	diode dsense[];
+	static	int Th2o(void);
 	
 };
 

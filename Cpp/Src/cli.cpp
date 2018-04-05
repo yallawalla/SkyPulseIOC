@@ -394,7 +394,7 @@ FRESULT _CLI::Decode(char *p) {
 //			USBD_RegisterClass(&USBD_Device, USBD_CDC_CLASS);
 //			USBD_CDC_RegisterInterface(&USBD_Device, &USBD_CDC_fops);
 //			USBD_Start(&USBD_Device);
-//		} else 
+//		} else
 				return FR_NOT_READY;
 	} else if(!strncmp("@",sc[0],1)) {
 		FIL *f=new FIL;
@@ -403,16 +403,36 @@ FRESULT _CLI::Decode(char *p) {
 			Newline();
 			while(!f_eof(f))
 				Parse();
-//				_wait(2);
+//				_wait(2);z
 			f_close(f);
 			delete f;
 			io->file=NULL;
 			Newline();
 		}
-	} else if(!strncmp("+D",sc[0],2)) {
+	} else if(!strncmp("=d",sc[0],2)) {
+		float k=0.0006250;
+		float fo=15e6/(12+56)/2;
+		float t=atof(sc[1])/(1-expf(-fo*k*(float)atof(sc[1])));
+		float tt=t-atof(sc[1]);
+		float ut=0;
+		
+		for(int n=0; n<10; ++n) {	
+			float tt=t-atof(sc[1]);
+			ut+=1-fo*k*t*expf(-fo*k*t)-expf(-fo*k*t);
+			ut-=1-fo*k*tt*expf(-fo*k*tt)-expf(-fo*k*tt);
+			t+= atof(sc[2]);
+		// double t = Ton / (1 - exp(-fo * k * Ton));
+		// 9.06666666666666666666666 us
+			printf("\r\n t=%f, u(t)=%f",t,ut);	
+		}			
+		return FR_OK;
+		
+	} else if(!strncmp("-D",sc[0],2)) {
 	} else if(!strncmp("-D",sc[0],2)) {
 	} else if(!strncmp("+E",sc[0],2)) {
 	} else if(!strncmp("-E",sc[0],2)) {
+	} else if(!strncmp("?P",sc[0],2)) {
+		_proc_list();
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)

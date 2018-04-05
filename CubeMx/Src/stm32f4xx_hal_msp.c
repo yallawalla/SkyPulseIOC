@@ -51,6 +51,8 @@
 
 extern DMA_HandleTypeDef hdma_adc1;
 
+extern DMA_HandleTypeDef hdma_adc2;
+
 extern DMA_HandleTypeDef hdma_dac1;
 
 extern DMA_HandleTypeDef hdma_tim4_up;
@@ -127,7 +129,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PB1     ------> ADC1_IN9 
     */
     GPIO_InitStruct.Pin = Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
-                          |Dsense1_Pin|Dsense2_Pin;
+                          |GPIO_PIN_4|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -165,6 +167,46 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 
   /* USER CODE END ADC1_MspInit 1 */
   }
+  else if(hadc->Instance==ADC2)
+  {
+  /* USER CODE BEGIN ADC2_MspInit 0 */
+
+  /* USER CODE END ADC2_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_ADC2_CLK_ENABLE();
+  
+    /**ADC2 GPIO Configuration    
+    PC4     ------> ADC2_IN14
+    PC5     ------> ADC2_IN15 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    /* ADC2 DMA Init */
+    /* ADC2 Init */
+    hdma_adc2.Instance = DMA2_Stream2;
+    hdma_adc2.Init.Channel = DMA_CHANNEL_1;
+    hdma_adc2.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc2.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc2.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc2.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc2.Init.Mode = DMA_CIRCULAR;
+    hdma_adc2.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_adc2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_adc2) != HAL_OK)
+    {
+      _Error_Handler(__FILE__, __LINE__);
+    }
+
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc2);
+
+  /* USER CODE BEGIN ADC2_MspInit 1 */
+
+  /* USER CODE END ADC2_MspInit 1 */
+  }
 
 }
 
@@ -194,7 +236,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PB1     ------> ADC1_IN9 
     */
     HAL_GPIO_DeInit(GPIOC, Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
-                          |Dsense1_Pin|Dsense2_Pin);
+                          |GPIO_PIN_4|GPIO_PIN_5);
 
     HAL_GPIO_DeInit(GPIOA, PUMP_CSENSE_Pin|T1_H2O_Pin|T1_H2OA2_Pin|_5V_Pin);
 
@@ -205,6 +247,26 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
+  }
+  else if(hadc->Instance==ADC2)
+  {
+  /* USER CODE BEGIN ADC2_MspDeInit 0 */
+
+  /* USER CODE END ADC2_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_ADC2_CLK_DISABLE();
+  
+    /**ADC2 GPIO Configuration    
+    PC4     ------> ADC2_IN14
+    PC5     ------> ADC2_IN15 
+    */
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_4|GPIO_PIN_5);
+
+    /* ADC2 DMA DeInit */
+    HAL_DMA_DeInit(hadc->DMA_Handle);
+  /* USER CODE BEGIN ADC2_MspDeInit 1 */
+
+  /* USER CODE END ADC2_MspDeInit 1 */
   }
 
 }

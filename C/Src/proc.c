@@ -1,4 +1,5 @@
 #include "proc.h"
+#include "misc.h"
 SemaphoreHandle_t _sWait=NULL;
 TaskHandle_t 			_tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 TaskHandle_t 			*tWait=_tWait;
@@ -7,10 +8,10 @@ _buffer						*_proc_buf=NULL;
 void 	_proc_code(void *arg) {
 _proc *p=(_proc *)arg;
 			while(1) {
-				if(HAL_GetTick() >= p->t) {
-					p->to = HAL_GetTick() - p->t;
+				if(__time__ >= p->t) {
+					p->to = __time__ - p->t;
 					p->f(p->arg);
-					p->t = HAL_GetTick() + p->dt;
+					p->t = __time__ + p->dt;
 				}
 			}
 }
@@ -21,7 +22,7 @@ _proc	*p=malloc(sizeof(_proc));
 				p->f=(func *)f;
 				p->arg=arg;
 				p->name=name;
-				p->t=HAL_GetTick();
+				p->t=__time__;
 				p->dt=dt;
 				if(!_proc_buf) {
 					_proc_buf=_buffer_init(_PROC_BUFFER_SIZE*sizeof(_proc));				
@@ -34,10 +35,10 @@ _proc	*p=malloc(sizeof(_proc));
 void	*_proc_loop(void) {
 			_proc	*p=NULL;
 			if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
-				if(HAL_GetTick() >= p->t) {
-					p->to = HAL_GetTick() - p->t;
+				if(__time__ >= p->t) {
+					p->to = __time__ - p->t;
 					p->f(p->arg);
-					p->t = HAL_GetTick() + p->dt;
+					p->t = __time__ + p->dt;
 				}
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
@@ -85,10 +86,10 @@ void	_p_loop(void) {
 			if(xSemaphoreTake(_sWait,portMAX_DELAY)) {
 				_proc	*p=NULL;
 				if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
-					if(HAL_GetTick() >= p->t) {
-						p->to = HAL_GetTick() - p->t;
+					if(__time__ >= p->t) {
+						p->to = __time__ - p->t;
 						p->f(p->arg);
-						p->t = HAL_GetTick() + p->dt;
+						p->t = __time__ + p->dt;
 					}
 					_buffer_push(_proc_buf,&p,sizeof(_proc *));
 				}
@@ -100,7 +101,6 @@ void	_p_loop(void) {
 void	_task(const void *t) {
 			while(1) {
 				_p_loop();
-				vTaskDelay(1);
 			}
 }
 //___________________________________________________________________________

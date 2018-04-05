@@ -107,12 +107,12 @@ int		_FAN::Rpm(int fsc) {
 /*******************************************************************************/
 _err _FAN::Status(void) {	
 _err	e=_NOERR;
-			fan_drive  =Rpm(__PWMRATE);
-			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
-				if(HAL_GetTick()-fan1_cbk > _FAN_ERR_DELAY)
-					e = e | _fan1Tacho;	
-				if(HAL_GetTick()-fan2_cbk > _FAN_ERR_DELAY)
-					e = e | _fan2Tacho;
+			if(__time__ > _TACHO_ERR_DELAY) {
+				fan_drive  =Rpm(__PWMRATE);
+				if(__time__-fan1_cbk > _FAN_ERR_DELAY)
+					e = e | _fanTacho;	
+				if(__time__-fan2_cbk > _FAN_ERR_DELAY)
+					e = e | _flowTacho;
 			}
 			return e;
 }

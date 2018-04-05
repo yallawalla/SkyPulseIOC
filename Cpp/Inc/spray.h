@@ -8,7 +8,6 @@
 #include	<algorithm>
 #include	"lcd.h"
 
-#define		_BAR(a) ((int)((a)*16384.0))
 #define		_SPRAY_READY_T	500
 				
 typedef	struct {

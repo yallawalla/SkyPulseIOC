@@ -1,6 +1,6 @@
 Configuration	SkyPulse
-STM32CubeMX 	4.23.0
-Date	11/23/2017
+STM32CubeMX 	4.24.0
+Date	02/07/2018
 MCU	STM32F405VGTx
 
 
@@ -100,7 +100,8 @@ Pin Nb	PINs	FUNCTIONs	LABELs
 86	PD5	GPIO_Output	_GREEN2
 87	PD6	GPIO_Output	_YELLOW2
 88	PD7	GPIO_Output	_BLUE2
-90	PB4	GPIO_Output	SYS_SHG
+89	PB3	GPIO_Output	_12Voff
+90	PB4	GPIO_Output	_SYS_SHG
 91	PB5	CAN2_RX	
 95	PB8	TIM10_CH1	FAN_PWM
 97	PE0	GPIO_Input	FSW0
@@ -114,7 +115,7 @@ Project Settings :
 Project Name : SkyPulse
 Project Folder : C:\Users\Mocnik\Desktop\skyCube\CubeMx
 Toolchain / IDE : MDK-ARM V5
-Firmware Package Name and Version : STM32Cube FW_F4 V1.17.0
+Firmware Package Name and Version : STM32Cube FW_F4 V1.18.0
 
 
 Code Generation Settings : 

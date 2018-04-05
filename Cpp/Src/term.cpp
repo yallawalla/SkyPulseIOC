@@ -1,4 +1,5 @@
 #include "term.h"
+#include "misc.h"
 /**
 ******************************************************************************
 * @file
@@ -18,7 +19,7 @@
 * Return				:
 *******************************************************************************/
 void	_TERM::Repeat(int t, int ch) {
-			rpt.timeout = HAL_GetTick() + t;
+			rpt.timeout = __time__ + t;
 			rpt.seq=ch;
 }
 /*******************************************************************************
@@ -75,11 +76,11 @@ int		_TERM::Escape(void) {
 int		i=getchar();
 
 			if(i==EOF) {
-				if(esc.timeout && (HAL_GetTick() > esc.timeout)) {
+				if(esc.timeout && (__time__ > esc.timeout)) {
 					esc.timeout=0;
 					return esc.seq;
 					}
-				if(rpt.timeout && (HAL_GetTick() > rpt.timeout)) {
+				if(rpt.timeout && (__time__ > rpt.timeout)) {
 					rpt.timeout=0;
 					return rpt.seq;
 					}
@@ -90,7 +91,7 @@ int		i=getchar();
 					return esc.seq;
 				}
 			} else if(i==__Esc) {
-				esc.timeout=HAL_GetTick()+10;
+				esc.timeout=__time__+10;
 				esc.seq=i;
 			} else {
 				esc.timeout=0;
@@ -111,8 +112,7 @@ void	*_TERM::Parse(FIL *f) {
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(void) {
-
-	return Parse(Escape());
+			return Parse(Escape());
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(int i) {
@@ -153,9 +153,9 @@ int		_TERM::Fsw() {
 			int i=__FSW;
 			if(i != fsw.temp) {
 				fsw.temp = i;
-				fsw.timeout = HAL_GetTick() + 10;
+				fsw.timeout = __time__ + 10;
 			} else 
-					if(fsw.timeout && HAL_GetTick() > fsw.timeout) {
+					if(fsw.timeout && __time__ > fsw.timeout) {
 						fsw.timeout=0;
 						if(fsw.temp != fsw.key ) {
 							fsw.key=fsw.temp ;

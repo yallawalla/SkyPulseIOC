@@ -32,9 +32,11 @@ typedef enum {
 	idIOC_State				=0x200,
 	idIOC_SprayParm		=0x201,
 	idIOC_Footreq			=0x202,
+	idIOC_AuxReq			=0x203,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
+	idIOC_AuxAck			=0x243,
 	idCAN2COM					=0x20B,
   idCOM2CAN					=0x24B,
 	idCAN2FOOT				=0x20C,
@@ -86,6 +88,16 @@ typedef __packed struct _IOC_FootAck {
 	}
 } IOC_FootAck;
 //_____________________________________________________________________
+typedef __packed struct _IOC_Aux{
+	short Temp;
+	_IOC_Aux() : Temp(0)	{}	
+	void	Send() {
+		CanTxMsgTypeDef	m={idIOC_AuxAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_Aux),0,0,0,0,0,0,0,0};
+		memcpy(m.Data,(const void *)&Temp,sizeof(_IOC_Aux));
+		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
+	}
+} IOC_Aux;
+//_____________________________________________________________________
 typedef __packed struct _IOC_SprayAck {
 	_Spray	Status;
 	_IOC_SprayAck() : Status(_SPRAY_NOT_READY)	{}	
@@ -99,7 +111,7 @@ typedef __packed struct _IOC_SprayAck {
 class _IOC : public _ADC {
 	private:
 		static const string	ErrMsg[];
-		int key, temp,timeout;
+		int key,temp;
 	
 	public:
 		static _IOC			*parent;
@@ -109,6 +121,7 @@ class _IOC : public _ADC {
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
+		_IOC_Aux				IOC_Aux;
 		_CAN						can;
 		_SPRAY 					spray;
 		_WS 						ws2812;

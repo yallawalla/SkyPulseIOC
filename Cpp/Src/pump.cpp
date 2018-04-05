@@ -21,9 +21,13 @@
 /*******************************************************************************/
 _PUMP::_PUMP()  {
 			ftl=25; fth=40; fpl=10; fph=50;
-			offset.cooler=12500;
-			gain.cooler=13300;
+			offset.cooler=_BAR(1);
+			gain.cooler=_BAR(1);
 			idx=0;
+			timeout=__time__ + _PUMP_ERR_DELAY;
+			mode=(1<<PUMP_FLOW);
+			curr_limit=flow_limit=flow=0;
+			Enabled=true;
 }
 /*******************************************************************************/
 /**
@@ -35,7 +39,7 @@ _PUMP::_PUMP()  {
 void	_PUMP::LoadSettings(FIL *f) {
 char	c[128];
 			f_gets(c,sizeof(c),f);
-			sscanf(c,"%d,%d,%d,%d",&fpl,&fph,&ftl,&fth);
+			sscanf(c,"%d,%d,%d,%d,%d,%d",&fpl,&fph,&ftl,&fth,&curr_limit,&flow_limit);
 }
 /*******************************************************************************/
 /**
@@ -45,7 +49,7 @@ char	c[128];
 	*/
 /*******************************************************************************/
 void	_PUMP::SaveSettings(FIL *f) {
-			f_printf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+			f_printf(f,"%5d,%5d,%5d,%5d,%5d,%5d     /.. pump\r\n",fpl,fph,ftl,fth,curr_limit,flow_limit);
 }
 /*******************************************************************************/
 /**
@@ -57,11 +61,15 @@ void	_PUMP::SaveSettings(FIL *f) {
 void	_PUMP::Newline(void) {
 			_print("\r:pump      %5d%c,",Rpm(100),'%');
 			_printdec(Th2o()/10,10);_print("'C, ");
-			_printdec(10*(fval.cooler-offset.cooler)/gain.cooler,10);
+			if(mode & (1<<PUMP_FLOW))
+				_printdec(flow/2200,10);
+			else
+				_printdec(10*(fval.cooler-offset.cooler)/gain.cooler,10);
 			if(idx>0) {
 				int i=fval.Ipump*33/4096.0/2.1/16;
 				_print("   %2d%c-%2d%c,%2d'C-%2d'C, ",fpl,'%',fph,'%',ftl,fth);
 				_printdec(i,10);		
+				_print(",%dmA",fval.Ipump/(int)(4096.0*2.1*16/3.3));
 			}
 			for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
 }
@@ -104,6 +112,27 @@ int		_PUMP::Rpm(int fsc) {
 }
 /*******************************************************************************/
 /**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/
+void		_PUMP::Enable() {
+				if(Enabled==false) {
+					timeout=__time__ +  _PUMP_ERR_DELAY;
+					Enabled=true;
+				}
+}
+/*******************************************************************************/
+/**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/
+void		_PUMP::Disable() {
+				Enabled=false;
+}
+/*******************************************************************************/
+/**
 	* @brief
 	* @param	: None
 	* @retval : None
@@ -111,9 +140,9 @@ int		_PUMP::Rpm(int fsc) {
 /*******************************************************************************/
 _err	_PUMP::Status(void) {	
 _err	e=_NOERR;
-			pump_drive =Rpm(1<<12);
-			if(HAL_GetTick() > _TACHO_ERR_DELAY) {
-				if(HAL_GetTick()-pump_cbk > _PUMP_ERR_DELAY)
+			if(__time__ > _TACHO_ERR_DELAY) {
+				pump_drive =Rpm(1<<12);
+				if(__time__-pump_cbk > _PUMP_ERR_DELAY)
 					e = e | _pumpTacho;	
 			}
 			return e;

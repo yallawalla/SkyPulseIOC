@@ -25,7 +25,7 @@ void					_proc_list(void),
 							*_proc_loop(void);
 _proc					*_proc_add(void *,void *,char *,int),
 							*_proc_find(void *,void *);
-
+void					_task(const void *);
 #ifdef __cplusplus
 }
 #endif

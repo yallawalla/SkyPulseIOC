@@ -19,8 +19,9 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canFilterCfg(idEC20_req,	0x780);
 	canFilterCfg(idEM_ack,		0x7ff);
 	canFilterCfg(idBOOT,			0x7ff);
-	
-	_proc_add((void *)task,this,(char *)"can task",0);
+
+	_proc_add((void *)taskRx,this,(char *)"can rx",0);
+	_proc_add((void *)taskTx,this,(char *)"can tx",1);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -41,15 +42,6 @@ int _CAN::SendRemote(int stdid) {
 	if(tx.DLC > 0)
 		Send(&tx);
 	return i;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-void _CAN::Send(CanTxMsgTypeDef *msg) {
-	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
 }
 /*******************************************************************************
 * Function Name	: 
@@ -150,52 +142,70 @@ FRESULT _CAN::Decode(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_CAN::Poll() {
-	_IOC *ioc=_IOC::parent;
+void	_CAN::pollTx() {
+//	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
+////______________________________________________________________________________________					
+//	while(1) {
+//		if(((hcan->Instance->TSR&CAN_TSR_TME0) != CAN_TSR_TME0) && \
+//			 ((hcan->Instance->TSR&CAN_TSR_TME1) != CAN_TSR_TME1) && \
+//			 ((hcan->Instance->TSR&CAN_TSR_TME2) != CAN_TSR_TME2)) 	
+//					return;
+//		if(_buffer_pull(canBuffer->tx,tx,sizeof(CanTxMsgTypeDef)))
+//			HAL_CAN_Transmit_IT(hcan);
+//		else if(remote) {
+//			tx->DLC=_buffer_pull(remote->io->tx,tx->Data,8);
+//			tx->StdId=idCAN2COM;
+//			if(tx->DLC)
+//				HAL_CAN_Transmit_IT(hcan);
+//			else
+//				return;
+//		} else
+//			return;
+//	}
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void _CAN::Send(CanTxMsgTypeDef *msg) {
+	
+	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	_CAN::pollRx() {
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
-	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
-	_io* temp=_stdio(io);										//remote console printout !!!
-//______________________________________________________________________________________					
-	if(timeout && HAL_GetTick() > timeout) {
-		timeout=0;
-		ioc->SetError(_energyMissing);	
-	}
-//______________________________________________________________________________________					
-	while(1) {
-		if(((hcan->Instance->TSR&CAN_TSR_TME0) != CAN_TSR_TME0) && \
-			 ((hcan->Instance->TSR&CAN_TSR_TME1) != CAN_TSR_TME1) && \
-			 ((hcan->Instance->TSR&CAN_TSR_TME2) != CAN_TSR_TME2)) 	
-					break;
-		if(_buffer_pull(canBuffer->tx,tx,sizeof(CanTxMsgTypeDef)))
-			HAL_CAN_Transmit_IT(hcan);
-		else if(remote) {
-			tx->DLC=_buffer_pull(remote->io->tx,tx->Data,8);
-			tx->StdId=idCAN2COM;
-			if(tx->DLC)
-				HAL_CAN_Transmit_IT(hcan);
-			else
-				break;
-		} else
-			break;
-	}
-
+	_IOC*							ioc=_IOC::parent;
+	
 	if(_buffer_pull(canBuffer->rx,rx,sizeof(CanRxMsgTypeDef))) {
+		_io*	temp=_stdio(io);										//remote console printout !!!
 		switch(rx->StdId) {
 			case idIOC_State:
 				if(rx->DLC) {
 					switch((_State)rx->Data[0]) {
 						case	_STANDBY:
+							if(ioc->IOC_State.State == _ERROR)
+								ioc->IOC_State.Error = _NOERR;
 							ioc->IOC_State.State = _STANDBY;
-							ioc->IOC_State.Error = _NOERR;
+							ioc->pump.Enable();
 //							ioc->Submit("@standby.led");
 							_SYS_SHG_ENABLE;
 							break;
 						case	_READY:
-								ioc->IOC_State.State = _READY;
-//								ioc->Submit("@ready.led");
+							ioc->IOC_State.State = _READY;
+							ioc->pump.Enable();
+//							ioc->Submit("@ready.led");
+							break;
 						case	_ACTIVE:
-								ioc->IOC_State.State = _ACTIVE;
-//								ioc->Submit("@active.led");
+							ioc->IOC_State.State = _ACTIVE;
+							ioc->pump.Enable();
+//							ioc->Submit("@active.led");
 							break;
 						case	_ERROR:
 							ioc->IOC_State.State = _ERROR;
@@ -213,18 +223,24 @@ void	_CAN::Poll() {
 				ioc->spray.WaterLevel	= std::min(10,(int)rx->Data[1]);
 				if(rx->Data[2]==0) {
 					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
-						ioc->spray.readyTimeout=HAL_GetTick() + _SPRAY_READY_T;
+						ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
 				}
 				ioc->spray.mode.Air=rx->Data[2] & 1;
 				ioc->spray.mode.Water=rx->Data[2] & 2;
 			break;
+//______________________________________________________________________________________							
+			case idIOC_AuxReq:
+				ioc->IOC_Aux.Temp = ioc->Th2o();
+				ioc->IOC_Aux.Send();
+			break;
 //______________________________________________________________________________________
 			case idEC20_req:
-				timeout=HAL_GetTick()+_EC20_EM_DELAY;
+				timeout=__time__+_EC20_EM_DELAY;
 			break;
 //______________________________________________________________________________________
 			case idEM_ack:
 				timeout=0;
+			case idIOC_Footreq:
 				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________
@@ -265,8 +281,13 @@ void	_CAN::Poll() {
 				Newline();	
 			break;
 		}
-	}
 	_stdio(temp);
+	}
+//______________________________________________________________________________________					
+	if(timeout && __time__ > timeout) {
+		timeout=0;
+		ioc->SetError(_energyMissing);	
+	}
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize

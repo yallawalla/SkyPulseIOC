@@ -135,7 +135,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
 * Return				:
 *******************************************************************************/
 void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(canBuffer)
+	if(hcan->State == HAL_CAN_STATE_READY)
 		if(_buffer_pull(canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
 			HAL_CAN_Transmit_IT(hcan);
 }
@@ -168,6 +168,8 @@ void	date_time(uint32_t d,uint32_t t) {
 * Return				:
 *******************************************************************************/
 __weak	void	Watchdog() {
+	
+	
 }
 /*******************************************************************************
 * Function Name	: 

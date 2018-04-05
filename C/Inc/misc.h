@@ -32,6 +32,7 @@ extern UART_HandleTypeDef huart3;
 extern CAN_HandleTypeDef	hcan2;
 extern RTC_HandleTypeDef 	hrtc;
 extern ADC_HandleTypeDef	hadc1;
+extern ADC_HandleTypeDef	hadc2;
 extern TIM_HandleTypeDef	htim4;
 
 extern	uint32_t pump_cbk, fan1_cbk, fan2_cbk,valve_timeout[];
@@ -43,6 +44,8 @@ extern void	*CDC_Poll_FS(void *);
 extern void	date_time(uint32_t, uint32_t);
 extern	RTC_TimeTypeDef sTime;
 extern	RTC_DateTypeDef sDate;
+
+#define __time__	HAL_GetTick()
 
 #ifdef __cplusplus
 }

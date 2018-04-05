@@ -12,7 +12,7 @@
 *******************************************************************************/
 class _CAN : public _TERM {
 private:
-	int		filter_count, timeout;
+	int		filter_count,timeout;
 	CAN_HandleTypeDef *hcan;
 	_CLI	*remote;
 
@@ -23,12 +23,16 @@ public:
 	virtual FRESULT	Decode(char *);
 
 	_io		*io,*ioFsw;	
-	void	Poll(void),
+	void	pollRx(void),pollTx(void),
 				canFilterCfg(int, int),
 				Send(CanTxMsgTypeDef *);	
 	int		SendRemote(int);
-	static void	task(_CAN *me) {
-		me->Poll();
+				
+	static void	taskRx(_CAN *me) {
+		me->pollRx();
+	}
+	static void	taskTx(_CAN *me) {
+		me->pollTx();
 	}
 };
 #endif
