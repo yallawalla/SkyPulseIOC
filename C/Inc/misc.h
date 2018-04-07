@@ -35,15 +35,25 @@ extern ADC_HandleTypeDef	hadc1;
 extern ADC_HandleTypeDef	hadc2;
 extern TIM_HandleTypeDef	htim4;
 
-extern	uint32_t pump_cbk, fan1_cbk, fan2_cbk,valve_timeout[];
+extern	uint32_t pumpTacho, fanTacho, flowTacho,valve_timeout[];
 extern	uint16_t pump_drive, fan_drive, valve_drive[], led_drive[];
 
 extern _io	*_VCP,*canBuffer;
 extern void	*CDC_Poll_FS(void *);
 
 extern void	date_time(uint32_t, uint32_t);
-extern	RTC_TimeTypeDef sTime;
-extern	RTC_DateTypeDef sDate;
+extern RTC_TimeTypeDef sTime;
+extern RTC_DateTypeDef sDate;
+
+extern void	led_poll(void);
+void __RED1(int32_t);
+void __GREEN1(int32_t);
+void __YELLOW1(int32_t);
+void __BLUE1(int32_t);
+void __RED2(int32_t);
+void __GREEN2(int32_t);
+void __YELLOW2(int32_t);
+void __BLUE2(int32_t);
 
 #define __time__	HAL_GetTick()
 

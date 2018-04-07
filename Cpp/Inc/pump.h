@@ -16,7 +16,7 @@ class	_PUMP : public _TERM, public _ADC {
 		int 		fpl,fph,ftl,fth;
 		int			idx,mode,timeout;
 		bool		Enabled;
-		int			flow, curr_limit, flow_limit;
+		int			flow, tacho_limit,curr_limit, flow_limit;
 
 	public:
 		_PUMP();

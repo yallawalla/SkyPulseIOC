@@ -26,7 +26,7 @@ _PUMP::_PUMP()  {
 			idx=0;
 			timeout=__time__ + _PUMP_ERR_DELAY;
 			mode=(1<<PUMP_FLOW);
-			curr_limit=flow_limit=flow=0;
+			tacho_limit=curr_limit=flow_limit=flow=0;
 			Enabled=true;
 }
 /*******************************************************************************/
@@ -69,7 +69,7 @@ void	_PUMP::Newline(void) {
 				int i=fval.Ipump*33/4096.0/2.1/16;
 				_print("   %2d%c-%2d%c,%2d'C-%2d'C, ",fpl,'%',fph,'%',ftl,fth);
 				_printdec(i,10);		
-				_print(",%dmA",fval.Ipump/(int)(4096.0*2.1*16/3.3));
+				_print(",%dmA",fval.Ipump/(int)(4.096*2.1*16/3.3));
 			}
 			for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
 }
@@ -139,13 +139,24 @@ void		_PUMP::Disable() {
 	*/
 /*******************************************************************************/
 _err	_PUMP::Status(void) {	
-_err	e=_NOERR;
-			if(__time__ > _TACHO_ERR_DELAY) {
+int		e=_NOERR;
+			if(Enabled)
 				pump_drive =Rpm(1<<12);
-				if(__time__-pump_cbk > _PUMP_ERR_DELAY)
-					e = e | _pumpTacho;	
-			}
-			return e;
+			else
+				pump_drive =0;
+			
+			if(__time__ > timeout) {
+				if(pumpTacho <= tacho_limit)
+					e |= _pumpTacho;
+				if(fval.Ipump > curr_limit)
+					e |= _pumpCurrent;
+				if(flowTacho <= flow_limit) {
+					e |= _flowTacho;
+				}
+				timeout=__time__+100;
+				pumpTacho=flowTacho=0;
+			} 	
+			return (_err)e;
 }
 /*******************************************************************************/
 /**

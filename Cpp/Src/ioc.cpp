@@ -17,7 +17,7 @@ _IOC*	_IOC::parent			= NULL;
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 	
 	SetState(_STANDBY);	
-	error_mask = _flowTacho | _sprayInPressure | _sprayNotReady;
+	error_mask = _sprayInPressure | _sprayNotReady;
 	
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	
@@ -48,12 +48,10 @@ _IOC::~_IOC() {
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
-//			me->adcFilter();
 			me->SetError(me->pump.Status());
 			me->SetError(me->fan.Status());
 			me->SetError(me->spray.Status());
 			me->SetError(me->adcError());
-			me->led.poll();
 			return me;
 }
 /*******************************************************************************
@@ -94,13 +92,13 @@ void	_IOC::SetState(_State s) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetError(_err e) {
-	
+
 int		ee = (e ^ IOC_State.Error) & e & ~error_mask;
-	
+
 			if(_SYS_SHG_ENABLED)
-				led.GREEN1(20);
+				__GREEN1(20);
 			else
-				led.RED1(20);
+				__RED1(20);
 			
 			if(ee && __time__ > 3000) {
 				_SYS_SHG_DISABLE;

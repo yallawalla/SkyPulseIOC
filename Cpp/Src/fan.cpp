@@ -23,7 +23,8 @@ _FAN::_FAN()  {
 			ftl=25; fth=40; fpl=20; fph=95;
 			offset.cooler=12500;
 			gain.cooler=13300;
-			idx=0;
+			idx=fan_limit=0;
+			timeout=__time__ + _FAN_ERR_DELAY;
 }
 /*******************************************************************************/
 /**
@@ -105,16 +106,16 @@ int		_FAN::Rpm(int fsc) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-_err _FAN::Status(void) {	
-_err	e=_NOERR;
-			if(__time__ > _TACHO_ERR_DELAY) {
-				fan_drive  =Rpm(__PWMRATE);
-				if(__time__-fan1_cbk > _FAN_ERR_DELAY)
-					e = e | _fanTacho;	
-				if(__time__-fan2_cbk > _FAN_ERR_DELAY)
-					e = e | _flowTacho;
-			}
-			return e;
+_err	_FAN::Status(void) {	
+int		e=_NOERR;
+			fan_drive  =Rpm(__PWMRATE);
+			if(__time__ > timeout) {
+				if(fan_limit && fanTacho <= fan_limit)
+					e |= _fanTacho;
+				timeout=__time__+100;
+				fanTacho=0;
+				}
+			return (_err)e;
 }
 /*******************************************************************************/
 /**

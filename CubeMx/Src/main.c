@@ -121,7 +121,7 @@ void ioc(void);																										// main app. C++ relay object
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-uint32_t	pump_cbk, fan1_cbk, fan2_cbk, valve_timeout[__VALVES];	// DMA memory registers..
+uint32_t	pumpTacho, fanTacho, flowTacho, valve_timeout[__VALVES];	// DMA memory registers..
 uint16_t	pump_drive, fan_drive, valve_drive[__VALVES], led_drive[__LEDS*24+2];
 _io				*canBuffer=NULL;
 /* USER CODE END 0 */
@@ -952,7 +952,9 @@ void StartDefaultTask(void const * argument)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 /* USER CODE BEGIN Callback 0 */
-
+  if (htim->Instance == TIM2) {
+    led_poll();
+  }
 /* USER CODE END Callback 0 */
   if (htim->Instance == TIM2) {
     HAL_IncTick();

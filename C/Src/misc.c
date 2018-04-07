@@ -111,11 +111,11 @@ _io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 *******************************************************************************/
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
-		pump_cbk=HAL_GetTick();
+		pumpTacho++;
 	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
-		fan1_cbk=HAL_GetTick();
+		fanTacho++;
 	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2)
-		fan2_cbk=HAL_GetTick();	
+		flowTacho++;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -167,7 +167,7 @@ void	date_time(uint32_t d,uint32_t t) {
 * Output				:
 * Return				:
 *******************************************************************************/
-__weak	void	Watchdog() {
+void	Watchdog() {
 	
 	
 }
@@ -235,3 +235,45 @@ void vApplicationMallocFailedHook( void ) {
 void vApplicationStackOverflowHook( TaskHandle_t xTask, signed char *pcTaskName ) {
 	_print("stack error in...%s",pcTaskName);
 }
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+struct {
+		uint32_t			timeout[8];
+		GPIO_TypeDef*	gpio[8]; 
+		uint32_t			pin[8];	
+} leds = {
+	{0,0,0,0,0,0,0,0},
+	{GPIOD,GPIOD,GPIOD,GPIOD,GPIOD,GPIOD,GPIOD,GPIOD},
+	{GPIO_PIN_0,GPIO_PIN_1,GPIO_PIN_2,GPIO_PIN_3,GPIO_PIN_4,GPIO_PIN_5,GPIO_PIN_6,GPIO_PIN_7}
+};
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	led_poll(void) {
+	for(int i = 0; i < sizeof(leds.pin)/sizeof(uint32_t); ++i)
+		if(HAL_GetTick() < leds.timeout[i])	
+			HAL_GPIO_WritePin(leds.gpio[i],leds.pin[i], GPIO_PIN_RESET);
+		else
+			HAL_GPIO_WritePin(leds.gpio[i],leds.pin[i], GPIO_PIN_SET);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void __RED1(int32_t t)			{ leds.timeout[0]=t+HAL_GetTick(); };
+void __GREEN1(int32_t t)		{ leds.timeout[1]=t+HAL_GetTick(); };
+void __YELLOW1(int32_t t)		{ leds.timeout[2]=t+HAL_GetTick(); };
+void __BLUE1(int32_t t)			{ leds.timeout[3]=t+HAL_GetTick(); };
+void __RED2(int32_t t)			{ leds.timeout[4]=t+HAL_GetTick(); };
+void __GREEN2(int32_t t)		{ leds.timeout[5]=t+HAL_GetTick(); };
+void __YELLOW2(int32_t t) 	{ leds.timeout[6]=t+HAL_GetTick(); };
+void __BLUE2(int32_t t)			{ leds.timeout[7]=t+HAL_GetTick(); };

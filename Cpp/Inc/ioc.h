@@ -5,7 +5,6 @@
 #include "can.h"
 #include "cli.h"
 #include "adc.h"
-#include "leds.h"
 #include "misc.h"
 #include "err.h"
 #include "fan.h"
@@ -127,7 +126,6 @@ class _IOC : public _ADC {
 		_WS 						ws2812;
 		_PUMP 					pump;
 		_FAN 						fan;
-		_LED 						led;
 		_RTC						rtc;
 		_CLI						com,com1,com3;
 
