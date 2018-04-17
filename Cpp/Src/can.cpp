@@ -19,9 +19,6 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canFilterCfg(idEC20_req,	0x780);
 	canFilterCfg(idEM_ack,		0x7ff);
 	canFilterCfg(idBOOT,			0x7ff);
-
-	_proc_add((void *)taskRx,this,(char *)"can rx",0);
-	_proc_add((void *)taskTx,this,(char *)"can tx",1);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -142,36 +139,12 @@ FRESULT _CAN::Decode(char *c) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_CAN::pollTx() {
-//	CanTxMsgTypeDef*	tx=hcan->pTxMsg;
-////______________________________________________________________________________________					
-//	while(1) {
-//		if(((hcan->Instance->TSR&CAN_TSR_TME0) != CAN_TSR_TME0) && \
-//			 ((hcan->Instance->TSR&CAN_TSR_TME1) != CAN_TSR_TME1) && \
-//			 ((hcan->Instance->TSR&CAN_TSR_TME2) != CAN_TSR_TME2)) 	
-//					return;
-//		if(_buffer_pull(canBuffer->tx,tx,sizeof(CanTxMsgTypeDef)))
-//			HAL_CAN_Transmit_IT(hcan);
-//		else if(remote) {
-//			tx->DLC=_buffer_pull(remote->io->tx,tx->Data,8);
-//			tx->StdId=idCAN2COM;
-//			if(tx->DLC)
-//				HAL_CAN_Transmit_IT(hcan);
-//			else
-//				return;
-//		} else
-//			return;
-//	}
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 void _CAN::Send(CanTxMsgTypeDef *msg) {
-	
-	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
+	if(_buffer_count(canBuffer->tx) == 0)
+		*hcan->pTxMsg=*msg;
+	else
+		_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
+	HAL_CAN_Transmit_IT(hcan);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -179,45 +152,20 @@ void _CAN::Send(CanTxMsgTypeDef *msg) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_CAN::pollRx() {
+void	_CAN::pollRx(void *v) {
 	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
-	_IOC*							ioc=_IOC::parent;
+	_IOC*							ioc=static_cast<_IOC *>(v);
 	
 	if(_buffer_pull(canBuffer->rx,rx,sizeof(CanRxMsgTypeDef))) {
-		_io*	temp=_stdio(io);										//remote console printout !!!
+		_io*	temp=_stdio(io);
 		switch(rx->StdId) {
+//______________________________________________________________________________________							
 			case idIOC_State:
-				if(rx->DLC) {
-					switch((_State)rx->Data[0]) {
-						case	_STANDBY:
-							if(ioc->IOC_State.State == _ERROR)
-								ioc->IOC_State.Error = _NOERR;
-							ioc->IOC_State.State = _STANDBY;
-							ioc->pump.Enable();
-//							ioc->Submit("@standby.led");
-							_SYS_SHG_ENABLE;
-							break;
-						case	_READY:
-							ioc->IOC_State.State = _READY;
-							ioc->pump.Enable();
-//							ioc->Submit("@ready.led");
-							break;
-						case	_ACTIVE:
-							ioc->IOC_State.State = _ACTIVE;
-							ioc->pump.Enable();
-//							ioc->Submit("@active.led");
-							break;
-						case	_ERROR:
-							ioc->IOC_State.State = _ERROR;
-//							ioc->Submit("@error.led");
-							_SYS_SHG_DISABLE;
-							break;
-						default:
-							break;
-					}
-				}
+				if(rx->DLC)
+					ioc->SetState((_State)rx->Data[0]);
 				ioc->IOC_State.Send();
 				break;
+//______________________________________________________________________________________							
 			case idIOC_SprayParm:
 				ioc->spray.AirLevel		= std::min(10,(int)rx->Data[0]);
 				ioc->spray.WaterLevel	= std::min(10,(int)rx->Data[1]);
@@ -288,6 +236,13 @@ void	_CAN::pollRx() {
 		timeout=0;
 		ioc->SetError(_energyMissing);	
 	}
+//______________________________________________________________________________________
+	if(remote) {
+		CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
+		tx.DLC=_buffer_pull(remote->io->tx,tx.Data,8);
+		if(tx.DLC)
+			Send(&tx);
+		}
 }
 /*******************************************************************************
 * Function Name  : CAN_Initialize

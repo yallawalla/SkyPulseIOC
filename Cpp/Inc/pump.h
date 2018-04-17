@@ -14,7 +14,7 @@ extern DAC_HandleTypeDef hdac;
 class	_PUMP : public _TERM, public _ADC {
 	private:
 		int 		fpl,fph,ftl,fth;
-		int			idx,mode,timeout;
+		int			idx,mode,timeout,__pumpTacho,__flowTacho;
 		bool		Enabled;
 		int			flow, tacho_limit,curr_limit, flow_limit;
 

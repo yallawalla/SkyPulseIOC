@@ -13,7 +13,7 @@ extern TIM_HandleTypeDef htim10;
 class	_FAN : public _TERM, public _ADC {
 	private:
 		int fpl,fph,ftl,fth;
-		int	idx,timeout,fan_limit;
+		int	idx,timeout,fan_limit,__fanTacho;
 	public:
 		_FAN();
 		void		LoadSettings(FIL *);

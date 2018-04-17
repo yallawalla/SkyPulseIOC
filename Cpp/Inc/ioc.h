@@ -115,7 +115,7 @@ class _IOC : public _ADC {
 	public:
 		static _IOC			*parent;
 		_IOC();
-		_err 						error_mask;
+		_err 						error_mask,warn_mask;
 		_dbg						debug;
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
@@ -134,5 +134,9 @@ class _IOC : public _ADC {
 		static void	*pollStatus(void *);
 		void SetState(_State);
 		void SetError(_err);
+
+		static void	taskRx(_IOC *me) {
+			me->can.pollRx(me);
+		}
 };
 #endif

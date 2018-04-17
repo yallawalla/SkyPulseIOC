@@ -151,7 +151,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>pump_drive</ItemText>
+          <ItemText>flowTacho-__flowTacho</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -236,6 +236,14 @@
         <Entry>
           <Name>System Viewer\TIM10</Name>
           <WinId>35902</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\TIM3</Name>
+          <WinId>35901</WinId>
+        </Entry>
+        <Entry>
+          <Name>System Viewer\TIM9</Name>
+          <WinId>35900</WinId>
         </Entry>
       </SystemViewers>
       <DebugDescription>

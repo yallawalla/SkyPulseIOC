@@ -146,15 +146,16 @@ int		e=_NOERR;
 				pump_drive =0;
 			
 			if(__time__ > timeout) {
-				if(pumpTacho <= tacho_limit)
+				if(tacho_limit && (pumpTacho-__pumpTacho) <= tacho_limit)
 					e |= _pumpTacho;
-				if(fval.Ipump > curr_limit)
+				if(curr_limit && fval.Ipump > curr_limit)
 					e |= _pumpCurrent;
-				if(flowTacho <= flow_limit) {
+				if(flow_limit && (flowTacho-__flowTacho) <= flow_limit)
 					e |= _flowTacho;
-				}
+				
 				timeout=__time__+100;
-				pumpTacho=flowTacho=0;
+				__pumpTacho=pumpTacho;
+				__flowTacho=flowTacho;
 			} 	
 			return (_err)e;
 }

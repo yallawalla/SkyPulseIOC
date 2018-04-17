@@ -17,9 +17,8 @@ _IOC*	_IOC::parent			= NULL;
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 	
 	SetState(_STANDBY);	
-	error_mask = _sprayInPressure | _sprayNotReady;
+	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 	
-	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	
 	FIL f;
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
@@ -30,6 +29,10 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 		f_close(&f);
 	}	else
 		_print("... error settings file");
+	
+
+	_proc_add((void *)pollStatus,this,(char *)"error task",1);
+	_proc_add((void *)taskRx,this,(char *)"can rx",0);
 }
 /*******************************************************************************
 * Function Name	:
@@ -62,27 +65,31 @@ _IOC *me=static_cast<_IOC *>(v);
 *******************************************************************************/
 void	_IOC::SetState(_State s) {
 			switch(s) {
-					case	_STANDBY:
-						IOC_State.State = _STANDBY;
+				case	_STANDBY:
+					if(IOC_State.State == _ERROR)
 						IOC_State.Error = _NOERR;
-						//Submit("@standby.led");
-						_SYS_SHG_ENABLE;
-						break;
-					case	_READY:
-							IOC_State.State = _READY;
-							//Submit("@ready.led");
-						break;
-					case	_ACTIVE:
-							IOC_State.State = _ACTIVE;
-							//Submit("@active.led");
-						break;
-					case	_ERROR:
-						IOC_State.State = _ERROR;
-						//Submit("@error.led");
-						_SYS_SHG_DISABLE;
-						break;
-					default:
-						break;
+					IOC_State.State = _STANDBY;
+					pump.Enable();
+//					Submit("@standby.led");
+					_SYS_SHG_ENABLE;
+					break;
+				case	_READY:
+					IOC_State.State = _READY;
+					pump.Enable();
+//					Submit("@ready.led");
+					break;
+				case	_ACTIVE:
+					IOC_State.State = _ACTIVE;
+					pump.Enable();
+//					Submit("@active.led");
+					break;
+				case	_ERROR:
+					IOC_State.State = _ERROR;
+//					Submit("@error.led");
+					_SYS_SHG_DISABLE;
+					break;
+				default:
+					break;
 				}
 }
 /*******************************************************************************
@@ -91,34 +98,35 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::SetError(_err e) {
+void	_IOC::SetError(_err err) {
 
-int		ee = (e ^ IOC_State.Error) & e & ~error_mask;
+int		w = (err ^ IOC_State.Error) & err & warn_mask;
+int		e = (err ^ IOC_State.Error) & err & ~error_mask;
+			if(__time__ > 3000) {
+				if(e) {
+					_SYS_SHG_DISABLE;
+					if(e & (_pumpCurrent | _flowTacho))
+						pump.Disable();
+//					if(IOC_State.State != _ERROR)
+//						Submit("@error.led");
+					IOC_State.State = _ERROR;
+				}
+				if(e | w) {
+					IOC_State.Error = (_err)(IOC_State.Error | e | w );
+					IOC_State.Send();
+				}
 
-			if(_SYS_SHG_ENABLED)
-				__GREEN1(20);
-			else
-				__RED1(20);
-			
-			if(ee && __time__ > 3000) {
-				_SYS_SHG_DISABLE;
-//				if(IOC_State.State != _ERROR)
-//					Submit("@error.led");
-				IOC_State.Error = (_err)(IOC_State.Error | ee);
-				IOC_State.State = _ERROR;
-				IOC_State.Send();
-			} 
+				if(_SYS_SHG_ENABLED)
+					__GREEN2(200);
+				else
+					__RED2(200);
 
-//int		ww=(e ^ IOC_State.Error) & warn_mask;
-//			if(ww && __time__ > 3000) {
-//				IOC_State.Error = (_Error)(IOC_State.Error ^ ww);
-//				IOC_State.Send();
-//			} 
-			
-
-			for(int n=0; e && debug & (1<<DBG_ERR); e = (_err)(e>>1), ++n)
-				if(e & (1<<0))
-					_print("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+				if(e && debug & (1<<DBG_ERR)) {
+					for(int n=0; n<32; ++n)
+						if(e & (1<<n))
+							printf("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+				} 	
+			}
 }
 /*******************************************************************************
 * Function Name	:

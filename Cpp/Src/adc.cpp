@@ -32,18 +32,6 @@ int		_ADC::Th2o() {
 * Return				: None
 *******************************************************************************/
 void	_ADC::adcFilter() {
-//		fval.T1					+= (val.T1					- fval.T1)/16;
-//		fval.T2					+= (val.T2					- fval.T2)/16;
-//		fval.V5					+= (val.V5					- fval.V5)/16;
-//		fval.V12				+= (val.V12					- fval.V12)/16;
-//		fval.V24				+= (val.V24					- fval.V24)/16;
-//		fval.cooler			+= (val.cooler			- fval.cooler)/16;
-//		fval.bottle			+= (val.bottle			- fval.bottle)/16;
-//		fval.compressor	+= (val.compressor	- fval.compressor)/16;
-//		fval.air				+= (val.air					- fval.air)/16;
-//		fval.Ipump			+= (val.Ipump				- fval.Ipump)/16;
-//		fval.diode1			+= (val.diode1			- fval.diode1)/16;
-//		fval.diode2			+= (val.diode2			- fval.diode2)/16;
 			memset(&fval,0,sizeof(fval));
 			for(int i=0; i<sizeof(val)/sizeof(adc); ++i) {
 				fval.T1					+= val[i].T1;

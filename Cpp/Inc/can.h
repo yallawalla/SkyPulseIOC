@@ -23,16 +23,9 @@ public:
 	virtual FRESULT	Decode(char *);
 
 	_io		*io,*ioFsw;	
-	void	pollRx(void),pollTx(void),
+	void	pollRx(void *),
 				canFilterCfg(int, int),
 				Send(CanTxMsgTypeDef *);	
 	int		SendRemote(int);
-				
-	static void	taskRx(_CAN *me) {
-		me->pollRx();
-	}
-	static void	taskTx(_CAN *me) {
-		me->pollTx();
-	}
 };
 #endif

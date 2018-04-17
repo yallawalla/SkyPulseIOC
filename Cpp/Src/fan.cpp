@@ -110,10 +110,10 @@ _err	_FAN::Status(void) {
 int		e=_NOERR;
 			fan_drive  =Rpm(__PWMRATE);
 			if(__time__ > timeout) {
-				if(fan_limit && fanTacho <= fan_limit)
+				if(fan_limit && (fanTacho-__fanTacho) <= fan_limit)
 					e |= _fanTacho;
 				timeout=__time__+100;
-				fanTacho=0;
+				__fanTacho=fanTacho;
 				}
 			return (_err)e;
 }

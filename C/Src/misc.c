@@ -110,12 +110,17 @@ _io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 * Return				:
 *******************************************************************************/
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
-		pumpTacho++;
-	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1)
-		fanTacho++;
+	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1) {
+		if(pumpTacho++ % 50 == 0)
+			__BLUE1(50);
+	}
+	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1) {
+		if(fanTacho++ % 50 == 0)
+			__YELLOW1(50);
+	}
 	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2)
-		flowTacho++;
+		if(flowTacho++ % 200 == 0)
+			__GREEN1(50);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -124,8 +129,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 * Return				:
 *******************************************************************************/
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(canBuffer)
-		_buffer_push(canBuffer->rx,hcan->pRxMsg,sizeof(CanRxMsgTypeDef));
+	_buffer_push(canBuffer->rx,hcan->pRxMsg,sizeof(CanRxMsgTypeDef));
 	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 /*******************************************************************************
@@ -135,9 +139,8 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
 * Return				:
 *******************************************************************************/
 void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(hcan->State == HAL_CAN_STATE_READY)
-		if(_buffer_pull(canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
-			HAL_CAN_Transmit_IT(hcan);
+	if(_buffer_pull(canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
+		HAL_CAN_Transmit_IT(hcan);
 }
 /*******************************************************************************
 * Function Name	: 

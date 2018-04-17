@@ -67,10 +67,6 @@
 #define FSW2_GPIO_Port GPIOE
 #define FSW3_Pin GPIO_PIN_3
 #define FSW3_GPIO_Port GPIOE
-#define FAN_TACHO1_Pin GPIO_PIN_5
-#define FAN_TACHO1_GPIO_Port GPIOE
-#define FAN_TACHO2_Pin GPIO_PIN_6
-#define FAN_TACHO2_GPIO_Port GPIOE
 #define Psense0_Pin GPIO_PIN_0
 #define Psense0_GPIO_Port GPIOC
 #define Psense1_Pin GPIO_PIN_1
