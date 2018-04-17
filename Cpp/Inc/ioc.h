@@ -71,9 +71,7 @@ typedef __packed struct _IOC_State {
 	_err	Error;	
 	_IOC_State() : State(_STANDBY),Error(_NOERR)	{}
 	void	Send() {
-		CanTxMsgTypeDef	m={idIOC_State_Ack,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_State),0,0,0,0,0,0,0,0};
-		memcpy(m.Data,(const void *)&State,sizeof(_IOC_State));
-		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
+		_CAN::Send(idIOC_State_Ack,(void *)&State,sizeof(_IOC_State));
 	}
 } IOC_State;
 //_____________________________________________________________________
@@ -81,9 +79,7 @@ typedef __packed struct _IOC_FootAck {
 	_Footsw State;
 	_IOC_FootAck() : State(_OFF)	{}	
 	void	Send() {
-		CanTxMsgTypeDef	m={idIOC_FootAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_FootAck),0,0,0,0,0,0,0,0};
-		memcpy(m.Data,(const void *)&State,sizeof(_IOC_FootAck));
-		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
+		_CAN::Send(idIOC_FootAck,(void *)&State,sizeof(_IOC_FootAck));
 	}
 } IOC_FootAck;
 //_____________________________________________________________________
@@ -91,9 +87,7 @@ typedef __packed struct _IOC_Aux{
 	short Temp;
 	_IOC_Aux() : Temp(0)	{}	
 	void	Send() {
-		CanTxMsgTypeDef	m={idIOC_AuxAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_Aux),0,0,0,0,0,0,0,0};
-		memcpy(m.Data,(const void *)&Temp,sizeof(_IOC_Aux));
-		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
+		_CAN::Send(idIOC_AuxAck,(void *)&Temp,sizeof(_IOC_Aux));
 	}
 } IOC_Aux;
 //_____________________________________________________________________
@@ -101,9 +95,7 @@ typedef __packed struct _IOC_SprayAck {
 	_Spray	Status;
 	_IOC_SprayAck() : Status(_SPRAY_NOT_READY)	{}	
 	void	Send() {
-		CanTxMsgTypeDef	m={idIOC_SprayAck,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_SprayAck),0,0,0,0,0,0,0,0};
-		memcpy(m.Data,(const void *)&Status,sizeof(_IOC_SprayAck));
-		_buffer_push(canBuffer->tx,&m,sizeof(CanTxMsgTypeDef));
+		_CAN::Send(idIOC_SprayAck,(void *)&Status,sizeof(_IOC_SprayAck));
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
@@ -131,10 +123,10 @@ class _IOC : public _ADC {
 
 		~_IOC();
 
-		static void	*pollStatus(void *);
 		void SetState(_State);
 		void SetError(_err);
 
+		static void	*pollStatus(void *);
 		static void	taskRx(_IOC *me) {
 			me->can.pollRx(me);
 		}

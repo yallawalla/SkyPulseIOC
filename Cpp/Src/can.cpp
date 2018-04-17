@@ -1,4 +1,5 @@
 #include	"ioc.h"
+CAN_HandleTypeDef *_CAN::hcan;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -19,6 +20,30 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canFilterCfg(idEC20_req,	0x780);
 	canFilterCfg(idEM_ack,		0x7ff);
 	canFilterCfg(idBOOT,			0x7ff);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void _CAN::Send(CanTxMsgTypeDef *msg) {
+	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
+	HAL_CAN_TxCpltCallback(hcan);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	_CAN::Send(int id, void *data, int len) {
+	CanTxMsgTypeDef	msg={0,0,CAN_ID_STD,CAN_RTR_DATA,sizeof(_IOC_State),0,0,0,0,0,0,0,0};
+	msg.StdId=id;
+	msg.DLC=len;
+	memcpy(msg.Data,data,len);
+	_buffer_push(canBuffer->tx,&msg,sizeof(CanTxMsgTypeDef));
+	HAL_CAN_TxCpltCallback(hcan);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -132,19 +157,6 @@ FRESULT _CAN::Decode(char *c) {
 				return FR_INVALID_PARAMETER;
 	}
 	return FR_OK;
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-void _CAN::Send(CanTxMsgTypeDef *msg) {
-	if(_buffer_count(canBuffer->tx) == 0)
-		*hcan->pTxMsg=*msg;
-	else
-		_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
-	HAL_CAN_Transmit_IT(hcan);
 }
 /*******************************************************************************
 * Function Name	: 

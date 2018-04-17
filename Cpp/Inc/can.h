@@ -13,7 +13,7 @@
 class _CAN : public _TERM {
 private:
 	int		filter_count,timeout;
-	CAN_HandleTypeDef *hcan;
+	static CAN_HandleTypeDef *hcan;
 	_CLI	*remote;
 
 public:
@@ -27,5 +27,6 @@ public:
 				canFilterCfg(int, int),
 				Send(CanTxMsgTypeDef *);	
 	int		SendRemote(int);
+	static void	Send(int, void *, int);
 };
 #endif
