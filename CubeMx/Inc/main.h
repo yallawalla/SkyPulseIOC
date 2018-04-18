@@ -62,6 +62,9 @@
 #define __PWMRATE 2000
 #define __VALVES 4
 #define __LEDS 80
+#define __TH 75
+#define __TL 29
+#define __TP 104
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE

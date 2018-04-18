@@ -58,28 +58,6 @@ void	_PUMP::SaveSettings(FIL *f) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-void	_PUMP::Newline(void) {
-			_print("\r:pump      %5d%c,",Rpm(100),'%');
-			_printdec(Th2o()/10,10);_print("'C, ");
-			if(mode & (1<<PUMP_FLOW))
-				_printdec(flow/2200,10);
-			else
-				_printdec(10*(fval.cooler-offset.cooler)/gain.cooler,10);
-			if(idx>0) {
-				int i=fval.Ipump*33/4096.0/2.1/16;
-				_print("   %2d%c-%2d%c,%2d'C-%2d'C, ",fpl,'%',fph,'%',ftl,fth);
-				_printdec(i,10);		
-				_print(",%dmA",fval.Ipump/(int)(4.096*2.1*16/3.3));
-			}
-			for(int i=4*(5-idx)+6;idx && i--;_print("\b"));
-}
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
 int		_PUMP::Fkey(int t) {
 			switch(t) {
 					case __f5:
@@ -96,6 +74,9 @@ int		_PUMP::Fkey(int t) {
 					break;
 					case __Right:
 						Increment(0,1);
+					break;
+					case __CtrlR:
+					Increment(0,0);
 					break;
 				}
 			return EOF;
@@ -154,6 +135,7 @@ int		e=_NOERR;
 					e |= _flowTacho;
 				
 				timeout=__time__+100;
+				flow=(flowTacho-__flowTacho)*600;
 				__pumpTacho=pumpTacho;
 				__flowTacho=flowTacho;
 			} 	
@@ -167,7 +149,7 @@ int		e=_NOERR;
 	*/
 /*******************************************************************************/
 void 	_PUMP::Increment(int a, int b)	{
-			idx= std::min(std::max(idx+b,0),4);
+			idx= std::min(std::max(idx+b,0),5);
 			switch(idx) {
 				case 1:
 					fpl= std::min(std::max(fpl+a,5),fph);
@@ -183,6 +165,27 @@ void 	_PUMP::Increment(int a, int b)	{
 					break;
 			}
 			Newline();
+			Repeat(200,__CtrlR);
+}
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+void	_PUMP::Newline(void) {
+int		k, i=fval.Ipump*3300/4096.0/2.1/16;
+			if(mode & (1<<PUMP_FLOW))
+				k=flow/2200;
+			else
+				k=(fval.cooler-offset.cooler)/gain.cooler;
+			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
+			if(idx>0) {
+				_print("   %2d%c-%2d%c,%2d'-%2d',%d.%03dA",fpl,'%',fph,'%',ftl,fth,i/1000,i%1000);
+				for(int i=4*(6-idx)+2;idx && i--;_print("\b")) {}
+			} else
+				_print("\b");
 }
 /**
 * @}

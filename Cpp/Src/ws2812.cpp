@@ -73,16 +73,16 @@ uint16_t	k,*p=led_drive;
 					HSV2RGB(*hsvL++, &rgbL);
 					HSV2RGB(*hsvR++, &rgbR);
 					for(k=0; k<8; ++k) {
-						(rgbL.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-						(rgbR.g & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbL.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+						(rgbR.g & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
 					for(k=0; k<8; ++k) {
-						(rgbL.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-						(rgbR.r & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbL.r & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+						(rgbR.r & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
 					for(k=0; k<8; ++k) {
-						(rgbL.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
-						(rgbR.b & (0x80>>k)) ? (*p++=53)	: (*p++=20);
+						(rgbL.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
+						(rgbR.b & (0x80>>k)) ? (*p++=__TH)	: (*p++=__TL);
 					}
 				}
 				__rearmDMA(p-led_drive+2);

@@ -28,6 +28,12 @@ void	_VALVE::Set(int i, int t) {
 			valve_drive[n]=i;
 			valve_timeout[n]=__time__+t;
 };
+/*******************************************************************************
+* Function Name				:
+* Description					: 
+* Output							:
+* Return							: None
+*******************************************************************************/
 _SPRAY::_SPRAY() {	
 			BottleOut=	new _VALVE(0,false);
 			BottleIn=		new _VALVE(1,true);
