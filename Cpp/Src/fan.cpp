@@ -55,20 +55,6 @@ void	_FAN::SaveSettings(FIL *f) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-void	_FAN::Newline(void) {
-			_print("\r:fan       %5d%c,",Rpm(100),'%');
-			_printdec(Th2o()/10,10);_print("'C");
-			if(idx>0)
-				_print("        %2d%c-%2d%c,%2d'C-%2d'C",fpl,'%',fph,'%',ftl,fth);		
-			for(int i=4*(5-idx)+1;idx && i--;_print("\b"));
-}
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
 int		_FAN::Fkey(int t) {
 			switch(t) {
 					case __f6:
@@ -141,6 +127,19 @@ void 	_FAN::Increment(int a, int b)	{
 					break;
 			}
 			Newline();
+}
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+void	_FAN::Newline(void) {
+			_print("\r:fan   %3d%c,%2d.%d'C",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10);
+			if(idx>0)
+				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);
+			for(int i=4*(4-idx)+3;idx && i--;_print("\b"));
 }
 /**
 * @}
