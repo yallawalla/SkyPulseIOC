@@ -7,6 +7,7 @@
 
 #include 	"stm32f4xx_hal.h"
 #include 	"io.h"
+#include 	"proc.h"
 #define 	FATFS_SECTOR	FLASH_SECTOR_6
 #define		FATFS_ADDRESS 0x08040000
 #define		PAGE_SIZE			0x20000

@@ -139,14 +139,17 @@ const string _IOC::ErrMsg[] = {
 	"12V supply",
 	"24V supply",
 	"spray input pressure",
+	
 	"cooler temperature",
 	"pump rate out of range",
 	"pump pressure out of range",
 	"pump current out of range",
+	
 	"fan rate out of range",
 	"emergency button pressed",
 	"handpiece crowbar fail",
 	"flow rate out of range",
+	
 	"energy report timeout",
 	"spray not ready",
 	"doorswitch crowbar fail"

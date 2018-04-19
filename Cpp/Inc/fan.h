@@ -13,7 +13,7 @@ extern TIM_HandleTypeDef htim10;
 class	_FAN : public _TERM, public _ADC {
 	private:
 		int fpl,fph,ftl,fth;
-		int	idx,timeout,fan_limit,__fanTacho;
+		int	idx,timeout,speed,tacho_limit,__fanTacho;
 	public:
 		_FAN();
 		void		LoadSettings(FIL *);
@@ -23,6 +23,7 @@ class	_FAN : public _TERM, public _ADC {
 		virtual int		Fkey(int);
 		void		Increment(int, int);
 		int			Rpm(int);
+		bool		Setup(void);
 		_err		Status(void);
 };
 

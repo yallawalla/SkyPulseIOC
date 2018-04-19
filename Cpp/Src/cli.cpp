@@ -120,15 +120,51 @@ int	_CLI::Fkey(int t) {
 		}
 		return EOF;
 }
+
+static FRESULT DecodePlus(char *c) {
+	_IOC	*ioc=_IOC::parent;
+	switch(*++c) {
+		case 'D':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->debug = (_dbg(ioc->debug | (1<<strtoul(++c,&c,10))));
+		
+	}
+	return FR_OK;
+}
+static FRESULT DecodeMinus(char *c) {
+	_IOC	*ioc=_IOC::parent;
+	switch(*++c) {
+		case 'D':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->debug = (_dbg(ioc->debug & ~(1<<strtoul(++c,&c,10))));
+		
+	}
+	return FR_OK;
+}
+static FRESULT DecodeInq(char *p) {
+	return FR_OK;
+}
+static FRESULT DecodeEq(char *p) {
+	return FR_OK;
+}
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
     using namespace std;
 FRESULT _CLI::Decode(char *p) {
-//	_IOC	*ioc=_IOC::parent;
+	_IOC	*ioc=_IOC::parent;
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
-		
+	switch(*p) {
+		case '+':
+			return DecodePlus(p);
+		case '-':
+			return DecodeMinus(p);
+		case '?':
+			return DecodeInq(p);
+		case '=':
+			return DecodeEq(p);
+	}		
 	while (p[i]) {
 		while(p[i] && p[i]==' ')
 			p[i++]=0;
@@ -427,13 +463,17 @@ FRESULT _CLI::Decode(char *p) {
 		}			
 		return FR_OK;
 		
+	} /*else if(!strncmp("+D",sc[0],2)) {
+		for(char *c=sc[1]; c && *c;)
+			ioc->debug = (_dbg(ioc->debug | (1<<strtoul(c,&c,10))));
 	} else if(!strncmp("-D",sc[0],2)) {
-	} else if(!strncmp("-D",sc[0],2)) {
+		for(char *c=sc[1]; c && *c;)
+			ioc->debug = (_dbg(ioc->debug | ~(1<<strtoul(c,&c,10))));
 	} else if(!strncmp("+E",sc[0],2)) {
 	} else if(!strncmp("-E",sc[0],2)) {
 	} else if(!strncmp("?P",sc[0],2)) {
 		_proc_list();
-	} else {
+	} */else {
 		if(n) {
 			for(i=0; i<n; ++i)
 				_print(" %s",sc[i]);

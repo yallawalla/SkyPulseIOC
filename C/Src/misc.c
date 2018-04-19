@@ -1,6 +1,4 @@
 #include	"stm32f4xx_hal.h"
-#include 	"io.h"
-#include 	"proc.h"
 #include 	"misc.h"
 #include 	"ff.h"
 #include 	"diskio.h"

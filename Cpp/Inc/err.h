@@ -34,9 +34,9 @@ inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<in
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)
 
-#define	_SYS_SHG_ENABLE		HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin, GPIO_PIN_SET)
-#define	_SYS_SHG_DISABLE	HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin, GPIO_PIN_RESET)
-#define	_SYS_SHG_ENABLED	HAL_GPIO_ReadPin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin)
+#define	_SYS_SHG_ENABLE		HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin, GPIO_PIN_RESET)
+#define	_SYS_SHG_DISABLE	HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin, GPIO_PIN_SET)
+#define	_SYS_SHG_ENABLED	(!HAL_GPIO_ReadPin(_SYS_SHG_GPIO_Port,_SYS_SHG_Pin))
 
 #define	_cwbBUTTON				HAL_GPIO_ReadPin(cwbBUTTON_GPIO_Port,cwbBUTTON_Pin)
 #define	_cwbDOOR					HAL_GPIO_ReadPin(cwbDOOR_GPIO_Port,cwbDOOR_Pin)

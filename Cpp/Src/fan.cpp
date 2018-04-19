@@ -23,7 +23,7 @@ _FAN::_FAN()  {
 			ftl=25; fth=40; fpl=20; fph=95;
 			offset.cooler=12500;
 			gain.cooler=13300;
-			idx=fan_limit=0;
+			idx=speed=tacho_limit=0;
 			timeout=__time__ + _FAN_ERR_DELAY;
 }
 /*******************************************************************************/
@@ -36,7 +36,7 @@ _FAN::_FAN()  {
 void	_FAN::LoadSettings(FIL *f) {
 char	c[128];
 			f_gets(c,sizeof(c),f);
-			sscanf(c,"%d,%d,%d,%d",&fpl,&fph,&ftl,&fth);
+			sscanf(c,"%d,%d,%d,%d,%d",&fpl,&fph,&ftl,&fth,&tacho_limit);
 }
 /*******************************************************************************/
 /**
@@ -46,7 +46,7 @@ char	c[128];
 	*/
 /*******************************************************************************/
 void	_FAN::SaveSettings(FIL *f) {
-			f_printf(f,"%5d,%5d,%5d,%5d                 /.. pump\r\n",fpl,fph,ftl,fth);
+			f_printf(f,"%5d,%5d,%5d,%5d,%5d            /.. fan\r\n",fpl,fph,ftl,fth,tacho_limit);
 }
 /*******************************************************************************/
 /**
@@ -72,6 +72,12 @@ int		_FAN::Fkey(int t) {
 					case __Right:
 						Increment(0,1);
 					break;
+					case __CtrlR:
+					Increment(0,0);
+					break;
+					case __Delete:
+						Setup();
+					break;
 				}
 			return EOF;
 }
@@ -94,11 +100,17 @@ int		_FAN::Rpm(int fsc) {
 /*******************************************************************************/
 _err	_FAN::Status(void) {	
 int		e=_NOERR;
-			fan_drive  =Rpm(__PWMRATE);
+			if(fan_drive < Rpm(__PWMRATE))
+				++fan_drive;
+			else
+				--fan_drive;
+
 			if(__time__ > timeout) {
-				if(fan_limit && (fanTacho-__fanTacho) <= fan_limit)
+				if(tacho_limit && (fanTacho-__fanTacho) <= tacho_limit)
 					e |= _fanTacho;
 				timeout=__time__+100;
+				
+				speed=fanTacho-__fanTacho;
 				__fanTacho=fanTacho;
 				}
 			return (_err)e;
@@ -140,8 +152,29 @@ void	_FAN::Newline(void) {
 			if(idx>0)
 				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);
 			for(int i=4*(4-idx)+3;idx && i--;_print("\b"));
+			Repeat(200,__CtrlR);
 }
+/*******************************************************************************/
 /**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+bool	_FAN::Setup(void) {
+			if(tacho_limit) {
+				_print("\r\nfan errors disabled ...\r\n");
+				tacho_limit=0;
+			} else {
+				int 	i=fph;
+				fph=fpl;
+				_wait(3000);
+				tacho_limit=speed/2;
+				fph=i;
+				_print("\r\nfan errors enabled ...\r\n");
+			}
+			return true;
+}/**
 * @}
 */ 
 
