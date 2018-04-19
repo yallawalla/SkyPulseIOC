@@ -120,31 +120,83 @@ int	_CLI::Fkey(int t) {
 		}
 		return EOF;
 }
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
 
 static FRESULT DecodePlus(char *c) {
 	_IOC	*ioc=_IOC::parent;
 	switch(*++c) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->debug = (_dbg(ioc->debug | (1<<strtoul(++c,&c,10))));
-		
+			ioc->debug = (_dbg)(ioc->debug | (1<<strtoul(++c,&c,10)));
+		break;
+		case 'E':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->error_mask = (_err)(ioc->error_mask | (1<<strtoul(++c,&c,10)));
+		break;
+		case 'W':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->warn_mask = (_err)(ioc->warn_mask | (1<<strtoul(++c,&c,10)));
+		break;
+		default:
+			return FR_INVALID_NAME;
 	}
 	return FR_OK;
 }
+//_________________________________________________________________________________
 static FRESULT DecodeMinus(char *c) {
 	_IOC	*ioc=_IOC::parent;
 	switch(*++c) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->debug = (_dbg(ioc->debug & ~(1<<strtoul(++c,&c,10))));
-		
+			ioc->debug = (_dbg)(ioc->debug & ~(1<<strtoul(++c,&c,10)));
+		break;
+		case 'E':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
+		break;
+		case 'W':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->warn_mask = (_err)(ioc->warn_mask & ~(1<<strtoul(++c,&c,10)));
+		break;
+		default:
+			return FR_INVALID_NAME;
 	}
 	return FR_OK;
 }
-static FRESULT DecodeInq(char *p) {
+//_________________________________________________________________________________
+static FRESULT DecodeEq(char *c) {
+	_IOC	*ioc=_IOC::parent;
+	switch(*++c) {
+		case 'E':
+		for(c=strchr(c,' '); c && *c;)
+			ioc->SetError((_err)(1<<strtoul(++c,&c,10)));
+		break;
+		default:
+			return FR_INVALID_NAME;
+	}
 	return FR_OK;
 }
-static FRESULT DecodeEq(char *p) {
+//_________________________________________________________________________________
+static FRESULT DecodeInq(char *c) {
+	_IOC	*ioc=_IOC::parent;
+	switch(*++c) {
+		case 'E':
+			for(int n=0; n<32; ++n)
+				if(ioc->IOC_State.Error & ~ioc->error_mask & (1<<n))
+					printf("\r\nerror   %04d: %s",n, ioc->ErrMsg[n].c_str());	
+			break;	
+		case 'W':
+			for(int n=0; n<32; ++n)
+				if(ioc->IOC_State.Error & ioc->warn_mask & (1<<n))
+					printf("\r\nwarning %04d: %s",n, ioc->ErrMsg[n].c_str());	
+			break;	
+	} 	
 	return FR_OK;
 }
 //_________________________________________________________________________________
@@ -152,7 +204,6 @@ typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
     using namespace std;
 FRESULT _CLI::Decode(char *p) {
-	_IOC	*ioc=_IOC::parent;
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
 	switch(*p) {

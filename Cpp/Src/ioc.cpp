@@ -121,10 +121,15 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 				else
 					__RED2(200);
 
-				if(e && debug & (1<<DBG_ERR)) {
+				if(e && (debug & DBG_ERR)) {
 					for(int n=0; n<32; ++n)
 						if(e & (1<<n))
-							printf("\r\nerror %03d: %s",n, ErrMsg[n].c_str());	
+							printf("\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
+				} 	
+				if(w && (debug & DBG_ERR)) {
+					for(int n=0; n<32; ++n)
+						if(w & (1<<n))
+							printf("\r\nwarning %04d: %s",n, ErrMsg[n].c_str());	
 				} 	
 			}
 }

@@ -101,7 +101,6 @@ typedef __packed struct _IOC_SprayAck {
 //_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
-		static const string	ErrMsg[];
 		int key,temp;
 	
 	public:
@@ -126,6 +125,7 @@ class _IOC : public _ADC {
 		void SetState(_State);
 		void SetError(_err);
 
+		static const string	ErrMsg[];
 		static void	*pollStatus(void *);
 		static void	taskRx(_IOC *me) {
 			me->can.pollRx(me);
