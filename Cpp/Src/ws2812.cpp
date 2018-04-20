@@ -137,9 +137,9 @@ ws2812	*w=ws;
 							color.v=0;
 						case MOD_ON:
 							for(j=k=0; j<w->size;++j) {
-								w->hsvp[j].h = (color.h + (int)(w->mod.h * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size))) % 360;
-								w->hsvp[j].s = color.s + w->mod.s * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size);
-								w->hsvp[j].v = color.v + w->mod.v * cos(2.0 * _PI * (double)(j+w->shift) / (double)w->size);
+								w->hsvp[j].h = (color.h + (int)(w->mod.h * cos(2.0 * _PI * (float)(j+w->shift) / (float)w->size))) % 360;
+								w->hsvp[j].s = color.s + w->mod.s * cos(2.0 * _PI * (float)(j+w->shift) / (float)w->size);
+								w->hsvp[j].v = color.v + w->mod.v * cos(2.0 * _PI * (float)(j+w->shift) / (float)w->size);
 							}
 							k=w->size;
 						break;

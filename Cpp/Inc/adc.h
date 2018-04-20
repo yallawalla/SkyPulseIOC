@@ -18,7 +18,7 @@
 #define	_V5to16X					(int)(5.0/_UREF*_Rdiv(820.0,820.0)*65535.0+0.5)			
 #define	_V12to16X					(int)(12.0/_UREF*_Rdiv(820.0,3300.0)*65535.0+0.5)			
 #define	_V24to16X					(int)(24.0/_UREF*_Rdiv(820.0,6800.0)*65535.0+0.5)			
-#define	_BAR(a) ((int)((a)*16384.0))
+#define	_BAR(a)					 ((int)((a)*16384.0f))
 
 __inline 
 int			__fit(int to, const int t[], const int ft[]) {

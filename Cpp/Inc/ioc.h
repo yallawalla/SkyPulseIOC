@@ -108,6 +108,7 @@ class _IOC : public _ADC {
 		_IOC();
 		_err 						error_mask,warn_mask;
 		_dbg						debug;
+		_io							*dbgio;
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;

@@ -45,14 +45,14 @@ _SPRAY::_SPRAY() {
 			Air->Close();
 			Water->Close();
 		
-			offset.air=offset.bottle=offset.compressor=	_BAR(1);
-			gain.air=																		_BAR(2.5);
-			gain.bottle=																_BAR(0.5);
-			gain.compressor=														_BAR(1);
-			waterGain=																	_BAR(1.2);
+			offset.air=offset.bottle=offset.compressor=	_BAR(1.0f);
+			gain.air=																		_BAR(2.0f);
+			gain.bottle=																_BAR(0.5f);
+			gain.compressor=														_BAR(1.0f);
+			waterGain=																	_BAR(1.2f);
 			Air_P=Bottle_P=0;
 			AirLevel=WaterLevel=0;
-			Bottle_ref=Air_ref=													_BAR(1);
+			Bottle_ref=Air_ref=													_BAR(1.0f);
 
 			mode.Simulator=false;
 			mode.Vibrate=false;
@@ -145,28 +145,28 @@ _err	_err=_NOERR;
 //_________________________________________________________________________________
 void	_SPRAY::Newline(void) {
 			if(mode.Simulator) {
-				printf("\r:spray %3d,%5d,%5.2lf,%5.2lf,%5.2lf",
+				printf("\r:spray %3d,%5d,%5.2f,%5.2f,%5.2f",
 					AirLevel,WaterLevel,
-						(double)(fval.air-offset.air)/_BAR(1),
-							(double)(fval.bottle-offset.bottle)/_BAR(1),
-								Pout-1.0);
+						(float)(fval.air-offset.air)/_BAR(1),
+							(float)(fval.bottle-offset.bottle)/_BAR(1),
+								Pout-1.0f);
 			} else {
-				printf("\r:spray %3d,%5d,%5.2lf,%5.2lf,%5.2lf",
+				printf("\r:spray %3d,%5d,%5.2f,%5.2f,%5.2f",
 					AirLevel,WaterLevel,
-						(double)(fval.air-offset.air)/_BAR(1),
-							(double)(fval.bottle-offset.bottle)/_BAR(1),
-								(double)(fval.compressor-offset.compressor)/_BAR(1));
+						(float)(fval.air-offset.air)/_BAR(1),
+							(float)(fval.bottle-offset.bottle)/_BAR(1),
+								(float)(fval.compressor-offset.compressor)/_BAR(1));
 			}
 			if(mode.Air) 
-				printf("   Air"); 
+				_print("   Air"); 
 			else 
-				printf("   ---"); 
+				_print("   ---"); 
 			if(mode.Water) 
-				printf(" Water"); 
+				_print(" Water"); 
 			else 
-				printf("   ---"); 
+				_print("   ---"); 
 			
-			for(int i=1+6*(6-idx); i--; printf("\b"));		
+			for(int i=1+6*(6-idx); i--; _print("\b"));		
 			Repeat(200,__CtrlR);
 }
 /*******************************************************************************/
@@ -197,10 +197,10 @@ int		_SPRAY::Fkey(int t) {
 					Increment(0,0);
 					break;
 					case __PageUp:
-						waterGain=std::min(waterGain+1000,_BAR(2.5));
+						waterGain=std::min(waterGain+1000,_BAR(3.0f));
 						break;
 					case __PageDown:
-						waterGain=std::max(waterGain-1000,_BAR(0.5));
+						waterGain=std::max(waterGain-1000,_BAR(0.5f));
 						break;					
 					case __CtrlV:
 						if(mode.Vibrate)
@@ -208,17 +208,17 @@ int		_SPRAY::Fkey(int t) {
 						else
 							mode.Vibrate=true;
 						break;
-					case __CtrlI:
+					case __Delete:
 						_ADC::offset.air = _ADC::fval.air;
 						_ADC::offset.bottle = _ADC::fval.bottle;
-						printf("\r\n: air/water offset.... \r\n:");
+						_print("\r\n: air/water offset.... \r\n:");
 						break;
 						case __CtrlS:
 							HAL_ADC_DeInit(&hadc1);
 							lcd=new _LCD;
-							lcd->Add(&_ADC::fval.compressor,_BAR(1.0),_BAR(0.02), LCD_COLOR_YELLOW);
-							lcd->Add(&_ADC::fval.bottle,_BAR(1.0),_BAR(0.02), LCD_COLOR_GREY);
-							lcd->Add(&_ADC::fval.air,_BAR(1.0),_BAR(0.02), LCD_COLOR_MAGENTA);
+							lcd->Add(&_ADC::fval.compressor,_BAR(1.0f),_BAR(0.02f), LCD_COLOR_YELLOW);
+							lcd->Add(&_ADC::fval.bottle,_BAR(1.0f),_BAR(0.02f), LCD_COLOR_GREY);
+							lcd->Add(&_ADC::fval.air,_BAR(1.0f),_BAR(0.02f), LCD_COLOR_MAGENTA);
 							mode.Simulator=true;
 						break;
 					}
@@ -271,11 +271,11 @@ void	_SPRAY::Increment(int a, int b) {
 						case 2:
 							break;
 				case 3:
-					gain.bottle		= std::min(std::max(_BAR(0.1),gain.bottle+100*a),_BAR(0.5));
+					gain.bottle		= std::min(std::max(_BAR(0.1f),gain.bottle+100*a),_BAR(0.5f));
 					break;
 				case 4:
 					if(mode.Simulator) {
-						Pout 				= std::min(std::max(0.5,Pout+(double)a/10.0),1.5);
+						Pout 				= std::min(std::max(0.5f,Pout+(float)a/10.0f),1.5f);
 						if(a) {
 							AirLevel = WaterLevel;
 							mode.Air = mode.Water = false;

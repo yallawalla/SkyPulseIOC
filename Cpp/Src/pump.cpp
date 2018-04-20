@@ -20,7 +20,7 @@
 	*/
 /*******************************************************************************/
 _PUMP::_PUMP()  {
-			ftl=25; fth=40; fpl=10; fph=50;
+			ftl=30; fth=40; fpl=20; fph=50;
 			offset.cooler=_BAR(1);
 			gain.cooler=_BAR(1);
 			idx=0;
@@ -181,7 +181,7 @@ void 	_PUMP::Increment(int a, int b)	{
 void	_PUMP::Newline(void) {
 int		k, i=fval.Ipump*3300/4096.0/2.1/16;
 			if(mode & (1<<PUMP_FLOW))
-				k=flow/(2200/600);
+				k=flow/(2200/300);
 			else
 				k=(fval.cooler-offset.cooler)/gain.cooler;
 			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);

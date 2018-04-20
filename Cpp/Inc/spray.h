@@ -63,7 +63,7 @@ class	_SPRAY : public _TERM, public _ADC {
 	
 	
 		bool		Simulator(void);
-		double	pComp,pBott,pNozz,Pin,Pout;
+		float		pComp,pBott,pNozz,Pin,Pout;
 };
 
 #endif

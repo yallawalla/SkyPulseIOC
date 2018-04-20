@@ -16,9 +16,11 @@ class _FAT {
 //_________________________________________________________________________________
 class _CLI : public _TERM, public _FAT {
 	private:
+		FRESULT	DecodePlus(char *),DecodeMinus(char *),DecodeInq(char *),DecodeEq(char *);
 		int			wcard(char *, char *);
 		int			find_recurse (char *, char *, int);
 		void		printRtc(void);
+
 	public:	
 		_io			*io;
 		virtual void		Newline(void);

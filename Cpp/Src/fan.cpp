@@ -20,7 +20,7 @@
 	*/
 /*******************************************************************************/
 _FAN::_FAN()  {
-			ftl=25; fth=40; fpl=20; fph=95;
+			ftl=30; fth=40; fpl=20; fph=95;
 			offset.cooler=12500;
 			gain.cooler=13300;
 			idx=speed=tacho_limit=0;
@@ -169,7 +169,7 @@ bool	_FAN::Setup(void) {
 				int 	i=fph;
 				fph=fpl;
 				_wait(3000);
-				tacho_limit=speed/2;
+				tacho_limit=speed-speed/3;
 				fph=i;
 				_print("\r\nfan errors enabled ...\r\n");
 			}

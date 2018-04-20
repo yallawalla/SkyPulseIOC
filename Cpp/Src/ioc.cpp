@@ -15,10 +15,9 @@ _IOC*	_IOC::parent			= NULL;
 * Return				:
 *******************************************************************************/
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
-	
 	SetState(_STANDBY);	
 	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
-	
+	dbgio=NULL;
 	
 	FIL f;
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
@@ -121,15 +120,16 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 				else
 					__RED2(200);
 
-				if(e && (debug & DBG_ERR)) {
+
+				if((e | w) && dbgio && (debug & DBG_ERR)) {
+					_io *temp=_stdio(dbgio);
 					for(int n=0; n<32; ++n)
 						if(e & (1<<n))
-							printf("\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
-				} 	
-				if(w && (debug & DBG_ERR)) {
+							_print("\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
 					for(int n=0; n<32; ++n)
 						if(w & (1<<n))
-							printf("\r\nwarning %04d: %s",n, ErrMsg[n].c_str());	
+							_print("\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
+					_stdio(temp);
 				} 	
 			}
 }
