@@ -108,7 +108,10 @@ void	*v=Parse();
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(FIL *f) {
-			return Parse(fgetc((FILE *)f));
+_io		*temp=_stdio(NULL);
+void	*v=Parse(fgetc((FILE *)f));
+			_stdio(temp);
+			return v;
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(void) {

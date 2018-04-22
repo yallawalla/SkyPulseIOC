@@ -69,22 +69,22 @@ void	_IOC::SetState(_State s) {
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-//					Submit("@standby.led");
+					com.Batch("standby.led");
 					_SYS_SHG_ENABLE;
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
 					pump.Enable();
-//					Submit("@ready.led");
+					com.Batch("ready.led");
 					break;
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-//					Submit("@active.led");
+					com.Batch("active.led");
 					break;
 				case	_ERROR:
 					IOC_State.State = _ERROR;
-//					Submit("@error.led");
+					com.Batch("error.led");
 					_SYS_SHG_DISABLE;
 					break;
 				default:
@@ -98,7 +98,6 @@ void	_IOC::SetState(_State s) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetError(_err err) {
-
 int		w = (err ^ IOC_State.Error) & err & warn_mask;
 int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 			if(__time__ > 3000) {
@@ -106,8 +105,8 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					_SYS_SHG_DISABLE;
 					if(e & (_pumpCurrent | _flowTacho))
 						pump.Disable();
-//					if(IOC_State.State != _ERROR)
-//						Submit("@error.led");
+					if(IOC_State.State != _ERROR)
+						com1.Batch("error.led");
 					IOC_State.State = _ERROR;
 				}
 				if(e | w) {

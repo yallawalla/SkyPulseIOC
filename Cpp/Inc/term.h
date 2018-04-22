@@ -16,7 +16,9 @@
 	__FSW_4		=((FSW3_Pin | FSW2_Pin 					 )	<<8)
 } __FOOT;
 	
-#define __FSW (((FSW0_GPIO_Port->IDR & FSW0_Pin) | (FSW2_GPIO_Port->IDR & FSW2_Pin) | (FSW3_GPIO_Port->IDR & FSW3_Pin))<<8)
+#define __FSW (((FSW0_GPIO_Port->IDR & FSW0_Pin) |  \
+					(FSW2_GPIO_Port->IDR & FSW2_Pin) | 				\
+						(FSW3_GPIO_Port->IDR & FSW3_Pin))<<8)
 /*******************************************************************************
 * Function Name	: 
 * Description		: 

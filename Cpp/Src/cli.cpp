@@ -488,18 +488,7 @@ FRESULT _CLI::Decode(char *p) {
 //		} else
 				return FR_NOT_READY;
 	} else if(!strncmp("@",sc[0],1)) {
-		FIL *f=new FIL;
-		if(f_open(f,++sc[0],FA_READ) == FR_OK) {
-			io->file=f;
-			Newline();
-			while(!f_eof(f))
-				Parse();
-//				_wait(2);z
-			f_close(f);
-			delete f;
-			io->file=NULL;
-			Newline();
-		}
+		Batch(++sc[0]);
 	} else if(!strncmp("=d",sc[0],2)) {
 		float k=0.0006250;
 		float fo=15e6/(12+56)/2;
@@ -536,6 +525,21 @@ FRESULT _CLI::Decode(char *p) {
 		}
 	}
 	return FR_OK;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+void _CLI::Batch(char *filename) {
+			FIL *f=new FIL;
+			if(f_open(f,filename,FA_READ) == FR_OK) {
+				while(!f_eof(f))
+					Parse(f);
+				f_close(f);	
+			}
+			delete f;
 }
 //_________________________________________________________________________________
 int	_CLI::wcard(char *t, char *s) {

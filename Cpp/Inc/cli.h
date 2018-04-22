@@ -53,6 +53,7 @@ class _CLI : public _TERM, public _FAT {
 			_proc_add((void *)CDC_Poll_FS,NULL,(char *)"Tx VCP",0);
 		};
 
+		void Batch(char *);
 		~_CLI(void)	{};
 };
 #endif
