@@ -49,7 +49,8 @@ typedef enum {
 	_STANDBY,
 	_READY,
 	_ACTIVE,
-	_ERROR		
+	_ERROR,	
+	_STARTUP
 } _State;
 
 typedef enum {

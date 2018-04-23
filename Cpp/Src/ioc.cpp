@@ -15,7 +15,7 @@ _IOC*	_IOC::parent			= NULL;
 * Return				:
 *******************************************************************************/
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
-	SetState(_STANDBY);	
+	SetState(_STARTUP);	
 	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 	dbgio=NULL;
 	
@@ -69,23 +69,26 @@ void	_IOC::SetState(_State s) {
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-					com.Batch("standby.led");
+					com1.Batch((char *)"standby.led");
 					_SYS_SHG_ENABLE;
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
 					pump.Enable();
-					com.Batch("ready.led");
+					com1.Batch((char *)"ready.led");
 					break;
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-					com.Batch("active.led");
+					com1.Batch((char *)"active.led");
 					break;
 				case	_ERROR:
 					IOC_State.State = _ERROR;
-					com.Batch("error.led");
+					com1.Batch((char *)"error.led");
 					_SYS_SHG_DISABLE;
+					break;
+				case	_STARTUP:
+					IOC_State.State = _STARTUP;
 					break;
 				default:
 					break;
@@ -106,7 +109,7 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					if(e & (_pumpCurrent | _flowTacho))
 						pump.Disable();
 					if(IOC_State.State != _ERROR)
-						com1.Batch("error.led");
+						com1.Batch((char *)"error.led");
 					IOC_State.State = _ERROR;
 				}
 				if(e | w) {
@@ -130,7 +133,11 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 							_print("\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
 					_stdio(temp);
 				} 	
+			} else	if(IOC_State.State == _STARTUP) {
+				SetState(_STANDBY);
+				com1.Batch((char *)"onoff.led");
 			}
+
 }
 /*******************************************************************************
 * Function Name	:

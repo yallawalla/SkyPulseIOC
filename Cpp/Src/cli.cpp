@@ -133,14 +133,13 @@ FRESULT _CLI::DecodePlus(char *c) {
 	_IOC	*ioc=_IOC::parent;
 	switch(*++c) {
 		case 'D':
-			
 		for(c=strchr(c,' '); c && *c;)
 			ioc->debug = (_dbg)(ioc->debug | (1<<strtoul(++c,&c,10)));
 		ioc->dbgio=io;
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->error_mask = (_err)(ioc->error_mask | (1<<strtoul(++c,&c,10)));
+			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
 		break;
 		case 'W':
 		for(c=strchr(c,' '); c && *c;)
@@ -162,7 +161,7 @@ FRESULT _CLI::DecodeMinus(char *c) {
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
+			ioc->error_mask = (_err)(ioc->error_mask | (1<<strtoul(++c,&c,10)));
 		break;
 		case 'W':
 		for(c=strchr(c,' '); c && *c;)

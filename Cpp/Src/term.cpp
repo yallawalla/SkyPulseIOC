@@ -50,7 +50,6 @@ bool	_TERM::Cmd(int c) {
 					break;
 
 				case __LF:
-					break;
 				case __CR:
 					*cmdp=0;
 					cmdp=cmdbuf;		
