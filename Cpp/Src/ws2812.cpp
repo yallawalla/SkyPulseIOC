@@ -519,6 +519,8 @@ int			_WS::Fkey(int t) {
 					case __Right:
 						Increment(0,1);
 					break;
+					default:
+						return t;
 				}
 			return EOF;
 }
@@ -530,6 +532,7 @@ int			_WS::Fkey(int t) {
 	*/ 
 /*******************************************************************************/
 FRESULT	_WS::Decode(char *c) {
+				if(!strncmp
 				if(strchr(c,'='))
 					return ColorSet(c);
 				if(strchr(c,'+'))

@@ -144,7 +144,21 @@ void 	*v=this;
 			}
 		return v;
 }
-
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+void _TERM::Batch(char *filename) {
+			FIL *f=new FIL;
+			if(f_open(f,filename,FA_READ) == FR_OK) {
+				while(!f_eof(f))
+					Parse(f);
+				f_close(f);	
+			}
+			delete f;
+}
 /*******************************************************************************
 * Function Name	:
 * Description		:

@@ -65,26 +65,26 @@ _IOC *me=static_cast<_IOC *>(v);
 void	_IOC::SetState(_State s) {
 			switch(s) {
 				case	_STANDBY:
-					if(IOC_State.State == _ERROR)
+					if(IOC_State.State == _ERROR || IOC_State.State == _STARTUP)
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-					com1.Batch((char *)"standby.led");
+					ws2812.Batch((char *)"standby.led");
 					_SYS_SHG_ENABLE;
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
 					pump.Enable();
-					com1.Batch((char *)"ready.led");
+					ws2812.Batch((char *)"ready.led");
 					break;
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-					com1.Batch((char *)"active.led");
+					ws2812.Batch((char *)"active.led");
 					break;
 				case	_ERROR:
 					IOC_State.State = _ERROR;
-					com1.Batch((char *)"error.led");
+					ws2812.Batch((char *)"error.led");
 					_SYS_SHG_DISABLE;
 					break;
 				case	_STARTUP:
@@ -109,7 +109,7 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					if(e & (_pumpCurrent | _flowTacho))
 						pump.Disable();
 					if(IOC_State.State != _ERROR)
-						com1.Batch((char *)"error.led");
+						ws2812.Batch((char *)"error.led");
 					IOC_State.State = _ERROR;
 				}
 				if(e | w) {
@@ -135,7 +135,7 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 				} 	
 			} else	if(IOC_State.State == _STARTUP) {
 				SetState(_STANDBY);
-				com1.Batch((char *)"onoff.led");
+//				com1.Batch((char *)"onoff.led");
 			}
 
 }

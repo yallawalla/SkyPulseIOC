@@ -525,21 +525,6 @@ FRESULT _CLI::Decode(char *p) {
 	}
 	return FR_OK;
 }
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-void _CLI::Batch(char *filename) {
-			FIL *f=new FIL;
-			if(f_open(f,filename,FA_READ) == FR_OK) {
-				while(!f_eof(f))
-					Parse(f);
-				f_close(f);	
-			}
-			delete f;
-}
 //_________________________________________________________________________________
 int	_CLI::wcard(char *t, char *s) {
 			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : !*t : wcard(t+1,s) || (*s && wcard(t,s+1));
