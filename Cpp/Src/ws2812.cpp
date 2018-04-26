@@ -42,9 +42,10 @@ int			k=0;
 					ws[i].hsvp=&HSVbuf[k];
 					k+= ws[i].size;	
 				}
-				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",100);
+				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
 				idx=idxled=0;
-				fbatch=new FIL();
+				__fbatch=new FIL();
+				fbatch=NULL;
 }
 /*******************************************************************************/
 /**
@@ -55,6 +56,7 @@ int			k=0;
 /*******************************************************************************/
 _WS::~_WS() {
 				_proc_remove((void *)proc_WS2812,this);
+				delete __fbatch;
 }
 /*******************************************************************************/
 /**
@@ -240,10 +242,12 @@ ws2812	*w=ws;
 
 				if(trg)
 					me->trigger();
-				else {
-						me->Parse(me->fbatch);
-						if(f_eof(me->fbatch))
-							f_close(me->fbatch);
+				else if(me->fbatch) {
+					me->Parse(me->fbatch);
+					if(f_eof(me->fbatch)) {
+						f_close(me->fbatch);
+						me->fbatch=NULL;
+					}
 				}
 				return NULL;
 }
@@ -257,9 +261,10 @@ ws2812	*w=ws;
 FRESULT	_WS::ColorOn(char *p) {
 char		*c=strchr(p,'+');
 				*c++=0;
+				while(*p==' ')	++p;
 				p=strtok(p,",");
 				while(p) {
-					if(!isdigit(*p) && !isspace(*p))
+					if(!isdigit(*p))
 						return FR_INVALID_PARAMETER;
 					switch(*c) {
 						case 0:
@@ -294,9 +299,10 @@ char		*c=strchr(p,'+');
 FRESULT	_WS::ColorOff(char *p) {
 char		*c=strchr(p,'-');
 				*c++=0;
+				while(*p==' ')	++p;
 				p=strtok(p,",");
 				while(p) {
-					if(!isdigit(*p) && !isspace(*p))
+					if(!isdigit(*p))
 						return FR_INVALID_PARAMETER;
 					switch(*c) {
 						case 0:
@@ -331,6 +337,7 @@ char		*c=strchr(p,'-');
 FRESULT	_WS::ColorSet(char *p) {
 char		*c=strchr(p,'=');
 				*c++=0;
+				while(*p==' ')	++p;
 				p=strtok(p,",");
 				switch(*p) {
 					case 't':
@@ -338,7 +345,7 @@ char		*c=strchr(p,'=');
 					break;
 					default:
 						while(p) {
-							if(!isdigit(*p) && !isspace(*p))
+							if(!isdigit(*p))
 								return FR_INVALID_PARAMETER;
 							int i=atoi(p);
 							if(sscanf(c,"%hu,%hhu,%hhu",&ws[i].color.h, &ws[i].color.s, &ws[i].color.v) != 3)
@@ -600,7 +607,10 @@ void		_WS::Increment(int a, int b) {
 * Return				:
 *******************************************************************************/
 FRESULT _WS::Batch(char *filename) {
-			return f_open(fbatch,filename,FA_READ);
+				if(fbatch)
+					return FR_TOO_MANY_OPEN_FILES;
+				fbatch=__fbatch; 
+				return f_open(fbatch,filename,FA_READ);
 }
 /**
 * @}

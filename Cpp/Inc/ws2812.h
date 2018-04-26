@@ -35,7 +35,7 @@ typedef	struct	{
 class	_WS : public _TERM {
 	private:
 		int			idx,idxled;
-		FIL			*fbatch;
+		FIL			*__fbatch, *fbatch;
 		void 		RGB2HSV( RGB, HSV *);
 		void		HSV2RGB( HSV, RGB *);
 		void		trigger(void);

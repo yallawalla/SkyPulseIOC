@@ -31,8 +31,8 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	_proc_add((void *)taskRx,this,(char *)"can rx",0);
-	SetState(_STANDBY);	
 	ws2812.Batch((char *)"onoff.led");
+	SetState(_STANDBY);	
 }
 /*******************************************************************************
 * Function Name	:
