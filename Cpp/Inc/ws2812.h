@@ -35,18 +35,21 @@ typedef	struct	{
 class	_WS : public _TERM {
 	private:
 		int			idx,idxled;
+		FIL			*fbatch;
 		void 		RGB2HSV( RGB, HSV *);
 		void		HSV2RGB( HSV, RGB *);
 		void		trigger(void);
+	
 		static 	ws2812 	ws[];
 		static	HSV	HSVbuf[];
 		static	uint8_t	modh, mods,modv,modt;
 	public:
 		_WS(void);
 		~_WS(void);
+		virtual	FRESULT	Batch(char *);
+		virtual	FRESULT	Decode(char *);
 		virtual void		Newline(void);
 		virtual int			Fkey(int);
-		virtual	FRESULT	Decode(char *);
 		void						Increment(int, int);
 		void						LoadSettings(FIL *);
 		void						SaveSettings(FIL *);

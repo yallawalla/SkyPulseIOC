@@ -47,7 +47,6 @@ class _TERM {
 		};
 
 	bool	Cmd(int c);
-	void	Batch(char *);		
 	char	*Cmd(void);
 	int		Escape(void);
 	int		Fsw(void);
@@ -57,8 +56,9 @@ class _TERM {
 	void *Parse(_io *);
 	void *Parse(FIL *);
 
+	virtual	FRESULT	Batch(char *);		
+	virtual FRESULT	Decode(char *)		{	return FR_OK;			};
 	virtual	void		Newline(void)			{ _print("\r\n>");	}
 	virtual int			Fkey(int fkey)		{	return fkey;			};
-	virtual FRESULT	Decode(char *)		{	return FR_OK;			};
 };
 #endif

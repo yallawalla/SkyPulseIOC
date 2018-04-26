@@ -35,8 +35,16 @@ ws2812	_WS::ws[] =
 	* @retval : None
 	*/
 /*******************************************************************************/
-_WS::~_WS() {
-				_proc_remove((void *)proc_WS2812,this);
+#define __IMAX sizeof(ws)/sizeof(ws2812)
+_WS::_WS()  {
+int			k=0;
+				for(int i=0; i< __IMAX; ++i) {
+					ws[i].hsvp=&HSVbuf[k];
+					k+= ws[i].size;	
+				}
+				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",100);
+				idx=idxled=0;
+				fbatch=new FIL();
 }
 /*******************************************************************************/
 /**
@@ -45,15 +53,8 @@ _WS::~_WS() {
 	* @retval : None
 	*/
 /*******************************************************************************/
-#define __IMAX sizeof(ws)/sizeof(ws2812)
-_WS::_WS()  {
-int			k=0;
-				for(int i=0; i< __IMAX; ++i) {
-					ws[i].hsvp=&HSVbuf[k];
-					k+= ws[i].size;	
-				}
-				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
-				idx=idxled=0;
+_WS::~_WS() {
+				_proc_remove((void *)proc_WS2812,this);
 }
 /*******************************************************************************/
 /**
@@ -239,6 +240,11 @@ ws2812	*w=ws;
 
 				if(trg)
 					me->trigger();
+				else {
+						me->Parse(me->fbatch);
+						if(f_eof(me->fbatch))
+							f_close(me->fbatch);
+				}
 				return NULL;
 }
 /*******************************************************************************/
@@ -253,7 +259,7 @@ char		*c=strchr(p,'+');
 				*c++=0;
 				p=strtok(p,",");
 				while(p) {
-					if(!isdigit(*p))
+					if(!isdigit(*p) && !isspace(*p))
 						return FR_INVALID_PARAMETER;
 					switch(*c) {
 						case 0:
@@ -290,7 +296,7 @@ char		*c=strchr(p,'-');
 				*c++=0;
 				p=strtok(p,",");
 				while(p) {
-					if(!isdigit(*p))
+					if(!isdigit(*p) && !isspace(*p))
 						return FR_INVALID_PARAMETER;
 					switch(*c) {
 						case 0:
@@ -532,7 +538,14 @@ int			_WS::Fkey(int t) {
 	*/ 
 /*******************************************************************************/
 FRESULT	_WS::Decode(char *c) {
-				if(!strncmp
+	
+				if(!strncmp(c,"col",3))
+					c=strchr(c,' ');
+				if(!strncmp(c,"wait",4)) {
+					c=strchr(c,' ');
+					_wait(atoi(c));
+				}
+				
 				if(strchr(c,'='))
 					return ColorSet(c);
 				if(strchr(c,'+'))
@@ -580,7 +593,15 @@ void		_WS::Increment(int a, int b) {
 				}
 				Newline();
 }		
-
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT _WS::Batch(char *filename) {
+			return f_open(fbatch,filename,FA_READ);
+}
 /**
 * @}
 fil inserted.led
