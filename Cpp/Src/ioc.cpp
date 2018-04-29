@@ -4,7 +4,6 @@
 extern "C" {
 	void ioc(void) {
 		_IOC::parent=new _IOC;
-		_task(NULL);
 	}
 }
 _IOC*	_IOC::parent			= NULL;
@@ -14,9 +13,10 @@ _IOC*	_IOC::parent			= NULL;
 * Output				:
 * Return				:
 *******************************************************************************/
-_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
+_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 	dbgio=NULL;
+	SetState(_STANDBY);	
 	
 	FIL f;
 	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
@@ -31,8 +31,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3) {
 
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	_proc_add((void *)taskRx,this,(char *)"can rx",0);
-	ws2812.Batch((char *)"onoff.led");
-	SetState(_STANDBY);	
+	ws2812.Batch((char *)"@onoff.led");
 }
 /*******************************************************************************
 * Function Name	:
@@ -51,10 +50,11 @@ _IOC::~_IOC() {
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
-			me->SetError(me->pump.Status());
-			me->SetError(me->fan.Status());
-			me->SetError(me->spray.Status());
-			me->SetError(me->adcError());
+_err	e = me->pump.Status();
+			e = e | me->fan.Status();
+			e = e | me->spray.Status();
+			e = e | me->adcError();
+			me->SetError(e);
 			return me;
 }
 /*******************************************************************************
@@ -70,23 +70,25 @@ void	_IOC::SetState(_State s) {
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-					ws2812.Batch((char *)"standby.led");
+					ws2812.Batch((char *)"@standby.led");
 					_SYS_SHG_ENABLE;
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
 					pump.Enable();
-					ws2812.Batch((char *)"ready.led");
+					ws2812.Batch((char *)"@ready.led");
 					break;
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-					ws2812.Batch((char *)"active.led");
+					ws2812.Batch((char *)"@active.led");
 					break;
 				case	_ERROR:
-					IOC_State.State = _ERROR;
-					ws2812.Batch((char *)"error.led");
-					_SYS_SHG_DISABLE;
+					if(IOC_State.State != _ERROR) {
+						IOC_State.State = _ERROR;
+						ws2812.Batch((char *)"@error.led");
+						_SYS_SHG_DISABLE;
+					}
 					break;
 				default:
 					break;
@@ -103,12 +105,9 @@ int		w = (err ^ IOC_State.Error) & err & warn_mask;
 int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 			if(__time__ > 3000) {
 				if(e) {
-					_SYS_SHG_DISABLE;
 					if(e & (_pumpCurrent | _flowTacho))
 						pump.Disable();
-					if(IOC_State.State != _ERROR)
-						ws2812.Batch((char *)"error.led");
-					IOC_State.State = _ERROR;
+					SetState(_ERROR);
 				}
 				if(e | w) {
 					IOC_State.Error = (_err)(IOC_State.Error | e | w );
@@ -132,7 +131,6 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					_stdio(temp);
 				} 	
 			}
-
 }
 /*******************************************************************************
 * Function Name	:

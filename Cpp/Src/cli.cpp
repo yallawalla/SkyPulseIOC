@@ -332,7 +332,7 @@ FRESULT _CLI::Decode(char *p) {
 	}
 //__color menu_____________________________________________________________________
 	else if(!strncmp("color",sc[0],len)) {
-		return _IOC::parent->ws2812.Decode(sc[1]);
+		return _IOC::parent->ws2812.Batch(sc[1]);
 	}
 //__copy file______________________________________________________________________
 	else if(!strncmp("copy",sc[0],len)) {
@@ -370,14 +370,6 @@ FRESULT _CLI::Decode(char *p) {
 		delete f2;
 		return FR_OK;
 	}
-//
-////__entering new file____________________________________________________________
-//						if(!strncmp("file",sc[0],len)) {
-//							if(n == 2)
-//								return(EnterFile(sc[1]));
-//							else
-//								return _PARSE_ERR_SYNTAX;
-//						}
 //__format flash drive_____________________________________________________________
 //
 	else if(!strncmp("format",sc[0],len)) {

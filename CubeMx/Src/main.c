@@ -807,7 +807,7 @@ static void MX_USART3_UART_Init(void)
 {
 
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 57600;
+  huart3.Init.BaudRate = 115200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
@@ -897,8 +897,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : cwbBUTTON_Pin cwbDOOR_Pin cwbENGM_Pin */
-  GPIO_InitStruct.Pin = cwbBUTTON_Pin|cwbDOOR_Pin|cwbENGM_Pin;
+  /*Configure GPIO pin : cwbBUTTON_Pin */
+  GPIO_InitStruct.Pin = cwbBUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(cwbBUTTON_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : cwbDOOR_Pin cwbENGM_Pin */
+  GPIO_InitStruct.Pin = cwbDOOR_Pin|cwbENGM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
@@ -929,7 +935,29 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+SemaphoreHandle_t _sWait=NULL;
+TaskHandle_t 			_tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+TaskHandle_t 			*tWait=_tWait;
+extern void				_tLoop(SemaphoreHandle_t *);
+//___________________________________________________________________________
+void	_task(const void *t) {
+			while(1) {
+				_tLoop(&_sWait);
+			}
+}
+//___________________________________________________________________________
+void	_wait(int t) {
+			_io *temp=_stdio(NULL);
+			if(*tWait==NULL)
+				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait);
+			++tWait;
+			xSemaphoreGive(_sWait);
+			taskYIELD();
+			vTaskDelay(t);
+			xSemaphoreTake(_sWait,portMAX_DELAY);
+			--tWait;
+			_stdio(temp);
+}
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -944,6 +972,7 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	ioc();
+	xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait++);
   for(;;)
   {
     osDelay(1);

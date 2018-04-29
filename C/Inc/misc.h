@@ -8,6 +8,8 @@
 #include 	"stm32f4xx_hal.h"
 #include 	"io.h"
 #include 	"proc.h"
+#include 	"usb_device.h"
+	 
 #define 	FATFS_SECTOR	FLASH_SECTOR_6
 #define		FATFS_ADDRESS 0x08040000
 #define		PAGE_SIZE			0x20000
@@ -20,8 +22,8 @@ HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
 int								ff_pack(int );
 
-void	poll_uart(_io *);
-_io* init_uart(UART_HandleTypeDef *, int, int);
+void	pollUsart(_io *);
+_io* 	ioUsart(UART_HandleTypeDef *, int, int);
 
 void	dumpHex(int, int);
 void	flushVCP(const void *);

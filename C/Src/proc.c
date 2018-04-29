@@ -1,20 +1,6 @@
 #include "proc.h"
 #include "misc.h"
-SemaphoreHandle_t _sWait=NULL;
-TaskHandle_t 			_tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-TaskHandle_t 			*tWait=_tWait;
 _buffer						*_proc_buf=NULL;
-//______________________________________________________________________________
-void 	_proc_code(void *arg) {
-_proc *p=(_proc *)arg;
-			while(1) {
-				if(__time__ >= p->t) {
-					p->to = __time__ - p->t;
-					p->f(p->arg);
-					p->t = __time__ + p->dt;
-				}
-			}
-}
 //______________________________________________________________________________
 _proc	*_proc_add(void *f,void *arg,char *name, int dt) {
 _proc	*p=malloc(sizeof(_proc));
@@ -80,10 +66,10 @@ int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
 			}
 }
 //______________________________________________________________________________
-void	_p_loop(void) {
-			if(_sWait==NULL)
-				_sWait=xSemaphoreCreateMutex();
-			if(xSemaphoreTake(_sWait,portMAX_DELAY)) {
+void	_tLoop(SemaphoreHandle_t *s) {
+			if(*s==NULL)
+				*s=xSemaphoreCreateMutex();
+			if(xSemaphoreTake(*s,portMAX_DELAY)) {
 				_proc	*p=NULL;
 				if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
 					if(__time__ >= p->t) {
@@ -93,26 +79,7 @@ void	_p_loop(void) {
 					}
 					_buffer_push(_proc_buf,&p,sizeof(_proc *));
 				}
-				xSemaphoreGive(_sWait);
+				xSemaphoreGive(*s);
 			}
 			taskYIELD();
-}
-//___________________________________________________________________________
-void	_task(const void *t) {
-			while(1) {
-				_p_loop();
-			}
-}
-//___________________________________________________________________________
-void	_wait(int t) {
-			_io *temp=_stdio(NULL);
-			if(*tWait==NULL)
-				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait);
-			++tWait;
-			xSemaphoreGive(_sWait);
-			taskYIELD();
-			vTaskDelay(t);
-			xSemaphoreTake(_sWait,portMAX_DELAY);
-			--tWait;
-			_stdio(temp);
 }

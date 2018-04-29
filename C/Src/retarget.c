@@ -22,11 +22,9 @@ FILE 		__stderr;
 //__________________________________________________________________________________
 int 		fputc(int c, FILE *f) {
 				if(f==stdout) {
-					if(f->io) {
+					if(f->io && f->io->put) {
 						while(f->io->put(f->io->tx,c) == EOF)
 							_wait(2);
-						if(f->io->file)
-							f_putc(c,f->io->file);
 					}
 					return c;
 				}
@@ -36,10 +34,8 @@ int 		fputc(int c, FILE *f) {
 int 		fgetc(FILE *f) {
 int			c=EOF;
 				if(f==stdin) {
-					if(f->io) {
+					if(f->io && f->io->get) {
 						c=f->io->get(f->io->rx);
-						if(c==EOF && f->io->file)
-							c=f_getc(f->io->file);
 					}
 					return c;
 				}

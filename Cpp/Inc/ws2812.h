@@ -1,7 +1,7 @@
 #ifndef					WS2812_H
 #define					WS2812_H
 #include				"stm32f4xx_hal.h"
-#include				"term.h"
+#include				"cli.h"
 #include 				<algorithm>
 typedef struct	{uint8_t r; uint8_t g; uint8_t b; }	RGB;
 typedef struct	{int16_t h; uint8_t s; uint8_t v; }	HSV;
@@ -32,10 +32,9 @@ typedef	struct	{
 	int			shift;					// phase shift
 } ws2812;
 
-class	_WS : public _TERM {
+class	_WS : public _CLI {
 	private:
-		int			idx,idxled;
-		FIL			*__fbatch, *fbatch;
+		int			idx,idxled,busy;
 		void 		RGB2HSV( RGB, HSV *);
 		void		HSV2RGB( HSV, RGB *);
 		void		trigger(void);

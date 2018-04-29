@@ -119,7 +119,7 @@ class _IOC : public _ADC {
 		_PUMP 					pump;
 		_FAN 						fan;
 		_RTC						rtc;
-		_CLI						com,com1,com3;
+		_CLI						com1,com3,comUsb;
 
 		~_IOC();
 

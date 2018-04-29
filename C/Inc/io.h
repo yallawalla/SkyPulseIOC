@@ -24,7 +24,7 @@ typedef struct _io
 	_buffer	*rx,*tx,*gets;
 	int		(*get)(struct _buffer *),
 				(*put)(struct _buffer *, int);
-	void	*file,*huart;
+	void	*huart;
 } _io;
 //______________________________________________________________________________________
 _buffer	*_buffer_init(int),

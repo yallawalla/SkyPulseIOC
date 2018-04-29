@@ -312,6 +312,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 * Return				:
 *******************************************************************************/
 void	*CDC_Poll_FS(void *v) {
+	*(_io **)v=_VCP;
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
 	if(_VCP && hcdc->TxState ==  0) {
 		int len=_buffer_pull(_VCP->tx, UserTxBufferFS, CDC_DATA_FS_IN_PACKET_SIZE);

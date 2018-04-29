@@ -12,6 +12,13 @@ class _FAT {
 	static	DIR		dir;			
 	static	TCHAR lfn[_MAX_LFN + 1];
 	static	FILINFO	fno;
+	
+	_FAT() {
+			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
+				f_mount(&fatfs,"0:",1);
+				f_opendir(&dir,"/");
+			}
+	}
 };
 //_________________________________________________________________________________
 class _CLI : public _TERM, public _FAT {
@@ -27,30 +34,23 @@ class _CLI : public _TERM, public _FAT {
 		virtual FRESULT	Decode(char *);
 		virtual int			Fkey(int);
 
-		static void			parseUsart(_CLI *me) {
-			me->Parse(me->io);
-		}
-		static void			parseUsb(_CLI *me) {
-			me->io = _VCP;
+		static void			parseTask(_CLI *me) {
 			me->Parse(me->io);
 		}
 
+		_CLI()	{
+			io=ioUsart(NULL,__RXLEN,__TXLEN);
+			_proc_add((void *)parseTask,this,(char *)"Usart Cli",0);
+		};
+
 		_CLI(UART_HandleTypeDef *huart)	{
-			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
-				f_mount(&fatfs,"0:",1);
-				f_opendir(&dir,"/");
-			}
-			io=init_uart(huart,__RXLEN,__TXLEN);
-			_proc_add((void *)parseUsart,this,(char *)"Usart Cli",0);
+			io=ioUsart(huart,__RXLEN,__TXLEN);
+			_proc_add((void *)parseTask,this,(char *)"Usart Cli",0);
 		};
 		
-		_CLI() {
-			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
-				f_mount(&fatfs,"0:",1);
-				f_opendir(&dir,"/");
-			}
-			_proc_add((void *)parseUsb,this,(char *)"Usb Cli",0);
-			_proc_add((void *)CDC_Poll_FS,NULL,(char *)"Tx VCP",0);
+		_CLI(USBD_HandleTypeDef *usbd) {
+			_proc_add((void *)parseTask,this,(char *)"Usb Cli",0);
+			_proc_add((void *)CDC_Poll_FS,&io,(char *)"Tx VCP",0);
 		};
 
 		~_CLI(void)	{};

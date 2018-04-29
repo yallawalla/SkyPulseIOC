@@ -129,20 +129,22 @@ int			__put (_buffer *p, int c) {
 //______________________________________________________________________________________
 _io			*_io_init(int rxl, int txl) {
 _io			*p=calloc(1,sizeof(_io));
-				if(p) {
+				if(!p)
+					return(NULL);
+				if(rxl) {
 					p->rx=_buffer_init(rxl);
-					p->tx=_buffer_init(txl);
 					p->get=__get;
-					p->put=__put;
-					p->file=p->huart=NULL;
-					if(p->rx && p->tx)
-						return(p);
-					if(p->rx)
-						free(p->rx);
-					if(p->tx)
-						free(p->tx);
+					if(!p->rx)
+						return(NULL);
 				}
-				return(NULL);
+				if(txl) {
+					p->tx=_buffer_init(txl);
+					p->put=__put;
+					if(!p->tx)
+						return(NULL);
+				}
+				p->huart=NULL;
+				return(p);
 }
 //______________________________________________________________________________________
 //

@@ -72,7 +72,7 @@ void	dumpHex(int a, int n) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	poll_uart(_io *io) {
+void	pollUsart(_io *io) {
 UART_HandleTypeDef *huart=io->huart;
 	io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
 	if(huart->gState == HAL_UART_STATE_READY) {
@@ -92,12 +92,12 @@ UART_HandleTypeDef *huart=io->huart;
 * Output				:
 * Return				:
 *******************************************************************************/
-_io* init_uart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
+_io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 	_io* io=_io_init(sizeRx,sizeTx);
 	if(io && huart) {
 		io->huart=huart;
 		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->tx->size);
-		_proc_add(poll_uart,io,"uart",0);
+		_proc_add(pollUsart,io,"uart",0);
 	}
 	return io;
 }

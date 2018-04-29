@@ -42,10 +42,9 @@ int			k=0;
 					ws[i].hsvp=&HSVbuf[k];
 					k+= ws[i].size;	
 				}
-				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",10);
-				idx=idxled=0;
-				__fbatch=new FIL();
-				fbatch=NULL;
+				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",20);
+				idx=idxled=busy=0;
+				io->put=NULL;
 }
 /*******************************************************************************/
 /**
@@ -55,8 +54,6 @@ int			k=0;
 	*/
 /*******************************************************************************/
 _WS::~_WS() {
-				_proc_remove((void *)proc_WS2812,this);
-				delete __fbatch;
 }
 /*******************************************************************************/
 /**
@@ -98,8 +95,9 @@ uint16_t	k,*p=led_drive;
 	*/
 /*******************************************************************************/
 void		*_WS::proc_WS2812(_WS *me) {
-int			j,k,trg=0;
+int			j,k;
 ws2812	*w=ws;
+				me->busy=0;
 //------------------------------------------------------------------------------
 				do {
 					HSV	color = w->color;
@@ -234,21 +232,14 @@ ws2812	*w=ws;
 						}
 //------------------------------------------------------------------------------					
 						if(w->mode != noCOMM) {
-							++trg;
+							++me->busy;
 							if(k==w->size)
 								w->mode=noCOMM;
 						}
 				} while(++w != &ws[__IMAX]);
 
-				if(trg)
+				if(me->busy)
 					me->trigger();
-				else if(me->fbatch) {
-					me->Parse(me->fbatch);
-					if(f_eof(me->fbatch)) {
-						f_close(me->fbatch);
-						me->fbatch=NULL;
-					}
-				}
 				return NULL;
 }
 /*******************************************************************************/
@@ -505,8 +496,7 @@ void		_WS::Newline(void) {
 					idxled,ws[idxled].color.h,ws[idxled].color.s,ws[idxled].color.v,
 						ws[idxled].mod.h,ws[idxled].mod.s,ws[idxled].mod.v,ws[idxled].shift);
 					for(int i=1+4*(7-idx); i--; _print("\b"));
-				ws[idxled].mode = MOD_ON;
-				trigger();
+				_wait(20);
 }
 /*******************************************************************************/
 /**
@@ -545,7 +535,10 @@ int			_WS::Fkey(int t) {
 	*/ 
 /*******************************************************************************/
 FRESULT	_WS::Decode(char *c) {
-	
+				while(busy)
+					_wait(2);
+				if(strchr(c,'@'))
+					return _TERM::Batch(++c);
 				if(!strncmp(c,"col",3))
 					c=strchr(c,' ');
 				if(!strncmp(c,"wait",4)) {
@@ -560,6 +553,17 @@ FRESULT	_WS::Decode(char *c) {
 				if(strchr(c,'-'))
 					return ColorOff(c);	
 				return FR_INVALID_PARAMETER;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT _WS::Batch(char *filename) {
+				_buffer_push(io->rx,filename,strlen(filename));
+				_buffer_push(io->rx,(char *)"\r",1);
+				return FR_OK;
 }
 /*******************************************************************************/
 /**
@@ -599,57 +603,11 @@ void		_WS::Increment(int a, int b) {
 						break;
 				}
 				Newline();
+				ws[idxled].mode = MOD_ON;
+				trigger();
 }		
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-FRESULT _WS::Batch(char *filename) {
-				if(fbatch)
-					return FR_TOO_MANY_OPEN_FILES;
-				fbatch=__fbatch; 
-				return f_open(fbatch,filename,FA_READ);
-}
 /**
 * @}
-fil inserted.led
-col 0,5,-r
-col 0,5=180,180,50
-col 0,5,+r
-
-fil ejected.led
-col 0,5,-r
-col 0,5=1,255,50
-col 0,5,+r
-
-fil onoff.led
-col t=20
-col 0,1,4,5=180,180,50
-col 2,3=1,255,50
-col 0,1,4,5,+r
-col 2,+r
-col 3,+l
-w 1000
-col 2,-l
-col 3,-r
-
-fil standby.led
-col 2,-l
-col 3,-r
-
-fil ready.led
-col 2,+r
-col 3,+l
-
-fil error.led
-col 0,5,-r
-col 0,5=1,255,50
-col 0,5,+r
-col 2,-l
-col 3,-r
-
 */
 
 

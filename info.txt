@@ -1,13 +1,3 @@
-fil inserted.led
-col 0,3,-r
-col 0,3=180,180,50
-col 0,3,+r
-
-fil ejected.led
-col 0,3,-r
-col 0,3=1,255,50
-col 0,3,+r
-
 fil onoff.led
 col t=20
 col 0,1,3,4=180,180,50
@@ -16,16 +6,19 @@ col 0,1,2,3,4,5,+r
 wait 1000
 col 2,5,-l
 
+
 fil standby.led
-col 2,-l
-col 5,-r
+col 0,3=180,180,50
+col 0,3,+l
+
 
 fil ready.led
 col 2,5=0,255,50
 col 2,+l
 col 5,+r
 
+
 fil error.led
-col 0,3-
 col 0,3=1,255,50
-col 0,3+
+col 0,3,+l
+

@@ -7,10 +7,9 @@ CAN_HandleTypeDef *_CAN::hcan;
 * Return				:
 *******************************************************************************/
 _CAN::_CAN(CAN_HandleTypeDef *handle) {
-	remote = new _CLI(NULL);
+	remote = new _CLI();
 	hcan = handle;
 	hcan->pRxMsg=new CanRxMsgTypeDef;
-	hcan->pTxMsg=new CanTxMsgTypeDef;
 	canBuffer	=	_io_init(100*sizeof(CanRxMsgTypeDef), 100*sizeof(CanTxMsgTypeDef));
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 	filter_count=timeout=0;
@@ -28,8 +27,9 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 * Return				:
 *******************************************************************************/
 void _CAN::Send(CanTxMsgTypeDef *msg) {
-	_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
-	HAL_CAN_TxCpltCallback(hcan);
+	hcan->pTxMsg=msg;
+	if(HAL_CAN_Transmit_IT(hcan) != HAL_OK)
+		_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
 }
 /*******************************************************************************
 * Function Name	: 
@@ -42,8 +42,9 @@ void	_CAN::Send(int id, void *data, int len) {
 	msg.StdId=id;
 	msg.DLC=len;
 	memcpy(msg.Data,data,len);
-	_buffer_push(canBuffer->tx,&msg,sizeof(CanTxMsgTypeDef));
-	HAL_CAN_TxCpltCallback(hcan);
+	hcan->pTxMsg=&msg;
+	if(HAL_CAN_Transmit_IT(hcan) != HAL_OK)
+		_buffer_push(canBuffer->tx,&msg,sizeof(CanTxMsgTypeDef));
 }
 /*******************************************************************************
 * Function Name	: 
@@ -165,28 +166,28 @@ FRESULT _CAN::Decode(char *c) {
 * Return				:
 *******************************************************************************/
 void	_CAN::pollRx(void *v) {
-	CanRxMsgTypeDef*	rx=hcan->pRxMsg;
+	CanRxMsgTypeDef		rx;
 	_IOC*							ioc=static_cast<_IOC *>(v);
 	
-	if(_buffer_pull(canBuffer->rx,rx,sizeof(CanRxMsgTypeDef))) {
+	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CanRxMsgTypeDef))) {
 		_io*	temp=_stdio(io);
-		switch(rx->StdId) {
+		switch(rx.StdId) {
 //______________________________________________________________________________________							
 			case idIOC_State:
-				if(rx->DLC)
-					ioc->SetState((_State)rx->Data[0]);
+				if(rx.DLC)
+					ioc->SetState((_State)rx.Data[0]);
 				ioc->IOC_State.Send();
 				break;
 //______________________________________________________________________________________							
 			case idIOC_SprayParm:
-				ioc->spray.AirLevel		= std::min(10,(int)rx->Data[0]);
-				ioc->spray.WaterLevel	= std::min(10,(int)rx->Data[1]);
-				if(rx->Data[2]==0) {
+				ioc->spray.AirLevel		= std::min(10,(int)rx.Data[0]);
+				ioc->spray.WaterLevel	= std::min(10,(int)rx.Data[1]);
+				if(rx.Data[2]==0) {
 					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
 						ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
 				}
-				ioc->spray.mode.Air=rx->Data[2] & 1;
-				ioc->spray.mode.Water=rx->Data[2] & 2;
+				ioc->spray.mode.Air=rx.Data[2] & 1;
+				ioc->spray.mode.Water=rx.Data[2] & 2;
 			break;
 //______________________________________________________________________________________							
 			case idIOC_AuxReq:
@@ -205,39 +206,39 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idBOOT:
-				if(rx->Data[0]==0xAA)
+				if(rx.Data[0]==0xAA)
 					while(1);
 				break;
 //______________________________________________________________________________________							
 			case idFOOT2CAN:
-				rx->StdId=idCAN2FOOT;
-				Send((CanTxMsgTypeDef *)rx);
+				rx.StdId=idCAN2FOOT;
+				Send((CanTxMsgTypeDef *)&rx);
 			break;
 //______________________________________________________________________________________							
 			case idCAN2FOOT: {
 				_io*	io=_stdio(ioFsw);
-				for(int i=0; i<rx->DLC; ++i)
-					putchar(rx->Data[i]);
+				for(int i=0; i<rx.DLC; ++i)
+					putchar(rx.Data[i]);
 				_stdio(io);
 			} break;
 //______________________________________________________________________________________
 			case idCOM2CAN:
 				if(remote)
-					for(int i=0; i<rx->DLC; ++i)
-						while(!_buffer_push(remote->io->rx,&rx->Data[i],1))
+					for(int i=0; i<rx.DLC; ++i)
+						while(!_buffer_push(remote->io->rx,&rx.Data[i],1))
 							_wait(2);
 			break;
 //______________________________________________________________________________________
 			case idCAN2COM:
-				for(int i=0; i < rx->DLC;++i)
-					putchar(rx->Data[i]);
+				for(int i=0; i < rx.DLC;++i)
+					putchar(rx.Data[i]);
 			break;
 //______________________________________________________________________________________
 			default:
 				Newline();
-				_print(" < %02X ",rx->StdId);
-				for(int i=0; i < rx->DLC;++i)
-					_print(" %02X",rx->Data[i]);
+				_print(" < %02X ",rx.StdId);
+				for(int i=0; i < rx.DLC; ++i)
+					_print(" %02X",rx.Data[i]);
 				Newline();	
 			break;
 		}
