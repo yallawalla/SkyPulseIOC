@@ -2,7 +2,7 @@
 #include "ioc.h"
 
 extern "C" {
-	void ioc(void) {
+	void makeIoc(void) {
 		_IOC::parent=new _IOC;
 	}
 }
@@ -15,7 +15,6 @@ _IOC*	_IOC::parent			= NULL;
 *******************************************************************************/
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
-	dbgio=NULL;
 	SetState(_STANDBY);	
 	
 	FIL f;
@@ -120,16 +119,14 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					__RED2(200);
 
 
-				if((e | w) && dbgio && (debug & DBG_ERR)) {
-					_io *temp=_stdio(dbgio);
+				if(e | w) {
 					for(int n=0; n<32; ++n)
 						if(e & (1<<n))
-							_print("\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
+							_TERM::Debug(DBG_ERR,"\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
 					for(int n=0; n<32; ++n)
 						if(w & (1<<n))
-							_print("\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
-					_stdio(temp);
-				} 	
+							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
+					}
 			}
 }
 /*******************************************************************************

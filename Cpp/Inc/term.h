@@ -8,6 +8,22 @@
 * Output				:
 * Return				:
 *******************************************************************************/
+typedef enum {
+	DBG_OFF						=0,
+	DBG_CAN_TX				=1<<0,
+	DBG_CAN_RX				=1<<1,
+	DBG_ERR						=1<<2,
+	DBG_INFO					=1<<3,
+	DBG_CAN_COM				=1<<21,
+	DBG_EC_SIM				=1<<22,
+	DBG_ENRG					=1<<23
+}	_dbg;
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 	typedef enum {
 	__FSW_OFF	=((FSW3_Pin | FSW2_Pin | FSW0_Pin)	<<8),
 	__FSW_1		=((											 FSW0_Pin)	<<8),
@@ -45,6 +61,10 @@ class _TERM {
 			rpt.seq=rpt.timeout=0;
 			cmdp=cmdbuf=new char[__CMDLEN];
 		};
+		
+static	_dbg	debug;
+static	_io		*dbgio;
+static	void	Debug(_dbg, const char *format, ...);
 
 	bool	Cmd(int c);
 	char	*Cmd(void);

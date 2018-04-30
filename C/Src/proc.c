@@ -18,17 +18,16 @@ _proc	*p=malloc(sizeof(_proc));
 			return p;
 }
 //______________________________________________________________________________
-void	*_proc_loop(void) {
-			_proc	*p=NULL;
-			if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
-				if(__time__ >= p->t) {
-					p->to = __time__ - p->t;
-					p->f(p->arg);
-					p->t = __time__ + p->dt;
-				}
+_proc	*_proc_find(void  *f,void *arg) {
+_proc	*p,*q=NULL;
+int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
+			while(i--) {
+				_buffer_pull(_proc_buf,&p,sizeof(_proc *));
+				if(f == p->f && (arg == p->arg || !arg))
+					q=p;
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
-			return p;
+			return q;
 }
 //______________________________________________________________________________
 void	_proc_remove(void  *f,void *arg) {
@@ -43,18 +42,6 @@ int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
 			}
 }
 //______________________________________________________________________________
-_proc	*_proc_find(void  *f,void *arg) {
-_proc	*p,*q=NULL;
-int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
-			while(i--) {
-				_buffer_pull(_proc_buf,&p,sizeof(_proc *));
-				if(f == p->f && (arg == p->arg || !arg))
-					q=p;
-				_buffer_push(_proc_buf,&p,sizeof(_proc *));
-			}
-			return q;
-}
-//______________________________________________________________________________
 void	_proc_list(void) {
 _proc	*p;	
 int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
@@ -66,20 +53,15 @@ int		i	=_buffer_count(_proc_buf)/sizeof(_proc *);
 			}
 }
 //______________________________________________________________________________
-void	_tLoop(SemaphoreHandle_t *s) {
-			if(*s==NULL)
-				*s=xSemaphoreCreateMutex();
-			if(xSemaphoreTake(*s,portMAX_DELAY)) {
-				_proc	*p=NULL;
-				if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
-					if(__time__ >= p->t) {
-						p->to = __time__ - p->t;
-						p->f(p->arg);
-						p->t = __time__ + p->dt;
-					}
-					_buffer_push(_proc_buf,&p,sizeof(_proc *));
+void	*_proc_loop(void) {
+			_proc	*p=NULL;
+			if(_proc_buf && _buffer_pull(_proc_buf,&p,sizeof(_proc *)) && p) {
+				if(__time__ >= p->t) {
+					p->to = __time__ - p->t;
+					p->f(p->arg);
+					p->t = __time__ + p->dt;
 				}
-				xSemaphoreGive(*s);
+				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
-			taskYIELD();
+			return p;
 }

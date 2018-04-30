@@ -167,10 +167,6 @@ static int printi(char **out, int i, int b, int sg, int width, int pad, int letb
 	return pc + prints (out, s, width, pad);
 }
 
-//int fprintf(__FILE *stream, const char *format, ...)
-//{
-//return 0;
-//}
 int printk_va(char **out, const char *format, va_list args )
 {
 	register int width, pad;
@@ -352,24 +348,6 @@ int			_printdec(int n, int k) {
 				_print("%d.%d",n/k,n%k);
 				return(n);
 }
-/*******************************************************************************
-* Function Name : batch
-* Description   :	ADP1047 output voltage setup, using the default format
-* Input         :
-* Output        :
-* Return        :
-*******************************************************************************/
-//__weak 	int	f_printf(FIL *f,const char *format, ...) {
-//	char	buf[__TXLEN],*b=buf;	
-//				va_list	aptr;
-//				int			ret;
-//				va_start(aptr, format);
-//				ret = printk_va(&b, format, aptr );
-//				while(b)
-//					f_putc(*b++,f);
-//				va_end(aptr);
-//				return(ret);
-//}
 /*******************************************************************************
 * Function Name : batch
 * Description   :	ADP1047 output voltage setup, using the default format

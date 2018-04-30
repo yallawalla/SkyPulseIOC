@@ -1,5 +1,6 @@
 #include	"ioc.h"
 CAN_HandleTypeDef *_CAN::hcan;
+_io 							*_CAN::io,*_CAN::ioFsw;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -13,7 +14,6 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canBuffer	=	_io_init(100*sizeof(CanRxMsgTypeDef), 100*sizeof(CanTxMsgTypeDef));
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 	filter_count=timeout=0;
-	io=ioFsw=NULL;
 
 	canFilterCfg(idIOC_State,	0x780);
 	canFilterCfg(idEC20_req,	0x780);
@@ -26,10 +26,8 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void _CAN::Send(CanTxMsgTypeDef *msg) {
-	hcan->pTxMsg=msg;
-	if(HAL_CAN_Transmit_IT(hcan) != HAL_OK)
-		_buffer_push(canBuffer->tx,msg,sizeof(CanTxMsgTypeDef));
+void	_CAN::Send(CanTxMsgTypeDef *msg) {
+	Send(msg->StdId,msg->Data,msg->DLC);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -45,6 +43,12 @@ void	_CAN::Send(int id, void *data, int len) {
 	hcan->pTxMsg=&msg;
 	if(HAL_CAN_Transmit_IT(hcan) != HAL_OK)
 		_buffer_push(canBuffer->tx,&msg,sizeof(CanTxMsgTypeDef));
+
+	Debug(DBG_CAN_TX,"\r\n> %02X ",id);
+	uint8_t *p=(uint8_t *)data;
+	for(int i=0; i < len; ++i)
+		Debug(DBG_CAN_TX," %02X",*p++);
+	Debug(DBG_CAN_TX,"\r\n");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -52,19 +56,19 @@ void	_CAN::Send(int id, void *data, int len) {
 * Output				:
 * Return				:
 *******************************************************************************/
-int _CAN::SendRemote(int stdid) {
-	CanTxMsgTypeDef	tx={0,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};	
-	int i;	
-	tx.StdId=stdid;
-	while(tx.DLC  < 8) {
-		i=getchar();
-		if(i==EOF || i==__CtrlE)
-			break; 
-		tx.Data[tx.DLC++] = i;
+int 	_CAN::SendRemote(int stdid) {
+	uint8_t data[8];
+	int			m,n=0;
+	while(n<8) {
+		m=getchar();
+		if(m==EOF || m==__CtrlE)
+			break;
+		else
+			data[n++]=m;
 	}
-	if(tx.DLC > 0)
-		Send(&tx);
-	return i;
+	if(n)
+		Send(stdid,data,n);
+	return m;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -72,10 +76,10 @@ int _CAN::SendRemote(int stdid) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void _CAN::Newline(void) {
-			io=_stdio(NULL);
-			_stdio(io);
-		_print("\r\ncan>");
+void	_CAN::Newline(void) {
+	io=_stdio(NULL);
+	_stdio(io);
+	_print("\r\ncan>");
 }
 /*******************************************************************************
 * Function Name	: 
@@ -83,10 +87,10 @@ void _CAN::Newline(void) {
 * Output				:
 * Return				:
 *******************************************************************************/
-int	_CAN::Fkey(int t) {
+int		_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
-			_print("remote desktop...\r\n");
+			_print("remote console...\r\n");
 			while(SendRemote(idCOM2CAN) != __CtrlE) 
 				_wait(2);
 			_print("close...");
@@ -107,7 +111,122 @@ int	_CAN::Fkey(int t) {
 * Output				:
 * Return				:
 *******************************************************************************/
-FRESULT _CAN::Decode(char *c) {
+void	_CAN::pollRx(void *v) {
+	CanRxMsgTypeDef		rx;
+	_IOC*							ioc=static_cast<_IOC *>(v);
+	while(_buffer_pull(canBuffer->rx,&rx,sizeof(CanRxMsgTypeDef))) {
+//______________________________________________________________________________________							
+		Debug(DBG_CAN_RX,"\r\n> %02X ",rx.StdId);
+		for(int i=0; i < rx.DLC; ++i)
+			Debug(DBG_CAN_RX," %02X",rx.Data[i]);
+		Debug(DBG_CAN_RX,"\r\n");
+//______________________________________________________________________________________							
+		switch(rx.StdId) {
+			case idIOC_State:
+				if(rx.DLC)
+					ioc->SetState((_State)rx.Data[0]);
+				ioc->IOC_State.Send();
+				break;
+//______________________________________________________________________________________							
+			case idIOC_SprayParm:
+				ioc->spray.AirLevel		= std::min(10,(int)rx.Data[0]);
+				ioc->spray.WaterLevel	= std::min(10,(int)rx.Data[1]);
+				if(rx.Data[2]==0) {
+					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
+						ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
+				}
+				ioc->spray.mode.Air=rx.Data[2] & 1;
+				ioc->spray.mode.Water=rx.Data[2] & 2;
+			break;
+//______________________________________________________________________________________							
+			case idIOC_AuxReq:
+				ioc->IOC_Aux.Temp = ioc->Th2o();
+				ioc->IOC_Aux.Send();
+			break;
+//______________________________________________________________________________________
+			case idEC20_req:
+				timeout=__time__+_EC20_EM_DELAY;
+			break;
+//______________________________________________________________________________________
+			case idEM_ack:
+				timeout=0;
+			case idIOC_Footreq:
+				ioc->IOC_FootAck.Send();
+			break;
+//______________________________________________________________________________________
+			case idBOOT:
+				if(rx.Data[0]==0xAA)
+					while(1);
+				break;
+//______________________________________________________________________________________							
+			case idFOOT2CAN:
+				Send(idCAN2FOOT,rx.Data,rx.DLC);
+			break;
+//______________________________________________________________________________________							
+			case idCAN2FOOT:
+				while(!_buffer_push(ioFsw->tx,rx.Data,rx.DLC))
+					_wait(2);
+			break;
+//______________________________________________________________________________________
+			case idCAN2COM:
+				while(!_buffer_push(io->tx,rx.Data,rx.DLC))
+					_wait(2);
+			break;
+//______________________________________________________________________________________
+			case idCOM2CAN:
+				while(!_buffer_push(remote->io->rx,rx.Data,rx.DLC))
+					_wait(2);
+			break;
+//______________________________________________________________________________________
+			default:
+			break;
+		}
+	}
+//______________________________________________________________________________________					
+	if(timeout && __time__ > timeout) {
+		timeout=0;
+		ioc->SetError(_energyMissing);	
+	}
+//______________________________________________________________________________________
+	if(remote) {
+		CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
+		tx.DLC=_buffer_pull(remote->io->tx,tx.Data,8);
+		if(tx.DLC)
+			Send(&tx);
+	}
+}
+/*******************************************************************************
+* Function Name  : CAN_Initialize
+* Description    : Configures the CAN, transmit and receive using interrupt.
+* Input          : None
+* Output         : None
+* Return         : PASSED if the reception is well done, FAILED in other case
+*******************************************************************************/
+void	_CAN::canFilterCfg(int id, int mask) {
+CAN_FilterConfTypeDef  sFilterConfig;
+
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_16BIT;
+  sFilterConfig.FilterFIFOAssignment = 0;
+  sFilterConfig.BankNumber = 14;
+  sFilterConfig.FilterActivation = ENABLE;
+	if(filter_count % 2) {
+		sFilterConfig.FilterIdHigh = id<<5;
+		sFilterConfig.FilterMaskIdHigh = mask<<5;	
+	} else {
+		sFilterConfig.FilterIdLow =  id<<5;
+		sFilterConfig.FilterMaskIdLow = mask<<5;
+	}
+	sFilterConfig.FilterNumber = sFilterConfig.BankNumber + filter_count++;
+	HAL_CAN_ConfigFilter(hcan, &sFilterConfig);
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+FRESULT	_CAN::Decode(char *c) {
 	CanRxMsgTypeDef	rx={0,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
 	CanTxMsgTypeDef	tx={0,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};		
 
@@ -159,127 +278,5 @@ FRESULT _CAN::Decode(char *c) {
 	}
 	return FR_OK;
 }
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-void	_CAN::pollRx(void *v) {
-	CanRxMsgTypeDef		rx;
-	_IOC*							ioc=static_cast<_IOC *>(v);
-	
-	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CanRxMsgTypeDef))) {
-		_io*	temp=_stdio(io);
-		switch(rx.StdId) {
-//______________________________________________________________________________________							
-			case idIOC_State:
-				if(rx.DLC)
-					ioc->SetState((_State)rx.Data[0]);
-				ioc->IOC_State.Send();
-				break;
-//______________________________________________________________________________________							
-			case idIOC_SprayParm:
-				ioc->spray.AirLevel		= std::min(10,(int)rx.Data[0]);
-				ioc->spray.WaterLevel	= std::min(10,(int)rx.Data[1]);
-				if(rx.Data[2]==0) {
-					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
-						ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
-				}
-				ioc->spray.mode.Air=rx.Data[2] & 1;
-				ioc->spray.mode.Water=rx.Data[2] & 2;
-			break;
-//______________________________________________________________________________________							
-			case idIOC_AuxReq:
-				ioc->IOC_Aux.Temp = ioc->Th2o();
-				ioc->IOC_Aux.Send();
-			break;
-//______________________________________________________________________________________
-			case idEC20_req:
-				timeout=__time__+_EC20_EM_DELAY;
-			break;
-//______________________________________________________________________________________
-			case idEM_ack:
-				timeout=0;
-			case idIOC_Footreq:
-				ioc->IOC_FootAck.Send();
-			break;
-//______________________________________________________________________________________
-			case idBOOT:
-				if(rx.Data[0]==0xAA)
-					while(1);
-				break;
-//______________________________________________________________________________________							
-			case idFOOT2CAN:
-				rx.StdId=idCAN2FOOT;
-				Send((CanTxMsgTypeDef *)&rx);
-			break;
-//______________________________________________________________________________________							
-			case idCAN2FOOT: {
-				_io*	io=_stdio(ioFsw);
-				for(int i=0; i<rx.DLC; ++i)
-					putchar(rx.Data[i]);
-				_stdio(io);
-			} break;
-//______________________________________________________________________________________
-			case idCOM2CAN:
-				if(remote)
-					for(int i=0; i<rx.DLC; ++i)
-						while(!_buffer_push(remote->io->rx,&rx.Data[i],1))
-							_wait(2);
-			break;
-//______________________________________________________________________________________
-			case idCAN2COM:
-				for(int i=0; i < rx.DLC;++i)
-					putchar(rx.Data[i]);
-			break;
-//______________________________________________________________________________________
-			default:
-				Newline();
-				_print(" < %02X ",rx.StdId);
-				for(int i=0; i < rx.DLC; ++i)
-					_print(" %02X",rx.Data[i]);
-				Newline();	
-			break;
-		}
-	_stdio(temp);
-	}
-//______________________________________________________________________________________					
-	if(timeout && __time__ > timeout) {
-		timeout=0;
-		ioc->SetError(_energyMissing);	
-	}
-//______________________________________________________________________________________
-	if(remote) {
-		CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
-		tx.DLC=_buffer_pull(remote->io->tx,tx.Data,8);
-		if(tx.DLC)
-			Send(&tx);
-		}
-}
-/*******************************************************************************
-* Function Name  : CAN_Initialize
-* Description    : Configures the CAN, transmit and receive using interrupt.
-* Input          : None
-* Output         : None
-* Return         : PASSED if the reception is well done, FAILED in other case
-*******************************************************************************/
-void _CAN::canFilterCfg(int id, int mask) {
-CAN_FilterConfTypeDef  sFilterConfig;
 
-  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-  sFilterConfig.FilterScale = CAN_FILTERSCALE_16BIT;
-  sFilterConfig.FilterFIFOAssignment = 0;
-  sFilterConfig.BankNumber = 14;
-  sFilterConfig.FilterActivation = ENABLE;
-	if(filter_count % 2) {
-		sFilterConfig.FilterIdHigh = id<<5;
-		sFilterConfig.FilterMaskIdHigh = mask<<5;	
-	} else {
-		sFilterConfig.FilterIdLow =  id<<5;
-		sFilterConfig.FilterMaskIdLow = mask<<5;
-	}
-	sFilterConfig.FilterNumber = sFilterConfig.BankNumber + filter_count++;
-	HAL_CAN_ConfigFilter(hcan, &sFilterConfig);
-}
 

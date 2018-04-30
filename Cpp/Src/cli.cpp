@@ -87,32 +87,27 @@ int	_CLI::Fkey(int t) {
 			case __FSW_OFF:
 				ioc->IOC_FootAck.State=_OFF;
 				ioc->IOC_FootAck.Send();
-				if(ioc->debug & DBG_INFO)
-					_print("\r\n:\r\n:footswitch disconnected \r\n:");					
+				Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
 				break;
 			case __FSW_1:
 				ioc->IOC_FootAck.State=_1;
 				ioc->IOC_FootAck.Send();
-				if(ioc->debug & DBG_INFO)
-					_print("\r\n:\r\n:footswitch state 1\r\n:");					
+				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
 				break;
 			case __FSW_2:
 				ioc->IOC_FootAck.State=_2;
 				ioc->IOC_FootAck.Send();
-				if(ioc->debug & DBG_INFO)
-					_print("\r\n:\r\n:footswitch state 2\r\n:");					
+				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
 				break;
 			case __FSW_3:
 				ioc->IOC_FootAck.State=_3;
 				ioc->IOC_FootAck.Send();
-				if(ioc->debug & DBG_INFO)
-					_print("\r\n:\r\n:footswitch state 3\r\n:");					
+				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
 				break;
 			case __FSW_4:
 				ioc->IOC_FootAck.State=_4;
 				ioc->IOC_FootAck.Send();
-				if(ioc->debug & DBG_INFO)
-					_print("\r\n:\r\n:footswitch state 4\r\n:");					
+				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");					
 				break;
 				
 			default:
@@ -134,8 +129,8 @@ FRESULT _CLI::DecodePlus(char *c) {
 	switch(*++c) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->debug = (_dbg)(ioc->debug | (1<<strtoul(++c,&c,10)));
-		ioc->dbgio=io;
+			debug = (_dbg)(debug | (1<<strtoul(++c,&c,10)));
+		dbgio=io;
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
@@ -156,8 +151,8 @@ FRESULT _CLI::DecodeMinus(char *c) {
 	switch(*++c) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->debug = (_dbg)(ioc->debug & ~(1<<strtoul(++c,&c,10)));
-		ioc->dbgio=io;
+			debug = (_dbg)(debug & ~(1<<strtoul(++c,&c,10)));
+		dbgio=io;
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
@@ -191,13 +186,13 @@ FRESULT _CLI::DecodeInq(char *c) {
 	switch(*++c) {
 		case 'E':
 		{
-			ioc->dbgio=io;
+			dbgio=io;
 			_err e = ioc->IOC_State.Error;
-			_dbg d = ioc->debug;
-			ioc->debug = (_dbg)(d | DBG_ERR);
+			_dbg d = debug;
+			debug = (_dbg)(d | DBG_ERR);
 			ioc->IOC_State.Error=_NOERR;
 			ioc->SetError(e);
-			ioc->debug = d;
+			debug = d;
 		}
 			break;	
 		default:
@@ -498,17 +493,7 @@ FRESULT _CLI::Decode(char *p) {
 		}			
 		return FR_OK;
 		
-	} /*else if(!strncmp("+D",sc[0],2)) {
-		for(char *c=sc[1]; c && *c;)
-			ioc->debug = (_dbg(ioc->debug | (1<<strtoul(c,&c,10))));
-	} else if(!strncmp("-D",sc[0],2)) {
-		for(char *c=sc[1]; c && *c;)
-			ioc->debug = (_dbg(ioc->debug | ~(1<<strtoul(c,&c,10))));
-	} else if(!strncmp("+E",sc[0],2)) {
-	} else if(!strncmp("-E",sc[0],2)) {
-	} else if(!strncmp("?P",sc[0],2)) {
-		_proc_list();
-	} */else {
+	} else {
 		if(n) {
 			for(i=0; i<n; ++i)
 				_print(" %s",sc[i]);

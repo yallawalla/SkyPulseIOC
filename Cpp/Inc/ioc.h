@@ -16,17 +16,6 @@
 #include <string>
 #include <ctype.h>
 
-typedef enum {
-	DBG_OFF						=0,
-	DBG_CAN_TX				=1<<0,
-	DBG_CAN_RX				=1<<1,
-	DBG_ERR						=1<<2,
-	DBG_INFO					=1<<3,
-	DBG_CAN_COM				=1<<21,
-	DBG_EC_SIM				=1<<22,
-	DBG_ENRG					=1<<23
-}	_dbg;
-
 typedef enum {    
 	idIOC_State				=0x200,
 	idIOC_SprayParm		=0x201,
@@ -107,8 +96,6 @@ class _IOC : public _ADC {
 		static _IOC			*parent;
 		_IOC();
 		_err 						error_mask,warn_mask;
-		_dbg						debug;
-		_io							*dbgio;
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;

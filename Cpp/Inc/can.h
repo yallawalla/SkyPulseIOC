@@ -22,11 +22,11 @@ public:
 	virtual int			Fkey(int);
 	virtual FRESULT	Decode(char *);
 
-	_io		*io,*ioFsw;	
 	void	pollRx(void *),
 				canFilterCfg(int, int),
 				Send(CanTxMsgTypeDef *);	
 	int		SendRemote(int);
 	static void	Send(int, void *, int);
+	static _io  *io,*ioFsw;	
 };
 #endif

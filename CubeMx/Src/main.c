@@ -117,7 +117,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-void ioc(void);																										// main app. C++ relay object
+void makeIoc(void);																										// main app. C++ relay object
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -189,7 +189,6 @@ int main(void)
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
 	HAL_TIM_DMABurst_WriteStart(&htim4,TIM_DMABASE_CCR1,TIM_DMA_UPDATE,(uint32_t *)led_drive,TIM_DMABURSTLENGTH_2TRANSFERS);
-	// ioc();
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -935,29 +934,32 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-SemaphoreHandle_t _sWait=NULL;
-TaskHandle_t 			_tWait[]={NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-TaskHandle_t 			*tWait=_tWait;
-extern void				_tLoop(SemaphoreHandle_t *);
-//___________________________________________________________________________
-void	_task(const void *t) {
-			while(1) {
-				_tLoop(&_sWait);
-			}
-}
+SemaphoreHandle_t sWait;
+TaskHandle_t 			*pWait;
 //___________________________________________________________________________
 void	_wait(int t) {
 			_io *temp=_stdio(NULL);
-			if(*tWait==NULL)
-				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait);
-			++tWait;
-			xSemaphoreGive(_sWait);
+			if(*pWait==NULL)
+				xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, pWait);
+			++pWait;
+			xSemaphoreGive(sWait);
 			taskYIELD();
 			vTaskDelay(t);
-			xSemaphoreTake(_sWait,portMAX_DELAY);
-			--tWait;
+			xSemaphoreTake(sWait,portMAX_DELAY);
+			--pWait;
 			_stdio(temp);
 }
+//___________________________________________________________________________
+void	_task(const void *t) {
+			while(1) {
+				if(xSemaphoreTake(sWait,portMAX_DELAY)) {
+					_proc_loop();
+					xSemaphoreGive(sWait);
+				}
+				taskYIELD();
+			}
+}
+//___________________________________________________________________________
 /* USER CODE END 4 */
 
 /* StartDefaultTask function */
@@ -971,8 +973,10 @@ void StartDefaultTask(void const * argument)
 
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	ioc();
-	xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, tWait++);
+	makeIoc();
+	sWait=xSemaphoreCreateMutex();
+	pWait=calloc(16,sizeof(TaskHandle_t));
+	xTaskCreate((TaskFunction_t)_task, "---", 512, NULL, 0, pWait++);
   for(;;)
   {
     osDelay(1);

@@ -12,6 +12,8 @@
 /** @addtogroup
 * @{
 */
+_dbg	_TERM::debug=DBG_OFF;
+_io		*_TERM::dbgio=NULL;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -181,6 +183,24 @@ int		_TERM::Fsw() {
 						}
 			}
 			return EOF;
+}
+/*******************************************************************************
+* Function Name : batch
+* Description   :	ADP1047 output voltage setup, using the default format
+* Input         :
+* Output        :
+* Return        :
+*******************************************************************************/
+extern "C" {int		printk_va(char **, const char *, va_list);}
+void	_TERM::Debug(_dbg d, const char *format, ...) {
+			if(debug & (d)) {
+				_io *temp=_stdio(dbgio);
+				va_list	aptr;
+				va_start(aptr, format);
+				printk_va(0, format, aptr );
+				va_end(aptr);
+				_stdio(temp);
+			}
 }
 /**
 * @}
