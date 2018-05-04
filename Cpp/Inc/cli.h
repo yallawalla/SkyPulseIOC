@@ -6,14 +6,14 @@
 #include "misc.h"
 #include "proc.h"
 
-class _FAT {
+class _FS {
 	public:	
 	static	FATFS fatfs;
 	static	DIR		dir;			
 	static	TCHAR lfn[_MAX_LFN + 1];
 	static	FILINFO	fno;
 	
-	_FAT() {
+	_FS() {
 			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);
 				f_opendir(&dir,"/");
@@ -21,13 +21,12 @@ class _FAT {
 	}
 };
 //_________________________________________________________________________________
-class _CLI : public _TERM, public _FAT {
+class _CLI : public _TERM, public _FS {
 	private:
-		FRESULT	DecodePlus(char *),DecodeMinus(char *),DecodeInq(char *),DecodeEq(char *);
-		int			wcard(char *, char *);
-		int			find_recurse (char *, char *, int);
-		void		printRtc(void);
-
+		virtual FRESULT	DecodePlus(char *),
+										DecodeMinus(char *),
+										DecodeInq(char *),
+										DecodeEq(char *);
 	public:	
 		_io			*io;
 		virtual void		Newline(void);
@@ -40,7 +39,7 @@ class _CLI : public _TERM, public _FAT {
 
 		_CLI()	{
 			io=ioUsart(NULL,__RXLEN,__TXLEN);
-			_proc_add((void *)parseTask,this,(char *)"Usart Cli",0);
+			_proc_add((void *)parseTask,this,(char *)"Cli",0);
 		};
 
 		_CLI(UART_HandleTypeDef *huart)	{

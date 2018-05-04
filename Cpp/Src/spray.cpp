@@ -49,7 +49,7 @@ _SPRAY::_SPRAY() {
 			gain.air=																		_BAR(2.0f);
 			gain.bottle=																_BAR(0.5f);
 			gain.compressor=														_BAR(1.0f);
-			waterGain=																	_BAR(1.2f);
+
 			Air_P=Bottle_P=0;
 			AirLevel=WaterLevel=0;
 			Bottle_ref=Air_ref=													_BAR(1.0f);
@@ -67,6 +67,10 @@ _SPRAY::_SPRAY() {
 			lcd=NULL;
 			Pin=4.0;
 			pComp= pBott=pNozz=Pout=1.0;
+			
+			pFit=new _FIT();
+			pFit->rp[0]=_BAR(1.2f);
+
 }
 /*******************************************************************************
 * Function Name				:
@@ -87,7 +91,9 @@ _err	_err=_NOERR;
 			}
 //------------------------------------------------------------------------------
 			Air_ref			= offset.air + AirLevel*gain.air/10;
-			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
+			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*pFit->Eval(Air_ref - offset.air)/0x10000 + gain.bottle*WaterLevel/10;
+			
+//			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
 //			Bottle_ref	= offset.bottle + AirLevel*waterGain*(100+4*WaterLevel)/100/10;
 //------------------------------------------------------------------------------
 			if(AirLevel || WaterLevel) {
@@ -197,10 +203,10 @@ int		_SPRAY::Fkey(int t) {
 					Increment(0,0);
 					break;
 					case __PageUp:
-						waterGain=std::min(waterGain+1000,_BAR(3.0f));
+						pFit->rp[0]=std::min((int)pFit->rp[0]+1000,_BAR(3.0f));
 						break;
 					case __PageDown:
-						waterGain=std::max(waterGain-1000,_BAR(0.5f));
+						pFit->rp[0]=std::max((int)pFit->rp[0]-1000,_BAR(0.5f));
 						break;					
 					case __CtrlV:
 						if(mode.Vibrate)
@@ -208,11 +214,30 @@ int		_SPRAY::Fkey(int t) {
 						else
 							mode.Vibrate=true;
 						break;
+						
 					case __Delete:
-						_ADC::offset.air = _ADC::fval.air;
-						_ADC::offset.bottle = _ADC::fval.bottle;
-						_print("\r\n: air/water offset.... \r\n:");
+						if(AirLevel || WaterLevel)
+							_print("\r\n: Air/Water not 0.... \r\n:");
+						else {
+							_ADC::offset.air = _ADC::fval.air;
+							_ADC::offset.bottle = _ADC::fval.bottle;
+							_print("\r\n: air/water offset.... \r\n:");
+							pFit=new _FIT();
+							pFit->rp[0]=_BAR(1.2f);
+						}
 						break;
+					case __End:
+						if(pFit && pFit->Compute()) {
+							_print("\r\n: fit computed  .... \r\n:");
+							break;
+						}
+						_print("\r\n: error, not enough samples .. \r\n:");
+						break;
+					case __Insert:
+						_print("\r\n: samples added %d.... \r\n:",
+							pFit->Sample(Air_ref - offset.air, pFit->rp[0]));
+						break;
+						
 						case __CtrlS:
 							HAL_ADC_DeInit(&hadc1);
 							lcd=new _LCD;
@@ -232,12 +257,17 @@ int		_SPRAY::Fkey(int t) {
 	*/
 void	_SPRAY::LoadSettings(FIL *f) {
 char	c[128];
+int		i,j,k;
 			f_gets(c,sizeof(c),f);
 			sscanf(c,"%hu,%hu,%hu,%hu",&offset.cooler,&offset.bottle,&offset.compressor,&offset.air);
 			f_gets(c,sizeof(c),f);
 			sscanf(c,"%hu,%hu,%hu,%hu",&gain.cooler,&gain.bottle,&gain.compressor,&gain.air);
 			f_gets(c,sizeof(c),f);
-			sscanf(c,"%d",&waterGain);
+			if(sscanf(c,"%d,%d,%d",&i,&j,&k)==3) {
+				pFit->rp[0]=i;
+				pFit->rp[1]=(float)j*1e-4f;
+				pFit->rp[2]=(float)k*1e-8f;
+			}
 }
 /*******************************************************************************/
 /**
@@ -248,7 +278,10 @@ char	c[128];
 void	_SPRAY::SaveSettings(FIL *f) {
 			f_printf(f,"%5d,%5d,%5d,%5d                 /.. offset\r\n", offset.cooler, offset.bottle, offset.compressor, offset.air);
 			f_printf(f,"%5d,%5d,%5d,%5d                 /.. gain\r\n", gain.cooler,gain.bottle,gain.compressor, gain.air);
-			f_printf(f,"%5d                                   /.. gain\r\n", waterGain);
+int		a=pFit->rp[0];
+int		b=pFit->rp[1]*1e4f;
+int		c=pFit->rp[2]*1e8f;
+			f_printf(f,"%5d,%5d,%5d                       /.. pressur fit coeff.\r\n",a,b,c);
 }
 /*******************************************************************************/
 /**

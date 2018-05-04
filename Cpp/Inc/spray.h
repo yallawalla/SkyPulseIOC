@@ -5,6 +5,7 @@
 #include	"adc.h"
 #include	"err.h"
 #include	"ff.h"
+#include	"fit.h"
 #include	<algorithm>
 #include	"lcd.h"
 
@@ -44,6 +45,7 @@ class	_SPRAY : public _TERM, public _ADC {
 		int	Bottle_ref, Bottle_P;
 		int	Air_ref, Air_P;
 		int	idx,simrate;
+		_FIT		*pFit;
 
 	public:
 		_SPRAY();
@@ -56,7 +58,6 @@ class	_SPRAY : public _TERM, public _ADC {
 		_VALVE	*BottleIn,*BottleOut,*Air,*Water;
 		_err		Status();
 		mode		mode;
-		int			waterGain;
 
 		int			AirLevel, WaterLevel, readyTimeout, offsetTimeout;
 		_LCD		*lcd;

@@ -1,10 +1,10 @@
 #include "term.h"
 #include "ioc.h"
 
-FATFS		_FAT::fatfs;
-DIR			_FAT::dir;			
-TCHAR		_FAT::lfn[_MAX_LFN + 1];
-FILINFO	_FAT::fno;
+FATFS		_FS::fatfs;
+DIR			_FS::dir;			
+TCHAR		_FS::lfn[_MAX_LFN + 1];
+FILINFO	_FS::fno;
 //_________________________________________________________________________________
 void _CLI::Newline(void) {
 		_print("\r\n");
@@ -243,7 +243,7 @@ FRESULT _CLI::Decode(char *p) {
 		if(FRESULT err=f_chdir(sc[1]))
 			return err;
 	}
-//__change directory_______________________________________________________________
+//_________________________________________________________________________________
 	else if(!strncmp("eject",sc[0],len)) {
 		if(n < 2)
 			return FR_DISK_ERR;
@@ -254,46 +254,35 @@ FRESULT _CLI::Decode(char *p) {
 	else if(!strncmp("directory",sc[0],len)) {
 		if(n==1)
 			sc[1]=(char *)"*";
-		if(FRESULT err=f_readdir(&dir,NULL))
+		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
 			return err;	
 		do {
-			if(FRESULT err=f_readdir(&dir,&fno))
+			_print("\r\n%-16s",fno.fname);
+			if (fno.fattrib & AM_DIR)
+				_print("%-8s","/");
+			else
+				_print("%-8d",(int)fno.fsize);	
+			date_time(fno.fdate,fno.ftime);
+			if(FRESULT err=f_findnext(&dir,&fno))
 				return err;	
-			if(dir.sect) {
-				char *p=fno.fname;
-					p=fno.fname;
-				if(wcard(sc[1],p)) {
-					_print("\r\n%-16s",p);
-					if (fno.fattrib & AM_DIR)
-						_print("%-8s","/");
-					else
-						_print("%-8d",(int)fno.fsize);	
-					date_time(fno.fdate,fno.ftime);
-				}
-			}
-		} while(dir.sect);
+		} while(*fno.fname);
+		return FR_OK;
 	}
-//__delete file____________________________________________________________________
-	else if(!strncmp("ls",sc[0],len))
-		find_recurse(lfn,sc[1],_LIST);
-//__delete file____________________________________________________________________
-	else if(!strncmp("er",sc[0],len))
-		find_recurse(lfn,sc[1],_ERASE);
-//__delete file____________________________________________________________________
+//__delete files___________________________________________________________________
 	else if(!strncmp("delete",sc[0],len)) {
 		if(n==1)
-		sc[1]=(char *)"*";
+			sc[1]=(char *)"*";
+		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
+			return err;	
 		do {
-			if(FRESULT err=f_readdir(&dir,&fno))
+			if (fno.fattrib & AM_DIR)
+				continue;
+			if(FRESULT err=f_unlink(fno.fname))
 				return err;	
-			if(dir.sect) {
-				char *p=fno.fname;
-				if(wcard(sc[1],p)) {		
-				if(FRESULT err=f_unlink(p))
-					return err;	
-				}
-			}
-		} while(dir.sect);
+			if(FRESULT err=f_findnext(&dir,&fno))
+				return err;	
+		} while(*fno.fname);
+		return FR_OK;
 	}
 //__rename file____________________________________________________________________
 	else if(!strncmp("rename",sc[0],len)) {
@@ -401,7 +390,7 @@ FRESULT _CLI::Decode(char *p) {
 	}
 //__file line edit/add ___________________________________________________________
 	else if(!strncmp("file",sc[0],len)) {
-		class _ENTERFILE : public _TERM, public _FAT {
+		class _ENTERFILE : public _TERM, public _FS {
 			private:
 				FIL *f;
 			public:
@@ -502,57 +491,18 @@ FRESULT _CLI::Decode(char *p) {
 	}
 	return FR_OK;
 }
-//_________________________________________________________________________________
-int	_CLI::wcard(char *t, char *s) {
-			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : !*t : wcard(t+1,s) || (*s && wcard(t,s+1));
-}
-//_________________________________________________________________________________
-string days[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
-string months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-void	_CLI::printRtc() {
-RTC_TimeTypeDef t;
-RTC_DateTypeDef d;
-		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
-		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
-		_print("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
-}
-//_________________________________________________________________________________
-int	_CLI::find_recurse (char * dir_name, char *w, int fact) {
-DIR	dir;
-FILINFO	fno;
-		if (f_opendir(&dir,dir_name) != FR_OK)
-			return (EXIT_FAILURE);
-		while (1) {
-			f_readdir(&dir,&fno);
-			if (!dir.sect)
-				break;
-			else {
-				char *p=fno.fname;
-					if (!strcmp (p, "..") || !strcmp (p, "."))
-					continue;
-				if (snprintf (lfn, sizeof(lfn), "%s/%s", dir_name, p) >= sizeof(lfn))
-					return  (EXIT_FAILURE);	
-				if (fno.fattrib & AM_DIR)
-						find_recurse (lfn,w,fact);
-				switch(fact) {
-					case _LIST:
-						if(wcard(w,p)) {
-							char *q=strchr(dir_name,'/');
-							++q;
-							_print("\r\n%s",lfn);
-							if (fno.fattrib & AM_DIR)
-								_print("/");
-							else
-								_print("%*d",32-strlen(lfn),(int)fno.fsize);
-						}
-					break;
-					case _ERASE:
-						if(wcard(w,p))
-							f_unlink(p);
-					}
-			}
-		}
-		if (f_closedir(&dir) != FR_OK)
-			return (EXIT_FAILURE);
-		return FR_OK;
-}
+////_________________________________________________________________________________
+//int	_CLI::wcard(char *t, char *s) {
+//			return *t-'*' ? *s ? (*t=='?') | (toupper(*s)==toupper(*t)) && wcard(t+1,s+1) : !*t : wcard(t+1,s) || (*s && wcard(t,s+1));
+//}
+////_________________________________________________________________________________
+//string days[]={"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
+//string months[]={"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+//void	_CLI::printRtc() {
+//RTC_TimeTypeDef t;
+//RTC_DateTypeDef d;
+//		HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
+//		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
+//		_print("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
+//}
+
