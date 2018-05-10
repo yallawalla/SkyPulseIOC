@@ -65,6 +65,7 @@
 #define __TH 94
 #define __TL 36
 #define __TP 130
+#define SW_version 20
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
@@ -92,8 +93,8 @@
 #define _12V_GPIO_Port GPIOB
 #define _24V_Pin GPIO_PIN_1
 #define _24V_GPIO_Port GPIOB
-#define cwbBUTTON_Pin GPIO_PIN_9
-#define cwbBUTTON_GPIO_Port GPIOD
+#define cwbBUTTON_Pin GPIO_PIN_15
+#define cwbBUTTON_GPIO_Port GPIOB
 #define cwbDOOR_Pin GPIO_PIN_10
 #define cwbDOOR_GPIO_Port GPIOD
 #define cwbENGM_Pin GPIO_PIN_11

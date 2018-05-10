@@ -238,7 +238,11 @@ FRESULT _CLI::Decode(char *p) {
 //	}
 ////__change directory_______________________________________________________________
 //	else 
-		if(!strncmp("cdir",sc[0],len)) {
+		if(!strncmp("version",sc[0],len)) {
+			printVersion();	
+		}
+//_________________________________________________________________________________
+	else if(!strncmp("cdir",sc[0],len)) {
 		if(n < 2)
 			return FR_NO_FILE;
 		if(FRESULT err=f_chdir(sc[1]))

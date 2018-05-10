@@ -28,7 +28,10 @@ _io* 	ioUsart(UART_HandleTypeDef *, int, int);
 void	dumpHex(int, int);
 void	flushVCP(const void *);
 void	flushUART(const void *);
+void	printVersion(void);
 HAL_StatusTypeDef canFilterCfg(CAN_HandleTypeDef *);
+
+extern uint32_t	__Vectors[];
 
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
@@ -38,6 +41,7 @@ extern ADC_HandleTypeDef	hadc1;
 extern ADC_HandleTypeDef	hadc2;
 extern TIM_HandleTypeDef	htim4;
 extern IWDG_HandleTypeDef hiwdg;
+extern CRC_HandleTypeDef 	hcrc;
 
 extern	uint32_t pumpTacho, fanTacho, flowTacho,valve_timeout[];
 extern	uint16_t pump_drive, fan_drive, valve_drive[], led_drive[];
@@ -49,7 +53,8 @@ extern void	date_time(uint32_t, uint32_t);
 extern RTC_TimeTypeDef sTime;
 extern RTC_DateTypeDef sDate;
 
-extern void	led_poll(void);
+void	led_poll(void);
+
 void __RED1(int32_t);
 void __GREEN1(int32_t);
 void __YELLOW1(int32_t);
