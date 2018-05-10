@@ -169,8 +169,19 @@ void	date_time(uint32_t d,uint32_t t) {
 * Return				:
 *******************************************************************************/
 void	Watchdog() {
-	
-	
+			HAL_IWDG_Refresh(&hiwdg);	
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	Watchdog_init(int t) {
+			hiwdg.Instance = IWDG;
+			hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+			hiwdg.Init.Reload = t;
+			HAL_IWDG_Init(&hiwdg);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -182,6 +193,7 @@ int		ff_pack(int mode) {
 int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];
 int		c0=0,c1=0;
 
+			Watchdog_init(4000);
 			f=FATFS_SECTOR;																															// f=koda prvega 128k sektorja
 			e=PAGE_SIZE;																																// e=velikost sektorja
 			p=(int *)FATFS_ADDRESS;																											// p=hw adresa sektorja

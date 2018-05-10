@@ -56,7 +56,7 @@ class _TERM {
 	public:
 		_TERM() {
 			fsw.timeout=0;
-			fsw.key=__FSW;
+			fsw.key=__FSW_OFF;
 			esc.seq=esc.timeout=0;
 			rpt.seq=rpt.timeout=0;
 			cmdp=cmdbuf=new char[__CMDLEN];

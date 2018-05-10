@@ -68,6 +68,8 @@ CAN_HandleTypeDef hcan2;
 DAC_HandleTypeDef hdac;
 DMA_HandleTypeDef hdma_dac1;
 
+IWDG_HandleTypeDef hiwdg;
+
 RTC_HandleTypeDef hrtc;
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
@@ -109,6 +111,7 @@ static void MX_TIM8_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
 static void MX_ADC2_Init(void);
+static void MX_IWDG_Init(void);
 void StartDefaultTask(void const * argument);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -170,6 +173,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   MX_ADC2_Init();
+  MX_IWDG_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -467,10 +471,10 @@ static void MX_CAN2_Init(void)
 {
 
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 4;
+  hcan2.Init.Prescaler = 6;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SJW = CAN_SJW_4TQ;
-  hcan2.Init.BS1 = CAN_BS1_10TQ;
+  hcan2.Init.BS1 = CAN_BS1_9TQ;
   hcan2.Init.BS2 = CAN_BS2_4TQ;
   hcan2.Init.TTCM = DISABLE;
   hcan2.Init.ABOM = ENABLE;
@@ -504,6 +508,20 @@ static void MX_DAC_Init(void)
   sConfig.DAC_Trigger = DAC_TRIGGER_T4_TRGO;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+}
+
+/* IWDG init function */
+static void MX_IWDG_Init(void)
+{
+
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
+  hiwdg.Init.Reload = 300;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -787,7 +805,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 921600;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -947,6 +965,7 @@ void	_wait(int t) {
 void	_task(const void *t) {
 			while(1) {
 				if(xSemaphoreTake(sWait,portMAX_DELAY)) {
+					Watchdog();
 					_proc_loop();
 					xSemaphoreGive(sWait);
 				}

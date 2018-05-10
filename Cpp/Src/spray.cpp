@@ -117,10 +117,10 @@ _err	_err=_NOERR;
 					BottleOut->Open();
 			}
 
-			if(10*(fval.compressor-offset.compressor)/gain.compressor < 25)
+			if((fval.compressor-offset.compressor)/gain.compressor == 0)
 				_err = _err | _sprayInPressure;		
 			if(readyTimeout && __time__ < readyTimeout)
-				_err = _err |  _sprayNotReady;
+				_err = _err | _sprayNotReady;
 			else
 				readyTimeout=0;
 

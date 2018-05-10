@@ -1,9 +1,24 @@
 #include "stm32f4xx_hal.h"
 #include "ioc.h"
+#include "io.h"
 
 extern "C" {
 	void makeIoc(void) {
 		_IOC::parent=new _IOC;
+		
+	_stdio(_IOC::parent->com1.io);
+	if(__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST) == SET)
+		_print("\r ... SWR reset, %dMHz\r\n>",SystemCoreClock/1000000);
+	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) == SET)
+		_print("\r ... IWDG reset\r\n>");
+	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST) == SET)
+		_print("\r ... WWDG reset\r\n>");
+	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST) == SET)
+		_print("\r ... power on reset\r\n>");
+	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST) == SET)
+	{} else {}
+	__HAL_RCC_CLEAR_RESET_FLAGS();
+	_stdio(NULL);
 	}
 }
 _IOC*	_IOC::parent			= NULL;
@@ -18,7 +33,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 	SetState(_STANDBY);	
 	
 	FIL f;
-	if(f_open(&f,"0:/lm.ini",FA_READ) == FR_OK) {
+	if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
 		pump.LoadSettings(&f);
 		fan.LoadSettings(&f);
 		spray.LoadSettings(&f);
@@ -30,7 +45,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	_proc_add((void *)taskRx,this,(char *)"can rx",0);
-	ws2812.Batch((char *)"@onoff.led");
+	ws2812.Batch((char *)"@onoff.ws");
 }
 /*******************************************************************************
 * Function Name	:
@@ -69,23 +84,23 @@ void	_IOC::SetState(_State s) {
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-					ws2812.Batch((char *)"@standby.led");
+					ws2812.Batch((char *)"@standby.ws");
 					_SYS_SHG_ENABLE;
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
 					pump.Enable();
-					ws2812.Batch((char *)"@ready.led");
+					ws2812.Batch((char *)"@ready.ws");
 					break;
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-					ws2812.Batch((char *)"@active.led");
+					ws2812.Batch((char *)"@active.ws");
 					break;
 				case	_ERROR:
 					if(IOC_State.State != _ERROR) {
 						IOC_State.State = _ERROR;
-						ws2812.Batch((char *)"@error.led");
+						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;
 					}
 					break;
@@ -100,7 +115,7 @@ void	_IOC::SetState(_State s) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetError(_err err) {
-int		w = (err ^ IOC_State.Error) & err & warn_mask;
+int		w = (err ^ IOC_State.Error) & warn_mask;
 int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 			if(__time__ > 3000) {
 				if(e) {
@@ -109,7 +124,7 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 					SetState(_ERROR);
 				}
 				if(e | w) {
-					IOC_State.Error = (_err)(IOC_State.Error | e | w );
+					IOC_State.Error = (_err)((IOC_State.Error | e) ^ w );
 					IOC_State.Send();
 				}
 
@@ -118,14 +133,17 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 				else
 					__RED2(200);
 
-
 				if(e | w) {
 					for(int n=0; n<32; ++n)
 						if(e & (1<<n))
 							_TERM::Debug(DBG_ERR,"\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
 					for(int n=0; n<32; ++n)
-						if(w & (1<<n))
-							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
+						if(w & (1<<n)) {
+							if(w & IOC_State.Error)
+								_TERM::Debug(DBG_ERR,"\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
+							else
+								_TERM::Debug(DBG_ERR,"\r\nwarning %04d: ...",n);
+						}
 					}
 			}
 }

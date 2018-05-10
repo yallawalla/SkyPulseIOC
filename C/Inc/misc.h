@@ -37,6 +37,7 @@ extern RTC_HandleTypeDef 	hrtc;
 extern ADC_HandleTypeDef	hadc1;
 extern ADC_HandleTypeDef	hadc2;
 extern TIM_HandleTypeDef	htim4;
+extern IWDG_HandleTypeDef hiwdg;
 
 extern	uint32_t pumpTacho, fanTacho, flowTacho,valve_timeout[];
 extern	uint16_t pump_drive, fan_drive, valve_drive[], led_drive[];

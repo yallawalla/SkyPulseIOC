@@ -70,7 +70,7 @@ int	_CLI::Fkey(int t) {
 			case __F11:
 			{
 				FIL *f=new FIL;
-				if(f_open(f,"0:/lm.ini",FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+				if(f_open(f,"0:/ioc.ini",FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
 					ioc->pump.SaveSettings(f);
 					ioc->fan.SaveSettings(f);
 					ioc->spray.SaveSettings(f);
@@ -225,19 +225,20 @@ FRESULT _CLI::Decode(char *p) {
 	if(!sc[0])
 		return FR_OK;
 	len=strlen(sc[0]);
-//_________________________________________________________________________________
-	if(!(strncmp("0:",sc[0],len) && strncmp("1:",sc[0],len))) {
-		if(FRESULT err=f_mount(&fatfs,sc[0],1))
-			return err;
-		if(FRESULT err=f_chdrive(sc[0]))
-			return err;
-		if(FRESULT err=f_getcwd(lfn,_MAX_LFN))
-			return err;
-		if(FRESULT err=f_opendir(&dir,lfn))
-			return err;
-	}
-//__change directory_______________________________________________________________
-	else if(!strncmp("cdir",sc[0],len)) {
+////_________________________________________________________________________________
+//	if(!(strncmp("0:",sc[0],len) && strncmp("1:",sc[0],len))) {
+//		if(FRESULT err=f_mount(&fatfs,sc[0],1))
+//			return err;
+//		if(FRESULT err=f_chdrive(sc[0]))
+//			return err;
+//		if(FRESULT err=f_getcwd(lfn,_MAX_LFN))
+//			return err;
+//		if(FRESULT err=f_opendir(&dir,lfn))
+//			return err;
+//	}
+////__change directory_______________________________________________________________
+//	else 
+		if(!strncmp("cdir",sc[0],len)) {
 		if(n < 2)
 			return FR_NO_FILE;
 		if(FRESULT err=f_chdir(sc[1]))
@@ -360,12 +361,14 @@ FRESULT _CLI::Decode(char *p) {
 		uint8_t	*workbuf;
 		if(n < 2)
 			return FR_NO_FILE;
-		
+
+		Watchdog_init(4000);
 		if(!strncmp("0:",sc[1],len)) {
 			for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
 				FLASH_Erase(i,1);
 				_print(".");
 				_wait(100);
+				Watchdog();
 			}
 		}		
 		FRESULT err=f_mount(&fatfs,sc[1],1);

@@ -58,9 +58,7 @@ bool	_TERM::Cmd(int c) {
 					return true;
 
 				default:
-					if(c < ' ' || c > 127)
-						_print("<%02X>",c);
-					else {
+					if(c >= ' ' && c < 128) {
 						_print("%c",c);
 						*cmdp++=c;
 					}
