@@ -156,6 +156,10 @@ int		e=_NOERR;
 void 	_PUMP::Increment(int a, int b)	{
 			idx= std::min(std::max(idx+b,0),5);
 			switch(idx) {
+				case 0:
+					if(a)
+						mode ^= (1<<PUMP_FLOW);
+					break;
 				case 1:
 					fpl= std::min(std::max(fpl+a,5),fph);
 					break;
@@ -183,7 +187,7 @@ int		k, i=fval.Ipump*3300/4096.0/2.1/16;
 			if(mode & (1<<PUMP_FLOW))
 				k=flow/(2200/300);
 			else
-				k=(fval.cooler-offset.cooler)/gain.cooler;
+				k=10*(fval.cooler-offset.cooler)/gain.cooler;
 			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
 			if(idx>0) {
 				_print("   %2d%c-%2d%c,%2d'-%2d',%d.%03dA",fpl,'%',fph,'%',ftl,fth,i/1000,i%1000);

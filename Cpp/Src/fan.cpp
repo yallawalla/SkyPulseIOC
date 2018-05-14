@@ -21,8 +21,6 @@
 /*******************************************************************************/
 _FAN::_FAN()  {
 			ftl=30; fth=40; fpl=20; fph=95;
-			offset.cooler=12500;
-			gain.cooler=13300;
 			idx=speed=tacho_limit=0;
 			timeout=__time__ + _FAN_ERR_DELAY;
 }

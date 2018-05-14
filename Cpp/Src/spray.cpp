@@ -69,8 +69,9 @@ _SPRAY::_SPRAY() {
 			pComp= pBott=pNozz=Pout=1.0;
 			
 			pFit=new _FIT();
-			pFit->rp[0]=_BAR(1.2f);
-
+			pFit->rp[0]=18049;
+			pFit->rp[1]=11544;
+			pFit->rp[2]=-1603;
 }
 /*******************************************************************************
 * Function Name				:
@@ -79,7 +80,6 @@ _SPRAY::_SPRAY() {
 * Return							: None
 *******************************************************************************/
 #define	_P_THRESHOLD  0x8000
-#define	_A_THRESHOLD	0x2000
 
 _err	_SPRAY::Status() {
 _err	_err=_NOERR;
@@ -92,7 +92,7 @@ _err	_err=_NOERR;
 //------------------------------------------------------------------------------
 			Air_ref			= offset.air + AirLevel*gain.air/10;
 			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*pFit->Eval(Air_ref - offset.air)/0x10000 + gain.bottle*WaterLevel/10;
-			
+//
 //			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
 //			Bottle_ref	= offset.bottle + AirLevel*waterGain*(100+4*WaterLevel)/100/10;
 //------------------------------------------------------------------------------
@@ -130,15 +130,18 @@ _err	_err=_NOERR;
 				Water->Close();	
 
 			if(AirLevel && mode.Air) {
-				Air_P += (Air_ref-(int)fval.air);
-				Air_P=std::max(0,std::min(_A_THRESHOLD*__PWMRATE, Air_P));
-				if(mode.Vibrate && __time__ % 50 < 10)
-					Air->Open();
+				if(Air_ref > (int)fval.air)
+					Air_P=std::min(__PWMRATE, ++Air_P);
+				if(Air_ref < (int)fval.air)
+					Air_P=std::max(__PWMRATE/10, --Air_P);
+				
+				if(mode.Vibrate && __time__ % 30 > 10)
+					Air->Close();
 				else
-					Air->Set(Air_P/_A_THRESHOLD);						
-			}
-			else
+					Air->Set(Air_P);					
+			}	else {
 				Air->Close();
+			}
 
 			if(mode.Simulator && Simulator()) {
 #ifdef USE_LCD
@@ -150,19 +153,13 @@ _err	_err=_NOERR;
 }
 //_________________________________________________________________________________
 void	_SPRAY::Newline(void) {
-			if(mode.Simulator) {
-				printf("\r:spray %3d,%5d,%5.2f,%5.2f,%5.2f",
-					AirLevel,WaterLevel,
-						(float)(fval.air-offset.air)/_BAR(1),
-							(float)(fval.bottle-offset.bottle)/_BAR(1),
-								Pout-1.0f);
-			} else {
-				printf("\r:spray %3d,%5d,%5.2f,%5.2f,%5.2f",
-					AirLevel,WaterLevel,
-						(float)(fval.air-offset.air)/_BAR(1),
-							(float)(fval.bottle-offset.bottle)/_BAR(1),
-								(float)(fval.compressor-offset.compressor)/_BAR(1));
-			}
+			int i=100*(fval.air-offset.air)/_BAR(1);
+			int j=100*(fval.bottle-offset.bottle)/_BAR(1);
+			int k=mode.Simulator ? 100*Pout-100 :  100*(fval.compressor-offset.compressor)/_BAR(1);
+
+			printf("\r:spray %3d,%5d,%2d.%02d,%2d.%02d,%2d.%02d",
+				AirLevel,WaterLevel, i/100, abs(i%100), j/100, abs(j%100), k/100, abs(k%100));
+
 			if(mode.Air) 
 				_print("   Air"); 
 			else 
@@ -397,11 +394,11 @@ double	Iout=(Uc2 - Pout)/Rout;
 
 	fval.compressor	=_BAR(pComp);
 	fval.bottle			=_BAR(pBott + 0.05*I12*R2);
-	fval.air					=_BAR(pNozz + I13*Ra);
+	fval.air				=_BAR(pNozz + I13*Ra);
 
-	fval.V5	= _V5to16X;
-	fval.V12	= _V12to16X;
-	fval.V24	= _V24to16X;
+	fval.V5					= _V5to16X;
+	fval.V12				= _V12to16X;
+	fval.V24				= _V24to16X;
 
 	fval.T2=(unsigned short)0xafff;
 	if(simrate && __time__ < simrate)

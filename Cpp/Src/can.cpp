@@ -116,7 +116,7 @@ void	_CAN::pollRx(void *v) {
 	_IOC*							ioc=static_cast<_IOC *>(v);
 	while(_buffer_pull(canBuffer->rx,&rx,sizeof(CanRxMsgTypeDef))) {
 //______________________________________________________________________________________							
-		Debug(DBG_CAN_RX,"\r\n> %02X ",rx.StdId);
+		Debug(DBG_CAN_RX,"\r\n< %02X ",rx.StdId);
 		for(int i=0; i < rx.DLC; ++i)
 			Debug(DBG_CAN_RX," %02X",rx.Data[i]);
 		Debug(DBG_CAN_RX,"\r\n");

@@ -6,10 +6,12 @@
 #include	"err.h"
 #include	"ff.h"
 #include	<algorithm>
+
 #define		__ramp(x,x1,x2,y1,y2)	std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
+
 typedef		enum	{PUMP_FLOW, PUMP_ERR_STOP} _MODE_;
 
-extern DAC_HandleTypeDef hdac;
+extern 		DAC_HandleTypeDef hdac;
 
 class	_PUMP : public _TERM, public _ADC {
 	private:

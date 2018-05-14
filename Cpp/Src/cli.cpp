@@ -280,8 +280,8 @@ FRESULT _CLI::Decode(char *p) {
 		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
 			return err;	
 		do {
-			if (fno.fattrib & AM_DIR)
-				continue;
+//			if (fno.fattrib & AM_DIR)
+//				continue;
 			if(FRESULT err=f_unlink(fno.fname))
 				return err;	
 			if(FRESULT err=f_findnext(&dir,&fno))

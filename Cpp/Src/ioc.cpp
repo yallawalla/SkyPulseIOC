@@ -9,39 +9,27 @@ extern "C" {
 * Output				:
 * Return				:
 ****************************f***************************************************/
-	void	printVersion() {
-		_print(" %d.%02d %s <%08X>",
-			SW_version/100,SW_version%100,
-				__DATE__,
-					HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)));
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-****************************f***************************************************/
 	void makeIoc(void) {
 		_IOC::parent=new _IOC;
 		
-	_stdio(_IOC::parent->com3.io);
-	if(__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
-		_print("\rSWR");
-	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
-		_print("\rIWDG");
-	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
-		_print("\rWWDG");
-	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
-		_print("\rPOR");
-	else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST))
-	{} else {}
-	__HAL_RCC_CLEAR_RESET_FLAGS();
-		
-	_print(" reset, CPU %dMHz\r\nV",SystemCoreClock/1000000);
-	 printVersion();
-	_print("\r\n/");
-		
-	_stdio(NULL);
+		_stdio(_IOC::parent->com1.io);
+		if(__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
+			_print("\rSWR");
+		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
+			_print("\rIWDG");
+		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
+			_print("\rWWDG");
+		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
+			_print("\rPOR");
+		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST))
+		{} else {}
+		__HAL_RCC_CLEAR_RESET_FLAGS();
+			
+		_print(" reset, CPU %dMHz\r\nV",SystemCoreClock/1000000);
+		 printVersion();
+		_print("\r\n/");
+			
+		_stdio(NULL);
 	}
 }
 _IOC*	_IOC::parent			= NULL;
