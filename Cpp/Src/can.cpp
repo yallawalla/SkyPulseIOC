@@ -91,7 +91,7 @@ int		_CAN::Fkey(int t) {
 	switch(t) {
 		case __CtrlE:
 			_print("remote console...\r\n");
-			while(SendRemote(idCOM2CAN) != __CtrlE) 
+			while(SendRemote(idCAN2COM) != __CtrlE) 
 				_wait(2);
 			_print("close...");
 			Newline();
@@ -169,12 +169,12 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idCAN2COM:
-				while(!_buffer_push(io->tx,rx.Data,rx.DLC))
+				while(!_buffer_push(remote->io->rx,rx.Data,rx.DLC))
 					_wait(2);
 			break;
 //______________________________________________________________________________________
 			case idCOM2CAN:
-				while(!_buffer_push(remote->io->rx,rx.Data,rx.DLC))
+				while(!_buffer_push(io->tx,rx.Data,rx.DLC))
 					_wait(2);
 			break;
 //______________________________________________________________________________________
@@ -189,7 +189,7 @@ void	_CAN::pollRx(void *v) {
 	}
 //______________________________________________________________________________________
 	if(remote) {
-		CanTxMsgTypeDef	tx={idCAN2COM,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
+		CanTxMsgTypeDef	tx={idCOM2CAN,0,CAN_ID_STD,CAN_RTR_DATA,0,0,0,0,0,0,0,0,0};
 		tx.DLC=_buffer_pull(remote->io->tx,tx.Data,8);
 		if(tx.DLC)
 			Send(&tx);

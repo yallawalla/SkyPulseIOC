@@ -107,7 +107,7 @@ class _IOC : public _ADC {
 		_FAN 						fan;
 		_RTC						rtc;
 		_CLI						com1,com3,comUsb;
-
+		_FSW						Fsw;
 		~_IOC();
 
 		void SetState(_State);

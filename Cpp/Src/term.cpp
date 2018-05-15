@@ -12,8 +12,8 @@
 /** @addtogroup
 * @{
 */
+_io*	_TERM::dbgio=NULL;
 _dbg	_TERM::debug=DBG_OFF;
-_io		*_TERM::dbgio=NULL;
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -96,7 +96,7 @@ int		i=getchar();
 				esc.timeout=0;
 				return i;
 			}
-			return Fsw();
+			return EOF;
 }
 //______________________________________________________________________________________
 void	*_TERM::Parse(_io *io) {
@@ -160,27 +160,6 @@ FRESULT _TERM::Batch(char *filename) {
 			}
 			delete f;
 			return ret;
-}
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-int		_TERM::Fsw() {	
-			int i=__FSW;
-			if(i != fsw.temp) {
-				fsw.temp = i;
-				fsw.timeout = __time__ + 10;
-			} else 
-					if(fsw.timeout && __time__ > fsw.timeout) {
-						fsw.timeout=0;
-						if(fsw.temp != fsw.key ) {
-							fsw.key=fsw.temp ;
-							return (fsw.key);
-						}
-			}
-			return EOF;
 }
 /*******************************************************************************
 * Function Name : batch

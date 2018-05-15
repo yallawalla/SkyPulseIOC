@@ -80,6 +80,33 @@ _err	e = me->pump.Status();
 			e = e | me->spray.Status();
 			e = e | me->adcError();
 			me->SetError(e);
+			switch(me->Fsw.Get()) {
+				case __FSW_OFF:
+					me->IOC_FootAck.State=_OFF;
+					me->IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
+					break;
+				case __FSW_1:
+					me->IOC_FootAck.State=_1;
+					me->IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
+					break;
+				case __FSW_2:
+					me->IOC_FootAck.State=_2;
+					me->IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
+					break;
+				case __FSW_3:
+					me->IOC_FootAck.State=_3;
+					me->IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
+					break;
+				case __FSW_4:
+					me->IOC_FootAck.State=_4;
+					me->IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");										
+					break;
+			}
 			return me;
 }
 /*******************************************************************************

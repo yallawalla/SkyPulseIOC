@@ -82,34 +82,7 @@ int	_CLI::Fkey(int t) {
 					_print("... error settings file");		
 				Newline();
 			}
-				break;
-			
-			case __FSW_OFF:
-				ioc->IOC_FootAck.State=_OFF;
-				ioc->IOC_FootAck.Send();
-				Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
-				break;
-			case __FSW_1:
-				ioc->IOC_FootAck.State=_1;
-				ioc->IOC_FootAck.Send();
-				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
-				break;
-			case __FSW_2:
-				ioc->IOC_FootAck.State=_2;
-				ioc->IOC_FootAck.Send();
-				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
-				break;
-			case __FSW_3:
-				ioc->IOC_FootAck.State=_3;
-				ioc->IOC_FootAck.Send();
-				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
-				break;
-			case __FSW_4:
-				ioc->IOC_FootAck.State=_4;
-				ioc->IOC_FootAck.Send();
-				Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");					
-				break;
-				
+			break;
 			default:
 				return t;
 		}
