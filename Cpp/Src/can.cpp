@@ -164,17 +164,17 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________							
 			case idCAN2FOOT:
-				while(!_buffer_push(ioFsw->tx,rx.Data,rx.DLC))
+				while(rx.DLC && !_buffer_push(ioFsw->tx,rx.Data,rx.DLC))
 					_wait(2);
 			break;
 //______________________________________________________________________________________
 			case idCAN2COM:
-				while(!_buffer_push(remote->io->rx,rx.Data,rx.DLC))
+				while(rx.DLC && !_buffer_push(remote->io->rx,rx.Data,rx.DLC))
 					_wait(2);
 			break;
 //______________________________________________________________________________________
 			case idCOM2CAN:
-				while(!_buffer_push(io->tx,rx.Data,rx.DLC))
+				while(rx.DLC && !_buffer_push(io->tx,rx.Data,rx.DLC))
 					_wait(2);
 			break;
 //______________________________________________________________________________________

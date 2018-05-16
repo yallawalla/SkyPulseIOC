@@ -147,6 +147,7 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
 * Return				:
 *******************************************************************************/
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
+		hcan->Instance->MSR |= 0x0004;
 		HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 /*******************************************************************************
