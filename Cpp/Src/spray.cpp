@@ -157,7 +157,7 @@ void	_SPRAY::Newline(void) {
 			int j=100*(fval.bottle-offset.bottle)/_BAR(1);
 			int k=mode.Simulator ? 100*Pout-100 :  100*(fval.compressor-offset.compressor)/_BAR(1);
 
-			printf("\r:spray %3d,%5d,%2d.%02d,%2d.%02d,%2d.%02d",
+			_print("\r:spray %3d,%5d,%2d.%02d,%2d.%02d,%2d.%02d",
 				AirLevel,WaterLevel, i/100, abs(i%100), j/100, abs(j%100), k/100, abs(k%100));
 
 			if(mode.Air) 

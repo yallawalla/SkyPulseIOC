@@ -17,7 +17,8 @@ typedef	enum {
 	_flowTacho				=1<<11,
 	_energyMissing		=1<<12,
 	_sprayNotReady		=1<<13,
-	_doorswDisabled		=1<<14
+	_doorswDisabled		=1<<14,
+	_footswerror			=1<<15
 } _err;           
            
 inline _err operator ~(_err a)

@@ -73,40 +73,55 @@ _IOC::~_IOC() {
 * Output				:
 * Return				:
 *******************************************************************************/
+_err	_IOC::fswError() {
+			switch(Fsw.Read()) {
+				case EOF:
+					break;
+				case __FSW_OFF:
+					IOC_FootAck.State=_OFF;
+					IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
+					break;
+				case __FSW_1:
+					IOC_FootAck.State=_1;
+					IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
+					break;
+				case __FSW_2:
+					IOC_FootAck.State=_2;
+					IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
+					break;
+				case __FSW_3:
+					IOC_FootAck.State=_3;
+					IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
+					break;
+				case __FSW_4:
+					IOC_FootAck.State=_4;
+					IOC_FootAck.Send();
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");										
+					break;
+				default:
+					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch error\r\n:");		
+					return _footswerror;			
+			}
+			return _NOERR;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
 _IOC *me=static_cast<_IOC *>(v);
 _err	e = me->pump.Status();
 			e = e | me->fan.Status();
 			e = e | me->spray.Status();
 			e = e | me->adcError();
+			e = e | me->fswError();
 			me->SetError(e);
-			switch(me->Fsw.Get()) {
-				case __FSW_OFF:
-					me->IOC_FootAck.State=_OFF;
-					me->IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
-					break;
-				case __FSW_1:
-					me->IOC_FootAck.State=_1;
-					me->IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
-					break;
-				case __FSW_2:
-					me->IOC_FootAck.State=_2;
-					me->IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
-					break;
-				case __FSW_3:
-					me->IOC_FootAck.State=_3;
-					me->IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
-					break;
-				case __FSW_4:
-					me->IOC_FootAck.State=_4;
-					me->IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");										
-					break;
-			}
 			return me;
 }
 /*******************************************************************************
@@ -192,22 +207,23 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 * Return				:
 *******************************************************************************/
 const string _IOC::ErrMsg[] = {
-	"5V  supply",
-	"12V supply",
-	"24V supply",
-	"spray input pressure",
-	
-	"cooler temperature",
-	"pump rate out of range",
-	"pump pressure out of range",
-	"pump current out of range",
-	
-	"fan rate out of range",
-	"emergency button pressed",
-	"handpiece crowbar fail",
-	"flow rate out of range",
-	
-	"energy report timeout",
-	"spray not ready",
-	"doorswitch crowbar fail"
+			"5V  supply",
+			"12V supply",
+			"24V supply",
+			"spray input pressure",
+			
+			"cooler temperature",
+			"pump rate out of range",
+			"pump pressure out of range",
+			"pump current out of range",
+			
+			"fan rate out of range",
+			"emergency button pressed",
+			"handpiece crowbar fail",
+			"flow rate out of range",
+			
+			"energy report timeout",
+			"spray not ready",
+			"doorswitch crowbar fail",
+			"footswitch error"
 };

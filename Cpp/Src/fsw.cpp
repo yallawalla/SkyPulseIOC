@@ -18,7 +18,7 @@
 * Output				:
 * Return				:
 *******************************************************************************/
-int		_FSW::Get() {	
+int		_FSW::Read() {	
 			int i=__FSW;
 			if(i != temp) {
 				temp = i;
@@ -28,15 +28,7 @@ int		_FSW::Get() {
 						timeout=0;
 						if(temp != key ) {
 							key=temp ;
-							switch(key) {
-								case __FSW_1:
-								case __FSW_2:
-								case __FSW_3:
-								case __FSW_4:
-									return (key);
-								default:
-									return __FSW_OFF;
-								}
+							return (key);
 						}
 			}
 			return EOF;

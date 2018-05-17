@@ -29,6 +29,6 @@ class _FSW {
 		int key,temp,timeout;
 	public:
 		_FSW();
-		int Get(void);
+		int Read(void);
 	};
 #endif

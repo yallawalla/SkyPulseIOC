@@ -112,6 +112,7 @@ class _IOC : public _ADC {
 
 		void SetState(_State);
 		void SetError(_err);
+		_err fswError(void);
 
 		static const string	ErrMsg[];
 		static void	*pollStatus(void *);

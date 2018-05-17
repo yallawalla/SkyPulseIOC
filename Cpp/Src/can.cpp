@@ -15,10 +15,10 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 	filter_count=timeout=0;
 
-	canFilterCfg(idIOC_State,	0x780);
-	canFilterCfg(idEC20_req,	0x780);
-	canFilterCfg(idEM_ack,		0x7ff);
-	canFilterCfg(idBOOT,			0x7ff);
+	canFilterCfg(idIOC_State,	0x780);	//0x200
+	canFilterCfg(idEC20_req,	0x7ff);	//0x280
+	canFilterCfg(idEM_ack,		0x7ff);	//0x0C0
+	canFilterCfg(idBOOT,			0x7ff);	//0x020
 }
 /*******************************************************************************
 * Function Name	: 
