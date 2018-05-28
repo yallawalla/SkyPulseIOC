@@ -113,8 +113,8 @@ static void MX_TIM8_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_RTC_Init(void);
 static void MX_ADC2_Init(void);
-static void MX_IWDG_Init(void);
 static void MX_CRC_Init(void);
+static void MX_IWDG_Init(void);
 void StartDefaultTask(void const * argument);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -176,8 +176,8 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   MX_ADC2_Init();
-  MX_IWDG_Init();
   MX_CRC_Init();
+  MX_IWDG_Init();
 
   /* USER CODE BEGIN 2 */
 
@@ -678,7 +678,7 @@ static void MX_TIM8_Init(void)
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
 
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 41;
+  htim8.Init.Prescaler = 29;
   htim8.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
   htim8.Init.Period = __PWMRATE;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -821,7 +821,7 @@ static void MX_USART1_UART_Init(void)
 {
 
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 921600;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -840,7 +840,7 @@ static void MX_USART3_UART_Init(void)
 {
 
   huart3.Instance = USART3;
-  huart3.Init.BaudRate = 57600;
+  huart3.Init.BaudRate = 115200;
   huart3.Init.WordLength = UART_WORDLENGTH_8B;
   huart3.Init.StopBits = UART_STOPBITS_1;
   huart3.Init.Parity = UART_PARITY_NONE;
@@ -930,8 +930,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : cwbBUTTON_Pin cwbDOOR_Pin cwbENGM_Pin */
-  GPIO_InitStruct.Pin = cwbBUTTON_Pin|cwbDOOR_Pin|cwbENGM_Pin;
+  /*Configure GPIO pin : cwbBUTTON_Pin */
+  GPIO_InitStruct.Pin = cwbBUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(cwbBUTTON_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : cwbDOOR_Pin cwbENGM_Pin */
+  GPIO_InitStruct.Pin = cwbDOOR_Pin|cwbENGM_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);

@@ -22,3 +22,7 @@ fil error.ws
 col 0,3=1,255,50
 col 0,3,+l
 
+
+- poskusi z novo masko
+- spremeni nastavitve bit timinga za CAN
+- forget it

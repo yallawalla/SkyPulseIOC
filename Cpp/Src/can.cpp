@@ -15,10 +15,8 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	HAL_CAN_Receive_IT(hcan,CAN_FIFO0);
 	filter_count=timeout=0;
 
-	canFilterCfg(idIOC_State,	0x780);	//0x200
-	canFilterCfg(idEC20_req,	0x7ff);	//0x280
-	canFilterCfg(idEM_ack,		0x7ff);	//0x0C0
-	canFilterCfg(idBOOT,			0x7ff);	//0x020
+	canFilterCfg(idIOC_State,	0x7C0, idEC20_req,	0x7ff);
+	canFilterCfg(idEM_ack,		0x7ff, idBOOT,			0x7ff);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -202,7 +200,7 @@ void	_CAN::pollRx(void *v) {
 * Output         : None
 * Return         : PASSED if the reception is well done, FAILED in other case
 *******************************************************************************/
-void	_CAN::canFilterCfg(int id, int mask) {
+void	_CAN::canFilterCfg(int id1, int mask1, int id2, int mask2) {
 CAN_FilterConfTypeDef  sFilterConfig;
 
   sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -210,13 +208,13 @@ CAN_FilterConfTypeDef  sFilterConfig;
   sFilterConfig.FilterFIFOAssignment = 0;
   sFilterConfig.BankNumber = 14;
   sFilterConfig.FilterActivation = ENABLE;
-	if(filter_count % 2) {
-		sFilterConfig.FilterIdHigh = id<<5;
-		sFilterConfig.FilterMaskIdHigh = mask<<5;	
-	} else {
-		sFilterConfig.FilterIdLow =  id<<5;
-		sFilterConfig.FilterMaskIdLow = mask<<5;
-	}
+//	if(filter_count % 2) {
+		sFilterConfig.FilterIdHigh = id1<<5;
+		sFilterConfig.FilterMaskIdHigh = mask1<<5;	
+//	} else {
+		sFilterConfig.FilterIdLow =  id2<<5;
+		sFilterConfig.FilterMaskIdLow = mask2<<5;
+//	}
 	sFilterConfig.FilterNumber = sFilterConfig.BankNumber + filter_count++;
 	HAL_CAN_ConfigFilter(hcan, &sFilterConfig);
 }
@@ -260,14 +258,16 @@ FRESULT	_CAN::Decode(char *c) {
 			for(c=strchr(c,' '); c && *c;) {
 				int i=strtoul(++c,&c,16);
 				int j=strtoul(++c,&c,16);
-				canFilterCfg(i,j);
+				int k=strtoul(++c,&c,16);
+				int l=strtoul(++c,&c,16);
+				canFilterCfg(i,j,k,l);
 			}
 			for(int i=0; i<28; ++i)
 				if(CAN1->FA1R & (1<<i)) {
-					if(i % 2)
-						_print("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR2 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR2) >> 21);
-					else
-						_print("\r\n%d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR1 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR1) >> 21);
+//					if(i % 2)
+						_print("\r\n%2d%c %04X,%04X",i,')',(CAN1->sFilterRegister[i].FR2 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR2) >> 21);
+//					else
+						_print("\r\n    %04X,%04X",(CAN1->sFilterRegister[i].FR1 & 0xffff)>>5,(CAN1->sFilterRegister[i].FR1) >> 21);
 				}
 
 			break;

@@ -23,7 +23,7 @@ public:
 	virtual FRESULT	Decode(char *);
 
 	void	pollRx(void *),
-				canFilterCfg(int, int),
+				canFilterCfg(int, int, int, int),
 				Send(CanTxMsgTypeDef *);	
 	int		SendRemote(int);
 	static void	Send(int, void *, int);
