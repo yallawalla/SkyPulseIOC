@@ -126,9 +126,16 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
-	_buffer_push(canBuffer->rx,hcan->pRxMsg,sizeof(CanRxMsgTypeDef));
-	HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef* hcan) {
+	CAN_RxHeaderTypeDef hdr;
+	uint8_t							data[8];
+	HAL_CAN_GetRxMessage(hcan,CAN_RX_FIFO0,&hdr,data);
+	_buffer_push(canBuffer->rx,&hdr,sizeof(CAN_RxHeaderTypeDef));
+	_buffer_push(canBuffer->rx,data,hdr.DLC);
+}
+//
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef* hcan) {
+	HAL_CAN_RxFifo0MsgPendingCallback(hcan);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -136,9 +143,22 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
-	if(_buffer_pull(canBuffer->tx,hcan->pTxMsg,sizeof(CanTxMsgTypeDef)))
-		HAL_CAN_Transmit_IT(hcan);
+void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef* hcan) {
+	CAN_TxHeaderTypeDef hdr;
+	uint8_t							data[8];
+	uint32_t						mailbox;
+	if(_buffer_pull(canBuffer->tx,&hdr,sizeof(CAN_TxHeaderTypeDef))) {
+		_buffer_pull(canBuffer->tx,data,hdr.DLC*sizeof(uint8_t));
+		HAL_CAN_AddTxMessage(hcan, &hdr, (uint8_t *)data, &mailbox);
+	}
+}
+//
+void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef* hcan) {
+	HAL_CAN_TxMailbox2CompleteCallback(hcan); 
+}
+//
+void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef* hcan) {
+	HAL_CAN_TxMailbox2CompleteCallback(hcan); 
 }
 /*******************************************************************************
 * Function Name	: 
@@ -148,7 +168,6 @@ void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan) {
 *******************************************************************************/
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef* hcan) {
 		hcan->Instance->MSR |= 0x0004;
-		HAL_CAN_Receive_IT(hcan, CAN_FIFO0);
 }
 /*******************************************************************************
 * Function Name	: 

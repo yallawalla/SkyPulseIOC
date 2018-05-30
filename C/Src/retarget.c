@@ -23,8 +23,9 @@ FILE 		__stderr;
 int 		fputc(int c, FILE *f) {
 				if(f==stdout) {
 					if(f->io && f->io->put) {
-						while(f->io->put(f->io->tx,c) == EOF)
+						while(f->io->put(f->io->tx,c) == EOF) {
 							_wait(2);
+						}
 					}
 					return c;
 				}

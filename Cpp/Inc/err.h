@@ -27,10 +27,10 @@ inline _err operator |  (_err a, _err b)	{return static_cast<_err>(static_cast<i
 inline _err operator &  (_err a, _err b)	{return static_cast<_err>(static_cast<int>(a) & static_cast<int>(b));}
 inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<int>(a) ^ static_cast<int>(b));}
 
-#define	_ADC_ERR_DELAY	200
-#define _PUMP_ERR_DELAY	1000
-#define _FAN_ERR_DELAY	3000
-#define _EC20_EM_DELAY	5
+#define	_ADC_ERR_DELAY		200
+#define _PUMP_ERR_DELAY		1000
+#define _FAN_ERR_DELAY		3000
+#define _EC20_EM_DELAY		5
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)

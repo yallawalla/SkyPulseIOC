@@ -15,6 +15,7 @@ private:
 	int		filter_count,timeout;
 	static CAN_HandleTypeDef *hcan;
 	_CLI	*remote;
+	int test;
 
 public:
   _CAN(CAN_HandleTypeDef *handle);
@@ -23,8 +24,7 @@ public:
 	virtual FRESULT	Decode(char *);
 
 	void	pollRx(void *),
-				canFilterCfg(int, int, int, int),
-				Send(CanTxMsgTypeDef *);	
+				canFilterCfg(int, int, int, int);
 	int		SendRemote(int);
 	static void	Send(int, void *, int);
 	static _io  *io,*ioFsw;	
