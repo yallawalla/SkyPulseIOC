@@ -37,7 +37,7 @@ void	_CAN::Send(int id,  void *data, int len) {
 		_buffer_push(canBuffer->tx,data,len*sizeof(uint8_t));
 	}
 
-	Debug(DBG_CAN_TX,"\r\n%04d > %02X ",__time__ % 10000,id);
+	Debug(DBG_CAN_TX,"\r\n%03d: > %02X ",__time__ % 1000,id);
 	uint8_t *p=(uint8_t *)data;
 	for(int i=0; i < len; ++i)
 		Debug(DBG_CAN_TX," %02X",*p++);
@@ -129,7 +129,7 @@ void	_CAN::pollRx(void *v) {
 	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CAN_RxHeaderTypeDef))) {
 		_buffer_pull(canBuffer->rx,data,rx.DLC*sizeof(uint8_t));
 //______________________________________________________________________________________				
-		Debug(DBG_CAN_RX,"\r\n%4d < %02X ",__time__ % 10000,rx.StdId);
+		Debug(DBG_CAN_RX,"\r\n%3d: < %02X ",__time__ % 1000,rx.StdId);
 		for(int i=0; i < rx.DLC; ++i)
 			Debug(DBG_CAN_RX," %02X",data[i]);
 		Debug(DBG_CAN_RX,"\r\n");
@@ -159,12 +159,13 @@ void	_CAN::pollRx(void *v) {
 //______________________________________________________________________________________
 			case idEC20_req:
 				timeout=__time__+_EC20_EM_DELAY;
-			++test;
+				++test;
 			break;
 //______________________________________________________________________________________
 			case idEM_ack:
 				timeout=0;
-			++test;
+				++test;
+				_wait(1);
 			case idIOC_Footreq:
 				ioc->IOC_FootAck.Send();
 			break;
