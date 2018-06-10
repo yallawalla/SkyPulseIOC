@@ -15,6 +15,7 @@ typedef	struct {
 	bool	Air:1;
 	bool	Water:1;
 	bool	Vibrate:1;
+	bool	Setup:1;
 	bool	Simulator:1;
 }	mode;
 //________________________________________________________________________________________________
@@ -42,7 +43,7 @@ class	_VALVE {
 
 class	_SPRAY : public _TERM, public _ADC {
 	private:
-		int	Bottle_ref, Bottle_P;
+		int	Bottle_ref, Bottle_P,bottle_event;
 		int	Air_ref, Air_P;
 		int	idx,simrate;
 		_FIT		*pFit;
@@ -59,7 +60,8 @@ class	_SPRAY : public _TERM, public _ADC {
 		_err		Status();
 		mode		mode;
 
-		int			AirLevel, WaterLevel, readyTimeout, offsetTimeout;
+		int			AirLevel, WaterLevel;
+		int			readyTimeout, offsetTimeout;
 		_LCD		*lcd;
 	
 	

@@ -46,7 +46,7 @@ _SPRAY::_SPRAY() {
 			Water->Close();
 		
 			offset.air=offset.bottle=offset.compressor=	_BAR(1.0f);
-			gain.air=																		_BAR(2.0f);
+			gain.air=																		_BAR(1.5f);
 			gain.bottle=																_BAR(0.5f);
 			gain.compressor=														_BAR(1.0f);
 
@@ -104,6 +104,7 @@ _err	_err=_NOERR;
 					BottleOut->Open(120);
 					if(readyTimeout)
 						readyTimeout = __time__ + _SPRAY_READY_T;
+					bottle_event=-1;
 				}
 				if(Bottle_P > _P_THRESHOLD) {
 					Bottle_P=0;
@@ -111,6 +112,7 @@ _err	_err=_NOERR;
 					BottleOut->Close();
 					if(readyTimeout)
 						readyTimeout = __time__ + _SPRAY_READY_T;
+					bottle_event=1;
 				}
 			} else {
 					BottleIn->Close();
@@ -157,19 +159,20 @@ void	_SPRAY::Newline(void) {
 			int j=100*(fval.bottle-offset.bottle)/_BAR(1);
 			int k=mode.Simulator ? 100*Pout-100 :  100*(fval.compressor-offset.compressor)/_BAR(1);
 
-			_print("\r:spray %3d,%5d,%2d.%02d,%2d.%02d,%2d.%02d",
-				AirLevel,WaterLevel, i/100, abs(i%100), j/100, abs(j%100), k/100, abs(k%100));
+			if(!mode.Setup) {
+				_print("\r:spray %3d,%5d,%2d.%02d,%2d.%02d,%2d.%02d",
+					AirLevel,WaterLevel, i/100, abs(i%100), j/100, abs(j%100), k/100, abs(k%100));
 
-			if(mode.Air) 
-				_print("   Air"); 
-			else 
-				_print("   ---"); 
-			if(mode.Water) 
-				_print(" Water"); 
-			else 
-				_print("   ---"); 
-			
-			for(int i=1+6*(6-idx); i--; _print("\b"));		
+				if(mode.Air) 
+					_print("   Air"); 
+				else 
+					_print("   ---"); 
+				if(mode.Water) 
+					_print(" Water"); 
+				else 
+					_print("   ---"); 
+				for(int i=1+6*(6-idx); i--; _print("\b"));		
+			}
 			Repeat(200,__CtrlR);
 }
 /*******************************************************************************/
@@ -184,6 +187,9 @@ int		_SPRAY::Fkey(int t) {
 					case __f7:
 					case __F7:
 						return __F12;
+					case '-':
+						Increment(-1,0);
+					break;
 					case __Up:
 						Increment(1,0);
 					break;
@@ -203,7 +209,7 @@ int		_SPRAY::Fkey(int t) {
 						pFit->rp[0]=std::min((int)pFit->rp[0]+1000,_BAR(3.0f));
 						break;
 					case __PageDown:
-						pFit->rp[0]=std::max((int)pFit->rp[0]-1000,_BAR(0.5f));
+						pFit->rp[0]=std::max((int)pFit->rp[0]-1000,_BAR(0.1f));
 						break;					
 					case __CtrlV:
 						if(mode.Vibrate)
@@ -243,6 +249,58 @@ int		_SPRAY::Fkey(int t) {
 							lcd->Add(&_ADC::fval.air,_BAR(1.0f),_BAR(0.02f), LCD_COLOR_MAGENTA);
 							mode.Simulator=true;
 						break;
+						case __f1:
+						case __F1:
+						{
+							AirLevel = WaterLevel = 0;
+							mode.Air=mode.Water=false;
+							_print("\r\n: depress. bottle");
+							bottle_event=0;
+							for(t=0; t<=10; ++t) {
+								_wait(1000);
+								_print(".");
+							}
+							_print("\r\n: initializing...\r\n:");
+							pFit=new _FIT();
+							pFit->rp[0]=_BAR(1.2f);
+							
+							
+							for(AirLevel = 2; AirLevel < 9; ++AirLevel) {
+								mode.Air=mode.Water=false;
+								bottle_event=0;
+								for(int t=__time__+5000, k=0; __time__ < t; ) {
+									_wait(100);
+									Newline();
+									if(bottle_event) {
+										if(bottle_event == k)
+											t=__time__+5000;
+										k=bottle_event;
+										bottle_event=0;
+									}
+								}
+								mode.Air=mode.Water=true;
+								_print("\r\n: adjusting backpressure, air level %d\r\n:",AirLevel);
+								_wait(3000);
+								for(int t=__time__+10000, k=0; __time__ < t; ) {
+									_wait(100);
+									Newline();
+									if(bottle_event) {
+										pFit->rp[0]=std::max(std::min((int)pFit->rp[0]-1000*bottle_event,_BAR(3.0f)),_BAR(0.1f));
+										if(bottle_event == k)
+											t=__time__+10000;
+										k=bottle_event;
+										bottle_event=0;
+									}
+								}
+							pFit->Sample(Air_ref - offset.air, pFit->rp[0]);
+						}
+						pFit && pFit->Compute();
+						AirLevel=5;
+						WaterLevel=2;
+						mode.Air=mode.Water=false;
+						_print("\r\n: finished !!!\r\n");							
+						break;
+						}
 					}
 			return EOF;
 }
