@@ -3,10 +3,9 @@
 #include	"stm32f4xx.h"
 #include	"stm32f4_discovery_lcd.h"
 #include	<vector>
-//____________________________________________________________________________________
 using					namespace std;
 template			<typename Type>	
-	
+
 class	_PLOT {
 	class _POINT {
 		public:
@@ -17,11 +16,19 @@ class	_PLOT {
 				LCD_DrawCircle(x,LCD_PIXEL_HEIGHT/2+100-((*Plot-Offset)/Scale),1);
 			}
 		};
+
 	private:
 		int x, idx;
 		vector<_POINT> points;
+	
 	public:
-		_PLOT() { x=idx=0; };
+		_PLOT() {
+			x=idx=0;
+		};
+
+		~_PLOT() {
+		};
+
 		void	Add(Type *type, Type offset, Type scale, short colour) {
 			_POINT p;
 			p.Plot=type;
@@ -34,17 +41,18 @@ class	_PLOT {
 		void	Clear(void) {
 			points.clear();
 		}
-//____________________________________________________________________________________
-		bool	Finished(void) {
+
+		bool	Refresh(void) {
 			for(int i = 0; i != points.size(); ++i)
 				points[i].Draw(x);
-			x = ++x % LCD_PIXEL_WIDTH;	
+			x = ++x % LCD_PIXEL_WIDTH;
+			
 			if(x) 
 				return false;
 			else
 				return true;
 		}
-//____________________________________________________________________________________
+
 		void	Colour(Type *type, short colour) {
 			for(int i = 0; i != points.size(); ++i)
 				if(points[i].Plot==type) {
@@ -53,14 +61,19 @@ class	_PLOT {
 				}
 		}
 };
-//____________________________________________________________________________________
-class	_LCD : public _PLOT<uint16_t> {
+
+
+
+class	_LCD {
 		private:
 			short x,y;
+
 		public:
 			_LCD();
+		
 void	Home(void);
 void	Grid(void);
+
 };
 
 #endif

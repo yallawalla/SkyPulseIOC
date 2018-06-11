@@ -8,6 +8,7 @@
 #include	"fit.h"
 #include	<algorithm>
 #include	"lcd.h"
+#include "simulator.h"
 
 #define		_SPRAY_READY_T	500
 				
@@ -16,7 +17,6 @@ typedef	struct {
 	bool	Water:1;
 	bool	Vibrate:1;
 	bool	Setup:1;
-	bool	Simulator:1;
 }	mode;
 //________________________________________________________________________________________________
 class	_VALVE {
@@ -46,7 +46,8 @@ class	_SPRAY : public _TERM, public _ADC {
 		int	Bottle_ref, Bottle_P,bottle_event;
 		int	Air_ref, Air_P;
 		int	idx,simrate;
-		_FIT		*pFit;
+		_FIT				*pFit;
+		_SIMULATOR	*sim;
 
 	public:
 		_SPRAY();
@@ -63,10 +64,6 @@ class	_SPRAY : public _TERM, public _ADC {
 		int			AirLevel, WaterLevel;
 		int			readyTimeout, offsetTimeout;
 		_LCD		*lcd;
-	
-	
-		bool		Simulator(void);
-		float		pComp,pBott,pNozz,Pin,Pout;
 };
 
 #endif
