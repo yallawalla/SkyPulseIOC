@@ -35,9 +35,6 @@ _RTC::_RTC() {
 _RTC::~_RTC() {	
 }
 //_________________________________________________________________________________
-string Days[]		= { "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
-string Months[]	= { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-
 void	_RTC::Newline(void) {
 			io=_stdio(NULL);
 			_stdio(io);
@@ -45,11 +42,11 @@ void	_RTC::Newline(void) {
 				HAL_RTC_GetTime(&hrtc,&time,RTC_FORMAT_BIN);
 				HAL_RTC_GetDate(&hrtc,&date,RTC_FORMAT_BIN);
 				_print("\r:time        %4s,%3d-%3s-%3d,%3d::%02d::%02d",
-					Days[date.WeekDay-1].c_str(),date.Date,Months[date.Month-1].c_str(),date.Year,
+					Days[date.WeekDay-1],date.Date,Months[date.Month-1],date.Year,
 						time.Hours,time.Minutes,time.Seconds);
 				for(int i=1+4*(6-idx); i--; _print("\b"));
 			}
-			Repeat(1000,__CtrlR);
+			Repeat(1000,__CtrlR);				
 }
 //_________________________________________________________________________________
 int		_RTC::Fkey(int t) {

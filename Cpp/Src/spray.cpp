@@ -61,11 +61,11 @@ _SPRAY::_SPRAY() {
 			
 			readyTimeout=0;
 			offsetTimeout=__time__ + 5000;
-		
+
 			pFit=new _FIT();
-			pFit->rp[0]=18049;
-			pFit->rp[1]=11544*1e-4f;
-			pFit->rp[2]=-1603*1e-8f;
+			pFit->rp[0]=18726;
+			pFit->rp[1]=3551*1e-4f;
+			pFit->rp[2]=-1003*1e-8f;
 			sim=NULL;
 }
 /*******************************************************************************
@@ -211,28 +211,28 @@ int		_SPRAY::Fkey(int t) {
 							mode.Vibrate=true;
 						break;
 						
-					case __Delete:
-						if(AirLevel || WaterLevel)
-							_print("\r\n: Air/Water not 0.... \r\n:");
-						else {
-							_ADC::offset.air = _ADC::fval.air;
-							_ADC::offset.bottle = _ADC::fval.bottle;
-							_print("\r\n: air/water offset.... \r\n:");
-							pFit=new _FIT();
-							pFit->rp[0]=_BAR(1.2f);
-						}
-						break;
-					case __End:
-						if(pFit && pFit->Compute()) {
-							_print("\r\n: fit computed  .... \r\n:");
-							break;
-						}
-						_print("\r\n: error, not enough samples .. \r\n:");
-						break;
-					case __Insert:
-						_print("\r\n: samples added %d.... \r\n:",
-							pFit->Sample(Air_ref - offset.air, pFit->rp[0]));
-						break;
+//					case __Delete:
+//						if(AirLevel || WaterLevel)
+//							_print("\r\n: Air/Water not 0.... \r\n:");
+//						else {
+//							_ADC::offset.air = _ADC::fval.air;
+//							_ADC::offset.bottle = _ADC::fval.bottle;
+//							_print("\r\n: air/water offset.... \r\n:");
+//							pFit=new _FIT();
+//							pFit->rp[0]=_BAR(1.2f);
+//						}
+//						break;
+//					case __End:
+//						if(pFit && pFit->Compute()) {
+//							_print("\r\n: fit computed  .... \r\n:");
+//							break;
+//						}
+//						_print("\r\n: error, not enough samples .. \r\n:");
+//						break;
+//					case __Insert:
+//						_print("\r\n: samples added %d.... \r\n:",
+//							pFit->Sample(Air_ref - offset.air, pFit->rp[0]));
+//						break;
 						
 					case __CtrlS:
 						if(sim) {
@@ -248,56 +248,8 @@ int		_SPRAY::Fkey(int t) {
 						break;
 					case __f1:
 					case __F1:
-						{
-							AirLevel = WaterLevel = 0;
-							mode.Air=mode.Water=false;
-							_print("\r\n: depress. bottle");
-							bottle_event=0;
-							for(t=0; t<=10; ++t) {
-								_wait(1000);
-								_print(".");
-							}
-							_print("\r\n: initializing...\r\n:");
-							pFit=new _FIT();
-							pFit->rp[0]=_BAR(1.2f);
-							
-							
-							for(AirLevel = 2; AirLevel < 9; ++AirLevel) {
-								mode.Air=mode.Water=false;
-								bottle_event=0;
-								for(int t=__time__+5000, k=0; __time__ < t; ) {
-									_wait(100);
-									Newline();
-									if(bottle_event) {
-										if(bottle_event == k)
-											t=__time__+5000;
-										k=bottle_event;
-										bottle_event=0;
-									}
-								}
-								mode.Air=mode.Water=true;
-								_print("\r\n: adjusting backpressure, air level %d\r\n:",AirLevel);
-								_wait(3000);
-								for(int t=__time__+10000, k=0; __time__ < t; ) {
-									_wait(100);
-									Newline();
-									if(bottle_event) {
-										pFit->rp[0]=std::max(std::min((int)pFit->rp[0]-1000*bottle_event,_BAR(3.0f)),_BAR(0.1f));
-										if(bottle_event == k)
-											t=__time__+10000;
-										k=bottle_event;
-										bottle_event=0;
-									}
-								}
-							pFit->Sample(Air_ref - offset.air, pFit->rp[0]);
-						}
-						pFit && pFit->Compute();
-						AirLevel=5;
-						WaterLevel=2;
-						mode.Air=mode.Water=false;
-						_print("\r\n: finished !!!\r\n");							
+						Adjust();
 						break;
-						}
 					}
 			return EOF;
 }
@@ -383,3 +335,72 @@ void	_SPRAY::Increment(int a, int b) {
 			}
 			Newline();
 }	
+/*******************************************************************************/
+/**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+void	*_SPRAY::Adjust() {
+	int kbhit=getchar();
+			_FIT *f=new _FIT(*pFit);
+			pFit=new _FIT();
+			pFit->rp[0]=_BAR(1.2f);
+						
+			AirLevel = WaterLevel = 0;
+			mode.Air=mode.Water=false;
+			_print("\r\n: bottle empty ?");
+			bottle_event=0;
+	
+			for(int t=0; t<=10 && kbhit == EOF; ++t) {
+				_wait(1000);
+				kbhit=getchar();
+				_print(".");
+			}
+			
+			for(AirLevel = 1; AirLevel<=10 && kbhit == EOF; ++AirLevel) {
+				mode.Air=mode.Water=false;
+				bottle_event=0;
+				_print("\r\n: initializing, level %d ",AirLevel);
+				for(int t=__time__+5000, k=0; __time__ < t && kbhit == EOF; _wait(2)) {
+					if(bottle_event) {
+						if(bottle_event == k)
+							t=__time__+10000;
+						_print(".");
+						k=bottle_event;
+						bottle_event=0;
+					}
+					kbhit=getchar();
+				}
+				
+				if(kbhit == EOF) {
+					mode.Air=mode.Water=true;
+					_print("\r\n: backpressure adjust ",AirLevel);
+					_wait(3000);
+				}
+				for(int t=__time__+10000, k=0; __time__ < t && kbhit == EOF; _wait(2)) {
+					if(bottle_event) {
+						pFit->rp[0]=std::max(std::min((int)pFit->rp[0]-1000*bottle_event,_BAR(3.0f)),_BAR(0.1f));
+						if(bottle_event == k)
+							t=__time__+10000;
+						_print(".");
+						k=bottle_event;
+						bottle_event=0;
+					}
+					kbhit=getchar();
+				}
+				pFit->Sample(Air_ref - offset.air, pFit->rp[0]);
+			}
+			
+			if(kbhit == EOF && pFit && pFit->Compute()) {
+				_print("\r\n: finished\r\n");			
+			} else {
+				_print("\r\n: aborted\r\n");
+				delete pFit;
+				pFit=f;
+			}
+			AirLevel=WaterLevel=0;
+			mode.Air=mode.Water=false;
+			return NULL;
+}

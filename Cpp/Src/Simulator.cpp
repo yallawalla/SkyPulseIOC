@@ -18,7 +18,7 @@
 	#define Uc3		pNozz
 	
 	#define Rin		10
-	#define Rout	100
+	#define Rout	50
 	
 	#define R2		100
 	#define Rw		300
@@ -133,18 +133,10 @@ _IOC		*ioc = static_cast<_IOC *>(v);
 		if(lcd && plot.Refresh())
 			lcd->Grid();
 	}
-//	
-//	tau1 += ((float)_fTIM->CCR1 / _fTIM->ARR - tau1) / 1000.0f;
-//	ioc->fan.Tau1 = tau1*10; 								//error po 10%
-
-//	if(ioc->pump.Enabled) {
-//		tau2 += (DAC_GetDataOutputValue(0)/4096.0f - tau2) / 100.0f;
-//		fval.Ipump=tau2*(16.0*2.1*4094/3.3);     // 1:1
-//	}	else {
-//		tau2 += (0 - tau2) / 100.0f;
-//		fval.Ipump=0;
-//	}
-//	ioc->fan.Tau2 = tau2*100;								// 50& = 500Hz 
+	
+	fval.Ipump=pump_drive<<5;
+	flowTacho=(22000/30/100)*pump_drive/(1<<12)/2;
+	fanTacho=(22000/30/100)*fan_drive/(1<<12)/2;
 }
 /**
 * @}

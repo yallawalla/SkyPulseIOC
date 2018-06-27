@@ -310,6 +310,8 @@ void __RED2(int32_t t)			{ leds.timeout[4]=t+HAL_GetTick(); };
 void __GREEN2(int32_t t)		{ leds.timeout[5]=t+HAL_GetTick(); };
 void __YELLOW2(int32_t t) 	{ leds.timeout[6]=t+HAL_GetTick(); };
 void __BLUE2(int32_t t)			{ leds.timeout[7]=t+HAL_GetTick(); };
+char* Days[]							= { "Mon","Tue","Wed","Thu","Fri","Sat","Sun" };
+char* Months[]						= { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -317,8 +319,8 @@ void __BLUE2(int32_t t)			{ leds.timeout[7]=t+HAL_GetTick(); };
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-	_print(" %d.%02d %s <%08X>",
-		SW_version/100,SW_version%100,
-			__DATE__,
-				HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)));
+			_print(" %d.%02d %s <%08X>",
+				SW_version/100,SW_version%100,
+					__DATE__,
+						HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)));
 }

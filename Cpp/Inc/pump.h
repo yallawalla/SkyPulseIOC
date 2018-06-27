@@ -29,7 +29,7 @@ class	_PUMP : public _TERM, public _ADC {
 		void		Increment(int, int);
 		void		Enable(void),Disable(void);
 		int			Rpm(int);
-		bool		Setup(void);
+		bool		Setup(void),Enabled(void);
 		_err		Status(void);
 };
 

@@ -1,7 +1,6 @@
 #include "stm32f4xx_hal.h"
 #include "ioc.h"
 #include "io.h"
-
 extern "C" {
 /*******************************************************************************
 * Function Name	: 
@@ -53,9 +52,18 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 	}	else
 		_print("... error settings file");
 	
-
 	_proc_add((void *)pollStatus,this,(char *)"error task",1);
 	_proc_add((void *)taskRx,this,(char *)"can rx",0);
+	
+	int	i=0;
+	while(strncmp(Months[i++],__DATE__,3))
+		if(i == 12)
+			break;
+		
+	IOC_VersionAck.hash=HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int));
+	IOC_VersionAck.date=atoi(&__DATE__[4]);
+	IOC_VersionAck.month=i + 12*(atoi(&__DATE__[7])-2018);
+				
 	ws2812.Batch((char *)"@onoff.ws");
 }
 /*******************************************************************************

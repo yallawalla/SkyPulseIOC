@@ -6,23 +6,16 @@ col 0,1,2,3,4,5,+r
 wait 1000
 col 2,5,-l
 
-
 fil standby.ws
 col 0,3=180,180,50
 col 0,3,+l
-
 
 fil ready.ws
 col 2,5=0,255,50
 col 2,+l
 col 5,+r
 
-
 fil error.ws
 col 0,3=1,255,50
 col 0,3,+l
 
-
-- poskusi z novo masko
-- spremeni nastavitve bit timinga za CAN
-- forget it

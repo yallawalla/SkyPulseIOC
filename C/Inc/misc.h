@@ -52,6 +52,7 @@ extern void	*CDC_Poll_FS(void *);
 extern void	date_time(uint32_t, uint32_t);
 extern RTC_TimeTypeDef sTime;
 extern RTC_DateTypeDef sDate;
+extern char *Days[],*Months[];
 
 void	led_poll(void);
 

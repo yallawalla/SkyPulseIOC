@@ -156,6 +156,10 @@ void	_CAN::pollRx(void *v) {
 				ioc->IOC_Aux.Temp = ioc->Th2o();
 				ioc->IOC_Aux.Send();
 			break;
+//______________________________________________________________________________________							
+			case idIOC_VersionReq:
+				ioc->IOC_VersionAck.Send();
+			break;
 //______________________________________________________________________________________
 			case idEC20_req:
 				timeout=__time__+_EC20_EM_DELAY;

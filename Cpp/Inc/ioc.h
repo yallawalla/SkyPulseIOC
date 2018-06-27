@@ -21,10 +21,12 @@ typedef enum {
 	idIOC_SprayParm		=0x201,
 	idIOC_Footreq			=0x202,
 	idIOC_AuxReq			=0x203,
+	idIOC_VersionReq	=0x204,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
 	idIOC_AuxAck			=0x243,
+	idIOC_VersionAck	=0x244,
 	idCAN2COM					=0x20B,
   idCOM2CAN					=0x24B,
 	idCAN2FOOT				=0x20C,
@@ -88,6 +90,18 @@ typedef __packed struct _IOC_SprayAck {
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
+typedef __packed struct _IOC_VersionAck {
+	uint16_t version;
+	uint32_t hash;
+	uint8_t	 date;
+	uint8_t  month;
+	
+	_IOC_VersionAck() : version(SW_version),hash(0),date(0),month(0)	{}	
+	void	Send() {
+		_CAN::Send(idIOC_VersionAck,(void *)&version,sizeof(_IOC_VersionAck));
+	}
+} IOC_VersionAck;
+//_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
 		int key,temp;
@@ -96,10 +110,13 @@ class _IOC : public _ADC {
 		static _IOC			*parent;
 		_IOC();
 		_err 						error_mask,warn_mask;
+	
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
+		_IOC_VersionAck	IOC_VersionAck;
+	
 		_CAN						can;
 		_SPRAY 					spray;
 		_WS 						ws2812;

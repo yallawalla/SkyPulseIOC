@@ -109,6 +109,15 @@ void		_PUMP::Enable() {
 	* @param	: None
 	* @retval : None
 	*/
+bool		_PUMP::Enabled() {
+				return speed;
+}
+/*******************************************************************************/
+/**
+	* @brief	TIM3 IC2 ISR
+	* @param	: None
+	* @retval : None
+	*/
 void		_PUMP::Disable() {
 				speed=0;
 }
