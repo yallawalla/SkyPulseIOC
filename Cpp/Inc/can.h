@@ -12,10 +12,10 @@
 *******************************************************************************/
 class _CAN : public _TERM {
 private:
-	int		filter_count,timeout;
-	static CAN_HandleTypeDef *hcan;
+	int		filter_count, timeout;
+	int		dl_ch1, dl_ch2;
 	_CLI	*remote;
-	int test;
+	static CAN_HandleTypeDef *hcan;
 
 public:
   _CAN(CAN_HandleTypeDef *handle);

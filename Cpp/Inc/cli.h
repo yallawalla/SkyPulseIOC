@@ -43,7 +43,7 @@ class _CLI : public _TERM, public _FS {
 		};
 
 		_CLI(UART_HandleTypeDef *huart)	{
-			io=ioUsart(huart,__RXLEN,__TXLEN);
+			io=ioUsart(huart,4*__RXLEN,4*__TXLEN);
 			_proc_add((void *)parseTask,this,(char *)"Usart Cli",0);
 		};
 		

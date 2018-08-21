@@ -237,6 +237,7 @@ int		_SPRAY::Fkey(int t) {
 					case __CtrlS:
 						if(sim) {
 							delete sim;
+							sim=NULL;
 							new _ADC;
 							printf("\r\n: simulator deactivated...\r\n:");
 						} else {

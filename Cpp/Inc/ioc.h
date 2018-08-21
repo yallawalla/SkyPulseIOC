@@ -22,6 +22,7 @@ typedef enum {
 	idIOC_Footreq			=0x202,
 	idIOC_AuxReq			=0x203,
 	idIOC_VersionReq	=0x204,
+	idDL_SetLimit			=0x21F,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
@@ -90,6 +91,13 @@ typedef __packed struct _IOC_SprayAck {
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
+typedef __packed struct _DL_SetLimit {
+	short Limit[2];
+	void	Send() {
+		_CAN::Send(idDL_SetLimit,(void *)Limit,sizeof(_DL_SetLimit));
+	}
+} DL_SetLimit;
+//_____________________________________________________________________
 typedef __packed struct _IOC_VersionAck {
 	uint16_t version;
 	uint32_t hash;
@@ -101,6 +109,9 @@ typedef __packed struct _IOC_VersionAck {
 		_CAN::Send(idIOC_VersionAck,(void *)&version,sizeof(_IOC_VersionAck));
 	}
 } IOC_VersionAck;
+//_____________________________________________________________________
+//_____________________________________________________________________
+//_____________________________________________________________________
 //_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
@@ -115,6 +126,7 @@ class _IOC : public _ADC {
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
+		_DL_SetLimit		DL_SetLimit;
 		_IOC_VersionAck	IOC_VersionAck;
 	
 		_CAN						can;

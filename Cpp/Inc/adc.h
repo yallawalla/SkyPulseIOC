@@ -36,22 +36,22 @@ const	int Rtab[]={ (0xffff*_Rdiv(18813.0,5100.0)), (0xffff*_Rdiv(10000.0,5100.0)
 typedef struct	{
 			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
+
 typedef struct	{
-			unsigned short	diode1,diode2;
+			float x[2],dx[2],k,fo;
+			unsigned short	dma[16*10][2];
 		} diode;
 
 class	_ADC {
 	private:
-
 	public:
 	_ADC();
 	_err		adcError(void);
 	
 	static	void adcFilter(),diodeFilter(int);
 	static	adc val[], fval, gain, offset;
-	static	diode dsense[];
+	static	diode DL;
 	static	int Th2o(void);
 	
 };
-
 #endif

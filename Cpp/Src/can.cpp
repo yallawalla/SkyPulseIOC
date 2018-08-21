@@ -14,8 +14,9 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	hcan = handle;
 	
 	filter_count=timeout=0;
-	canFilterCfg(idIOC_State,	0x7C0, idEC20_req,	0x7ff);
-	canFilterCfg(idEM_ack,		0x7ff, idBOOT,			0x7ff);
+	
+	canFilterCfg(idIOC_State,	0x7C0, idBOOT,			0x7ff);
+	canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_RX_FIFO0_MSG_PENDING);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_Start(hcan);
@@ -37,7 +38,8 @@ void	_CAN::Send(int id,  void *data, int len) {
 		_buffer_push(canBuffer->tx,data,len*sizeof(uint8_t));
 	}
 
-	Debug(DBG_CAN_TX,"\r\n%03d: > %02X ",__time__ % 1000,id);
+//	Debug(DBG_CAN_TX,"\r\n%03d: > %02X ",__time__ % 1000,id);
+	Debug(DBG_CAN_TX,"\r\n> %02X ",id);
 	uint8_t *p=(uint8_t *)data;
 	for(int i=0; i < len; ++i)
 		Debug(DBG_CAN_TX," %02X",*p++);
@@ -82,6 +84,7 @@ void	_CAN::Newline(void) {
 *******************************************************************************/
 int		_CAN::Fkey(int t) {
 	switch(t) {
+		
 		case __CtrlE:
 			_print("remote console...\r\n");
 			while(SendRemote(idCAN2COM) != __CtrlE) 
@@ -89,28 +92,12 @@ int		_CAN::Fkey(int t) {
 			_print("close...");
 			Newline();
 			break;
-		case __F1:
-			_print("test...\r\n");
-			for(int i=0; getchar() == EOF; ++i) {
-				test=0;				
-				Send(idEC20_req,&test,2);
-				_wait(2);
-				Send(idEM_ack,&test,2);
-				_wait(2);
-				if(test == 3) {
-					i%20==0 ? _print("\r") : _print(".");
-					_wait(rand() % 100 + 10);
-					continue;
-				}
-				_print("..err");
-				break;
-			}
-			Newline();
-			break;
+
 		case __f8:
 		case __F8:
 			io=_stdio(NULL);
-			return __F12;			
+			return __F12;		
+		
 		default:
 			return t;
 	}
@@ -129,7 +116,8 @@ void	_CAN::pollRx(void *v) {
 	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CAN_RxHeaderTypeDef))) {
 		_buffer_pull(canBuffer->rx,data,rx.DLC*sizeof(uint8_t));
 //______________________________________________________________________________________				
-		Debug(DBG_CAN_RX,"\r\n%3d: < %02X ",__time__ % 1000,rx.StdId);
+//		Debug(DBG_CAN_RX,"\r\n%3d: < %02X ",__time__ % 1000,rx.StdId);
+		Debug(DBG_CAN_RX,"\r\n< %02X ",rx.StdId);
 		for(int i=0; i < rx.DLC; ++i)
 			Debug(DBG_CAN_RX," %02X",data[i]);
 		Debug(DBG_CAN_RX,"\r\n");
@@ -139,8 +127,12 @@ void	_CAN::pollRx(void *v) {
 				if(rx.DLC)
 					ioc->SetState((_State)data[0]);
 				ioc->IOC_State.Send();
+				if(ioc->IOC_State.State == _ACTIVE)
+					timeout=__time__ + _DL_POLL_DELAY;
+				else
+					timeout=0;
 				break;
-//______________________________________________________________________________________							
+//______________________________________________________________________________________
 			case idIOC_SprayParm:
 				ioc->spray.AirLevel		= std::min(10,(int)data[0]);
 				ioc->spray.WaterLevel	= std::min(10,(int)data[1]);
@@ -151,31 +143,49 @@ void	_CAN::pollRx(void *v) {
 				ioc->spray.mode.Air=data[2] & 1;
 				ioc->spray.mode.Water=data[2] & 2;
 			break;
-//______________________________________________________________________________________							
+//______________________________________________________________________________________
 			case idIOC_AuxReq:
 				ioc->IOC_Aux.Temp = ioc->Th2o();
 				ioc->IOC_Aux.Send();
 			break;
-//______________________________________________________________________________________							
+//______________________________________________________________________________________
 			case idIOC_VersionReq:
 				ioc->IOC_VersionAck.Send();
 			break;
 //______________________________________________________________________________________
-			case idEC20_req:
-				timeout=__time__+_EC20_EM_DELAY;
-				++test;
+			case idEM_ack:
+				_wait(1);
+				if(ioc->IOC_State.State == _ACTIVE) {
+					timeout=__time__ + _EC20_MAX_PERIOD;
+					ioc->IOC_FootAck.Send();
+				} else {
+					timeout=0;
+					ioc->SetError(_energyMissing);			
+				}
 			break;
 //______________________________________________________________________________________
-			case idEM_ack:
-				timeout=0;
-				++test;
-				_wait(1);
+			case idEC20_req:
+				if(ioc->IOC_State.State == _ACTIVE)
+					timeout=__time__ + _EC20_ENM_DELAY;
+				else {
+					timeout=0;
+					ioc->SetError(_energyMissing);	
+				}
+			break;
+//______________________________________________________________________________________
+			case idDL_SetLimit:
+				ioc->DL_SetLimit.Limit[0] =data[0] + (data[1]<<8);
+				ioc->DL_SetLimit.Limit[1] =data[2] + (data[3]<<8);
+				if(ioc->IOC_State.State == _ACTIVE)
+					timeout=__time__ + _DL_POLL_DELAY;
+				ioc->IOC_FootAck.Send();
+			break;
+//______________________________________________________________________________________
 			case idIOC_Footreq:
 				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________
 			case idIOC_FootAck:
-			++test;
 			break;
 //______________________________________________________________________________________
 			case idBOOT:
@@ -279,8 +289,8 @@ FRESULT	_CAN::Decode(char *c) {
 			HAL_CAN_Init(hcan);
 		
 			filter_count=timeout=0;
-			canFilterCfg(idIOC_State,	0x7C0, idEC20_req,	0x7ff);
-			canFilterCfg(idEM_ack,		0x7ff, idBOOT,			0x7ff);
+			canFilterCfg(idIOC_State,	0x780, idBOOT,			0x7ff);
+			canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
 			HAL_CAN_ActivateNotification(hcan,CAN_IT_RX_FIFO0_MSG_PENDING);
 			HAL_CAN_ActivateNotification(hcan,CAN_IT_TX_MAILBOX_EMPTY);
 			HAL_CAN_Start(hcan);
@@ -301,6 +311,13 @@ FRESULT	_CAN::Decode(char *c) {
 				}
 
 			break;
+				
+		case 'w': 
+			_wait(atoi(++c));
+		break;
+		case '@': 
+			Batch(++c);
+		break;
 	
 		default:
 			if(*c)

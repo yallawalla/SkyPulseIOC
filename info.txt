@@ -19,3 +19,62 @@ fil error.ws
 col 0,3=1,255,50
 col 0,3,+l
 
+
+
+TODO:
+
+- timeout od prehod v streljanje do napovedi strela
+- diode supervise ( + dolocitev protokola, action diagram...)
+
+- V 2.0 prehod na CubeMX
+- STM32CubeMX Vers. 4.25.0
+- STM32Cube FW_F4 V1.21.0
+
+<200 00
+w 1000
+<200 01
+w 1000
+<200 02
+w 200
+<280
+w 2
+<C0
+w 100
+<280
+w 2
+<C0
+w 100
+<280
+w 2
+<C0
+w 100
+<280
+w 2
+<C0
+w 100
+<280
+w 2
+<C0
+w 100
+<200 00
+
+			
+			
+<200 00
+w 1000
+<21f 00 00 00 00
+<200 01
+w 1000
+<21f 00 00 00 00
+<200 02
+w 2
+<21f 00 00 00 00
+w 100
+<21f 00 00 00 00
+w 100
+<21f 00 00 00 00
+w 100
+<21f 00 00 00 00
+w 100
+<200 01
+

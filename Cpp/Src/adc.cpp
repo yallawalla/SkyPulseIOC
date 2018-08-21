@@ -1,7 +1,7 @@
 #include	"adc.h"
 #include	"misc.h"
 
-diode	_ADC::dsense[16*10]	={};
+diode	_ADC::DL={};
 adc		_ADC::val[16]	={},
 			_ADC::fval={},
 			_ADC::offset={},
@@ -13,8 +13,10 @@ adc		_ADC::val[16]	={},
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
+			DL.k=0.0006250;
+			DL.fo=15e6/(12+56)/2;
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
-			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dsense, sizeof(dsense)/sizeof(uint16_t));
+			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
 /*******************************************************************************
 * Function Name	:
@@ -46,28 +48,26 @@ void	_ADC::adcFilter() {
 				fval.Ipump			+= val[i].Ipump;
 			}
 }
-
-
-float x,dx,k=0.0006250;
-float fo=15e6/(12+56)/2;
-
-// double t = Ton / (1 - exp(-fo * k * Ton));
-// 9.06666666666666666666666 us
-								
-void	_ADC::diodeFilter(int half) {
-diode	*d=dsense;
-int		n=sizeof(dsense)/sizeof(diode)/2;
-			if(half)
-				d=&dsense[n];
-	
-//			pump_drive=x;
-	
-			
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void	_ADC::diodeFilter(int k) {
+unsigned short *p;
+int		n=sizeof(DL.dma)/sizeof(short)/4;
+			if(k)
+				p=&DL.dma[n][0];
+			else
+				p=&DL.dma[0][0];
 			while(n--) {
-				dx += k*(d++->diode1 - x-dx*(float)2);
-				x += k*dx;	
+				DL.dx[0] += DL.k*(p[0] - DL.x[0]-DL.dx[0]-DL.dx[0]);
+				DL.x[0] += DL.k*DL.dx[0];	
+				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
+				DL.x[1] += DL.k*DL.dx[1];	
+				++p;++p;
 			}
-//			pump_drive=0;
 }
 /*******************************************************************************
 * Function Name	: 

@@ -20,14 +20,14 @@ void _CLI::Newline(void) {
 int	_CLI::Fkey(int t) {
 		_IOC	*ioc=_IOC::parent;
 		switch(t) {
-		case __CtrlE: {
-			_io *temp=ioc->can.ioFsw;
-			ioc->can.ioFsw=io;
-			while(ioc->can.SendRemote(idFOOT2CAN) != __CtrlE) 
-				_wait(2);
-			ioc->can.ioFsw=temp;
-			Newline();
-		} break;
+			case __CtrlE: {
+				_io *temp=ioc->can.ioFsw;
+				ioc->can.ioFsw=io;
+				while(ioc->can.SendRemote(idFOOT2CAN) != __CtrlE) 
+					_wait(2);
+				ioc->can.ioFsw=temp;
+				Newline();
+			} break;
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
@@ -323,7 +323,7 @@ FRESULT _CLI::Decode(char *p) {
 			strcat(f,sc[1]);
 		if(f_open(f1,sc[1],FA_READ)==FR_OK && f_open(f2,f,FA_CREATE_ALWAYS | FA_WRITE)==FR_OK) {
 			while(!f_eof(f1))
-				if(fputc(fgetc((FILE *)&f1),(FILE *)&f2)==EOF)
+				if(f_putc(f_getc(f1),f2)==EOF)
 					break;
 		}
 		f_close(f1);
