@@ -129,7 +129,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PB1     ------> ADC1_IN9 
     */
     GPIO_InitStruct.Pin = Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
-                          |GPIO_PIN_4|GPIO_PIN_5;
+                          |DLsense1_Pin|DLsense2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -179,7 +179,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PC4     ------> ADC2_IN14
     PC5     ------> ADC2_IN15 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+    GPIO_InitStruct.Pin = DLsense1_Pin|DLsense2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -236,7 +236,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PB1     ------> ADC1_IN9 
     */
     HAL_GPIO_DeInit(GPIOC, Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
-                          |GPIO_PIN_4|GPIO_PIN_5);
+                          |DLsense1_Pin|DLsense2_Pin);
 
     HAL_GPIO_DeInit(GPIOA, PUMP_CSENSE_Pin|T1_H2O_Pin|T1_H2OA2_Pin|_5V_Pin);
 
@@ -260,7 +260,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PC4     ------> ADC2_IN14
     PC5     ------> ADC2_IN15 
     */
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_4|GPIO_PIN_5);
+    HAL_GPIO_DeInit(GPIOC, DLsense1_Pin|DLsense2_Pin);
 
     /* ADC2 DMA DeInit */
     HAL_DMA_DeInit(hadc->DMA_Handle);

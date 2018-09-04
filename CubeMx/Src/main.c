@@ -129,6 +129,7 @@ uint32_t	pumpTacho, fanTacho, flowTacho, valve_timeout[__VALVES];	// DMA memory 
 uint16_t	pump_drive, fan_drive, valve_drive[__VALVES], led_drive[__LEDS*24+2];
 _io				*canBuffer=NULL;
 /* USER CODE END 0 */
+
 /**
   * @brief  The application entry point.
   *
@@ -170,7 +171,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   MX_ADC2_Init();
-//  MX_IWDG_Init();
+  MX_IWDG_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
 

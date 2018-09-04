@@ -151,12 +151,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>f2</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>f1</ItemText>
+          <ItemText>DL</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -175,7 +170,7 @@
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>0</SubType>
-          <ItemText>0x20013b98</ItemText>
+          <ItemText>0x2001257C</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -848,7 +843,7 @@
 
   <Group>
     <GroupName>Application/User</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1187,8 +1182,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\Cpp\Src\ws2812.cpp</PathWithFileName>
-      <FilenameWithoutPath>ws2812.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\..\Cpp\Src\rtc.cpp</PathWithFileName>
+      <FilenameWithoutPath>rtc.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1199,8 +1194,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\Cpp\Src\rtc.cpp</PathWithFileName>
-      <FilenameWithoutPath>rtc.cpp</FilenameWithoutPath>
+      <PathWithFileName>..\..\Cpp\Src\ws2812.cpp</PathWithFileName>
+      <FilenameWithoutPath>ws2812.cpp</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1232,7 +1227,7 @@
 
   <Group>
     <GroupName>Simulator</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

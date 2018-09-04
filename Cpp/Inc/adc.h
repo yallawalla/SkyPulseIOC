@@ -38,7 +38,7 @@ typedef struct	{
 		} adc;
 
 typedef struct	{
-			float x[2],dx[2],k,fo;
+			float x[2],dx[2],max[2],min[2],k;
 			unsigned short	dma[16*10][2];
 		} diode;
 

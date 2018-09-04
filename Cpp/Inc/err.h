@@ -32,7 +32,8 @@ inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<in
 #define _FAN_ERR_DELAY		3000
 #define _EC20_MAX_PERIOD	750
 #define _EC20_ENM_DELAY		5
-#define _DL_POLL_DELAY		150
+#define _DL_POLL_DELAY		50
+#define _DL_OFFSET				50
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)

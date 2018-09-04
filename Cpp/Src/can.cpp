@@ -38,8 +38,8 @@ void	_CAN::Send(int id,  void *data, int len) {
 		_buffer_push(canBuffer->tx,data,len*sizeof(uint8_t));
 	}
 
-//	Debug(DBG_CAN_TX,"\r\n%03d: > %02X ",__time__ % 1000,id);
-	Debug(DBG_CAN_TX,"\r\n> %02X ",id);
+	Debug(DBG_CAN_TX,"\r\n%04d: > %02X ",__time__ % 1000,id);
+//	Debug(DBG_CAN_TX,"\r\n> %02X ",id);
 	uint8_t *p=(uint8_t *)data;
 	for(int i=0; i < len; ++i)
 		Debug(DBG_CAN_TX," %02X",*p++);
@@ -116,21 +116,27 @@ void	_CAN::pollRx(void *v) {
 	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CAN_RxHeaderTypeDef))) {
 		_buffer_pull(canBuffer->rx,data,rx.DLC*sizeof(uint8_t));
 //______________________________________________________________________________________				
-//		Debug(DBG_CAN_RX,"\r\n%3d: < %02X ",__time__ % 1000,rx.StdId);
-		Debug(DBG_CAN_RX,"\r\n< %02X ",rx.StdId);
+		Debug(DBG_CAN_RX,"\r\n%04d: < %02X ",__time__ % 1000,rx.StdId);
+//		Debug(DBG_CAN_RX,"\r\n< %02X ",rx.StdId);
 		for(int i=0; i < rx.DLC; ++i)
 			Debug(DBG_CAN_RX," %02X",data[i]);
 		Debug(DBG_CAN_RX,"\r\n");
 //______________________________________________________________________________________
 		switch(rx.StdId) {
 			case idIOC_State:
-				if(rx.DLC)
+				if(rx.DLC) {
 					ioc->SetState((_State)data[0]);
+					if(ioc->IOC_State.State == _ACTIVE)
+						timeout=__time__ + _DL_POLL_DELAY;
+					else {
+						timeout=0;
+						ioc->DL.dx[0]=
+						ioc->DL.dx[1]=
+						ioc->DL.x[0]=
+						ioc->DL.x[1]=0;
+					}
+				}
 				ioc->IOC_State.Send();
-				if(ioc->IOC_State.State == _ACTIVE)
-					timeout=__time__ + _DL_POLL_DELAY;
-				else
-					timeout=0;
 				break;
 //______________________________________________________________________________________
 			case idIOC_SprayParm:
@@ -173,9 +179,9 @@ void	_CAN::pollRx(void *v) {
 				}
 			break;
 //______________________________________________________________________________________
-			case idDL_SetLimit:
-				ioc->DL_SetLimit.Limit[0] =data[0] + (data[1]<<8);
-				ioc->DL_SetLimit.Limit[1] =data[2] + (data[3]<<8);
+			case idDL_Limits:
+				ioc->DL_Limits.Limit[0] =data[0] + (data[1]<<8);
+				ioc->DL_Limits.Limit[1] =data[2] + (data[3]<<8);
 				if(ioc->IOC_State.State == _ACTIVE)
 					timeout=__time__ + _DL_POLL_DELAY;
 				ioc->IOC_FootAck.Send();
@@ -198,8 +204,9 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________							
 			case idCAN2FOOT:
-				while(rx.DLC && !_buffer_push(ioFsw->tx,data,rx.DLC))
-					_wait(2);
+				if(ioFsw)
+					while(rx.DLC && !_buffer_push(ioFsw->tx,data,rx.DLC))
+						_wait(2);
 			break;
 //______________________________________________________________________________________
 			case idCAN2COM:
@@ -227,6 +234,23 @@ void	_CAN::pollRx(void *v) {
 		n=_buffer_pull(remote->io->tx,data,8);
 		if(n)
 			Send(idCOM2CAN,data,n);
+	}
+//______________________________________________________________________________________
+	if(HAL_IS_BIT_CLR(hadc2.Instance->CR2, ADC_CR2_ADON)) {
+		_ADC::diodeFilter(0);
+		_ADC::diodeFilter(1);
+	}
+//______________________________________________________________________________________
+	if(ioc->IOC_State.State == _ACTIVE) {
+		if((int)ioc->DL.x[0] > ioc->DL_Limits.Limit[0] + _DL_OFFSET)
+			ioc->SetError(_energyMissing);	
+		if((int)ioc->DL.x[1] > ioc->DL_Limits.Limit[1] + _DL_OFFSET)
+			ioc->SetError(_energyMissing);	
+	} else {
+		if((int)ioc->DL.x[0] >  + _DL_OFFSET)
+			ioc->SetError(_energyMissing);	
+		if((int)ioc->DL.x[1] >  + _DL_OFFSET)
+			ioc->SetError(_energyMissing);	
 	}
 }
 /*******************************************************************************
@@ -263,22 +287,22 @@ FRESULT	_CAN::Decode(char *c) {
 	uint32_t						stdid,n;
 	switch(*c)  {
 		case '<': 
-			rxHdr.StdId=strtol(++c,&c,16);
+			rxHdr.StdId=strtoul(++c,&c,16);
 			do {
 				while(*c == ' ') ++c;
 				for(rxHdr.DLC=0; *c && rxHdr.DLC < 8; ++rxHdr.DLC)
-					data[rxHdr.DLC]=strtol(c,&c,16);
+					data[rxHdr.DLC]=strtoul(c,&c,16);
 				_buffer_push(canBuffer->rx,&rxHdr,sizeof(CAN_RxHeaderTypeDef));
 				_buffer_push(canBuffer->rx,data,rxHdr.DLC*sizeof(uint8_t));
 			} while(*c);
 			break;
 
 		case '>': 
-			stdid=strtol(++c,&c,16);
+			stdid=strtoul(++c,&c,16);
 			do {
 				while(*c == ' ') ++c;
 				for(n=0; *c && n < 8; ++n)
-					data[n]=strtol(c,&c,16);
+					data[n]=strtoul(c,&c,16);
 				Send(stdid,data,n);
 			} while(*c);
 			break;
@@ -287,7 +311,7 @@ FRESULT	_CAN::Decode(char *c) {
 			HAL_CAN_DeInit(hcan);
 			hcan->Init.Mode = CAN_MODE_LOOPBACK;
 			HAL_CAN_Init(hcan);
-		
+				
 			filter_count=timeout=0;
 			canFilterCfg(idIOC_State,	0x780, idBOOT,			0x7ff);
 			canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
@@ -312,9 +336,23 @@ FRESULT	_CAN::Decode(char *c) {
 
 			break;
 				
+		case 'd': 
+			HAL_ADC_Stop_DMA(&hadc2);
+			for(c=strchr(c,' '); c && *c;) {
+				_IOC*	ioc = _IOC::parent;
+				int i=strtoul(++c,&c,16);
+				int j=strtoul(++c,&c,16);
+				for(int n=0; n< sizeof(ioc->DL.dma)/sizeof(uint16_t)/2; ++n) {
+					ioc->DL.dma[n][0]=i;
+					ioc->DL.dma[n][1]=j;
+				}
+			}
+		break;
+			
 		case 'w': 
 			_wait(atoi(++c));
-		break;
+		break;		
+		
 		case '@': 
 			Batch(++c);
 		break;

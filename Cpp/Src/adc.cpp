@@ -13,8 +13,7 @@ adc		_ADC::val[16]	={},
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			DL.k=0.0006250;
-			DL.fo=15e6/(12+56)/2;
+			DL.k=0.0006250f*10.0f;	// 1-10 ms
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
@@ -66,8 +65,17 @@ int		n=sizeof(DL.dma)/sizeof(short)/4;
 				DL.x[0] += DL.k*DL.dx[0];	
 				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
 				DL.x[1] += DL.k*DL.dx[1];	
+				
 				++p;++p;
 			}
+				if(DL.x[0]>DL.max[0])
+					DL.max[0]=DL.x[0];
+				if(DL.x[1]>DL.max[1])
+					DL.max[1]=DL.x[1];
+				if(DL.x[0]<DL.min[0])
+					DL.min[0]=DL.x[0];
+				if(DL.x[1]<DL.min[1])
+					DL.min[1]=DL.x[1];
 }
 /*******************************************************************************
 * Function Name	: 

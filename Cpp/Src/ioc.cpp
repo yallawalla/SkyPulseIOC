@@ -8,28 +8,28 @@ extern "C" {
 * Output				:
 * Return				:
 ****************************f***************************************************/
-	void makeIoc(void) {
-		_IOC::parent=new _IOC;
-		
-		_stdio(_IOC::parent->com1.io);
-		if(__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
-			_print("\rSWR");
-		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
-			_print("\rIWDG");
-		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
-			_print("\rWWDG");
-		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
-			_print("\rPOR");
-		else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST))
-		{} else {}
-		__HAL_RCC_CLEAR_RESET_FLAGS();
+void	makeIoc(void) {
+			_IOC::parent=new _IOC;
 			
-		_print(" reset, CPU %dMHz\r\nV",SystemCoreClock/1000000);
-		 printVersion();
-		_print("\r\n/");
-			
-		_stdio(NULL);
-	}
+			_stdio(_IOC::parent->com1.io);
+			if(__HAL_RCC_GET_FLAG(RCC_FLAG_SFTRST))
+				_print("\rSWR");
+			else if(__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST))
+				_print("\rIWDG");
+			else if(__HAL_RCC_GET_FLAG(RCC_FLAG_WWDGRST))
+				_print("\rWWDG");
+			else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PORRST))
+				_print("\rPOR");
+			else if(__HAL_RCC_GET_FLAG(RCC_FLAG_PINRST))
+			{} else {}
+			__HAL_RCC_CLEAR_RESET_FLAGS();
+				
+			_print(" reset, CPU %dMHz\r\nV",SystemCoreClock/1000000);
+			 printVersion();
+			_print("\r\n/");
+				
+			_stdio(NULL);
+			}
 }
 _IOC*	_IOC::parent			= NULL;
 /*******************************************************************************
@@ -39,32 +39,32 @@ _IOC*	_IOC::parent			= NULL;
 * Return				:
 *******************************************************************************/
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
-	error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
-	SetState(_STANDBY);	
-	
-	FIL f;
-	if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
-		pump.LoadSettings(&f);
-		fan.LoadSettings(&f);
-		spray.LoadSettings(&f);
-		ws2812.LoadSettings(&f);
-		f_close(&f);
-	}	else
-		_print("... error settings file");
-	
-	_proc_add((void *)pollStatus,this,(char *)"error task",1);
-	_proc_add((void *)taskRx,this,(char *)"can rx",0);
-	
-	int	i=0;
-	while(strncmp(Months[i++],__DATE__,3))
-		if(i == 12)
-			break;
-		
-	IOC_VersionAck.hash=HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int));
-	IOC_VersionAck.date=atoi(&__DATE__[4]);
-	IOC_VersionAck.month=i + 12*(atoi(&__DATE__[7])-2018);
+			error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
+			SetState(_STANDBY);	
+			
+			FIL f;
+			if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
+				pump.LoadSettings(&f);
+				fan.LoadSettings(&f);
+				spray.LoadSettings(&f);
+				ws2812.LoadSettings(&f);
+				f_close(&f);
+			}	else
+				_print("... error settings file");
+			
+			_proc_add((void *)pollStatus,this,(char *)"error task",1);
+			_proc_add((void *)taskRx,this,(char *)"can rx",0);
+			
+			int	i=0;
+			while(strncmp(Months[i++],__DATE__,3))
+				if(i == 12)
+					break;
 				
-	ws2812.Batch((char *)"@onoff.ws");
+			IOC_VersionAck.hash=HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int));
+			IOC_VersionAck.date=atoi(&__DATE__[4]);
+			IOC_VersionAck.month=i + 12*(atoi(&__DATE__[7])-2018);
+						
+			ws2812.Batch((char *)"@onoff.ws");
 }
 /*******************************************************************************
 * Function Name	:
@@ -123,7 +123,7 @@ _err	_IOC::fswError() {
 * Return				:
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
-_IOC *me=static_cast<_IOC *>(v);
+_IOC	*me=static_cast<_IOC *>(v);
 _err	e = me->pump.Status();
 			e = e | me->fan.Status();
 			e = e | me->spray.Status();
