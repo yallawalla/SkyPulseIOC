@@ -1,6 +1,7 @@
 #ifndef ERR_H
 #define ERR_H
 #include 	"stm32f4xx_hal.h"
+
 typedef	enum {
 	_NOERR						=0,
 	_V5								=1<<0,
@@ -18,9 +19,13 @@ typedef	enum {
 	_energyMissing		=1<<12,
 	_sprayNotReady		=1<<13,
 	_doorswDisabled		=1<<14,
-	_footswerror			=1<<15
-} _err;           
-           
+	_footswerror			=1<<15,
+//	_powerDLch0				=1<<16,
+//	_powerDLch1				=1<<17,
+//	_illegalEC20req		=1<<18,
+//	_illegalENMack		=1<<19
+} _err;
+
 inline _err operator ~(_err a)
 { return static_cast<_err> (~static_cast<int>(a)); }
 inline _err operator |  (_err a, _err b)	{return static_cast<_err>(static_cast<int>(a) | static_cast<int>(b));}
@@ -33,7 +38,7 @@ inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<in
 #define _EC20_MAX_PERIOD	750
 #define _EC20_ENM_DELAY		5
 #define _DL_POLL_DELAY		50
-#define _DL_OFFSET				50
+#define _DL_OFFSET				100
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)

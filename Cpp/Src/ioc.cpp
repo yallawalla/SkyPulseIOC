@@ -161,7 +161,7 @@ void	_IOC::SetState(_State s) {
 				case	_ERROR:
 					if(IOC_State.State != _ERROR) {
 						IOC_State.State = _ERROR;
-						ws2812.Batch((char *)"@error.ws");
+//						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;
 					}
 					break;
@@ -233,5 +233,10 @@ const string _IOC::ErrMsg[] = {
 			"energy report timeout",
 			"spray not ready",
 			"doorswitch crowbar fail",
-			"footswitch error"
+			"footswitch error",
+
+			"DL power, channel 0",
+			"DL power, channel 1",
+			"EC20 req. illegal",
+			"ENM ack. illegal"
 };

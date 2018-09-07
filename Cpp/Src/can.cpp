@@ -13,7 +13,7 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canBuffer	=	_io_init(100*(sizeof(CAN_RxHeaderTypeDef)+8), 100*(sizeof(CAN_TxHeaderTypeDef)+8));
 	hcan = handle;
 	
-	filter_count=timeout=0;
+	filter_count=timeout=anime=0;
 	
 	canFilterCfg(idIOC_State,	0x7C0, idBOOT,			0x7ff);
 	canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
@@ -164,6 +164,11 @@ void	_CAN::pollRx(void *v) {
 				if(ioc->IOC_State.State == _ACTIVE) {
 					timeout=__time__ + _EC20_MAX_PERIOD;
 					ioc->IOC_FootAck.Send();
+//					if(__time__ > anime) {
+//						ioc->ws2812.Batch((char *)"@active.ws");
+//						anime = __time__ + 500;
+//					}
+
 				} else {
 					timeout=0;
 					ioc->SetError(_energyMissing);			
@@ -182,8 +187,13 @@ void	_CAN::pollRx(void *v) {
 			case idDL_Limits:
 				ioc->DL_Limits.Limit[0] =data[0] + (data[1]<<8);
 				ioc->DL_Limits.Limit[1] =data[2] + (data[3]<<8);
-				if(ioc->IOC_State.State == _ACTIVE)
+				if(ioc->IOC_State.State == _ACTIVE) {
 					timeout=__time__ + _DL_POLL_DELAY;
+//					if(__time__ > anime) {
+//						ioc->ws2812.Batch((char *)"@active.ws");
+//						anime = __time__ + 500;
+//					}
+				}
 				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________

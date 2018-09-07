@@ -79,6 +79,7 @@ TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim10;
+TIM_HandleTypeDef htim12;
 DMA_HandleTypeDef hdma_tim4_up;
 DMA_HandleTypeDef hdma_tim8_up;
 
@@ -113,6 +114,7 @@ static void MX_RTC_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_IWDG_Init(void);
 static void MX_CRC_Init(void);
+static void MX_TIM12_Init(void);
 void StartDefaultTask(void const * argument);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
@@ -173,6 +175,7 @@ int main(void)
   MX_ADC2_Init();
   MX_IWDG_Init();
   MX_CRC_Init();
+  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
@@ -822,6 +825,50 @@ static void MX_TIM10_Init(void)
   }
 
   HAL_TIM_MspPostInit(&htim10);
+
+}
+
+/* TIM12 init function */
+static void MX_TIM12_Init(void)
+{
+
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  TIM_IC_InitTypeDef sConfigIC;
+
+  htim12.Instance = TIM12;
+  htim12.Init.Prescaler = 0;
+  htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim12.Init.Period = 0;
+  htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_Base_Init(&htim12) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim12, &sClockSourceConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_IC_Init(&htim12) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim12, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_IC_ConfigChannel(&htim12, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
 
 }
 

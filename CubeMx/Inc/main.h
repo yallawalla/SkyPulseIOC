@@ -99,6 +99,10 @@
 #define _12V_GPIO_Port GPIOB
 #define _24V_Pin GPIO_PIN_1
 #define _24V_GPIO_Port GPIOB
+#define DSenseTIM1_Pin GPIO_PIN_14
+#define DSenseTIM1_GPIO_Port GPIOB
+#define DSenseTIM1B15_Pin GPIO_PIN_15
+#define DSenseTIM1B15_GPIO_Port GPIOB
 #define cwbBUTTON_Pin GPIO_PIN_9
 #define cwbBUTTON_GPIO_Port GPIOD
 #define cwbDOOR_Pin GPIO_PIN_10

@@ -535,16 +535,18 @@ int			_WS::Fkey(int t) {
 	*/ 
 /*******************************************************************************/
 FRESULT	_WS::Decode(char *c) {
-				while(busy)
-					_wait(2);
+//				while(busy)
+//					_wait(2);
 				if(strchr(c,'@'))
 					return _TERM::Batch(++c);
-				if(!strncmp(c,"col",3))
-					c=strchr(c,' ');
 				if(!strncmp(c,"wait",4)) {
 					c=strchr(c,' ');
 					_wait(atoi(c));
+					return FR_OK;
 				}
+// preskoci "col" (v cli ga pobere ze parser, v batch je se noter...) 
+				if(!strncmp(c,"col",3))
+					c=strchr(c,' ');
 				
 				if(strchr(c,'='))
 					return ColorSet(c);

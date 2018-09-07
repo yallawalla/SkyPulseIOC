@@ -2,13 +2,18 @@ fil onoff.ws
 col t=20
 col 0,1,3,4=180,180,50
 col 2,5=0,255,50
-col 0,1,2,3,4,5,+r
+col 0,1,3,4,+r
+col 2,+r
+col 5,+l
 wait 1000
-col 2,5,-l
+col 2,-r
+col 5,-l
 
 fil standby.ws
 col 0,3=180,180,50
 col 0,3,+l
+col 2,-l
+col 5,-r
 
 fil ready.ws
 col 2,5=0,255,50
@@ -18,40 +23,36 @@ col 5,+r
 fil error.ws
 col 0,3=1,255,50
 col 0,3,+l
+col 2,-l
+col 5,-r
+
+fil active.ws
+col 2,5,-l
+wait 100
+col 2,5,+l
+
+---------------------------------------------------------------------------------------
+
+/v 0.21 Sep  4 2018 <5005D271>
+
+- DL protocol implementiran
+- DL lowpass 1-10ms, state vars reset of prehodu stanj
+- DL polling interval 10ms, IOC 50ms - SYS/DL prepocasna ob izklopu ???
+	Najboljse, da skrajsamo na 100ms
+- max moc 6W, ni preizkušeno na 2kHz pulse mode
+- offset cca 5, kratka spica na vklopu, plese za cca 20-30 counts, odvisno of moci.
+	Zaenkrat je nastavljen na 100 
+	
+/v 0.21 Sep  7 2018 <241ACE63>
+- prototip 3, Fišer
+- akt. timerska vhoda s pulldown na diode sense zaradi motenj samo z erbijem
 
 
-
-TODO:
-
-- timeout od prehod v streljanje do napovedi strela
-- diode supervise ( + dolocitev protokola, action diagram...)
-
-- V 2.0 prehod na CubeMX
-- STM32CubeMX Vers. 4.25.0
-- STM32Cube FW_F4 V1.21.0
-
-d 0 0
-w 1000
-<200 00
-<21f 00 10 00 10
-w 500
-<200 01
-<21f 00 10 00 10
-w 500
-<200 02
-d 800 800
-w 100
-<21f 00 10 00 10
-w 100
-<21f 00 10 00 10
-d 1000 1000
-w 100
-<21f 00 10 00 10
-w 100
-<21f 00 10 00 10
-w 100
-d 8 8
-<21f 00 10 00 10
-w 60
-<200 01
-
+	TODO:
+	- razširitev diagnostike
+	- smafu okrog konzole
+	- premostitev okvarjenega energometra
+	- boost mode, 
+	- problem detekcije diode, motnje na senz. linijah
+	
+	
