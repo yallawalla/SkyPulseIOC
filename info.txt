@@ -44,9 +44,7 @@ col 2,5,+l
 	Zaenkrat je nastavljen na 100 
 	
 /v 0.21 Sep  7 2018 <241ACE63>
-- prototip 3, Fišer
 - akt. timerska vhoda s pulldown na diode sense zaradi motenj samo z erbijem
-
 
 	TODO:
 	- razširitev diagnostike
@@ -54,5 +52,12 @@ col 2,5,+l
 	- premostitev okvarjenega energometra
 	- boost mode, 
 	- problem detekcije diode, motnje na senz. linijah
+	- kapitalna: AutoRetransmission = ENABLE, tudi v bootloaderju :(
 	
+/v 0.21 Sep 11 2018 <AF4B6B12>
+
+	- izvedba idEM_ack v can.cpp, zaradi možnosti err. maske; sistem vedno 
+	  pošlje IOC_FootAck
+	- Align() v spray.cpp; aktivacija z __Delete plus dodatna potrditev
+	- v vseh novih podsestavih in M321-8
 	

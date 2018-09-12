@@ -247,8 +247,7 @@ int		_SPRAY::Fkey(int t) {
 							printf("\r\n: simulator active     ...\r\n:");
 						}
 						break;
-					case __f1:
-					case __F1:
+					case __Delete:
 						Adjust();
 						break;
 					}
@@ -345,21 +344,22 @@ void	_SPRAY::Increment(int a, int b) {
 /*******************************************************************************/
 void	*_SPRAY::Adjust() {
 	int kbhit=getchar();
-			_FIT *f=new _FIT(*pFit);
+			_FIT *f=pFit;
 			pFit=new _FIT();
 			pFit->rp[0]=_BAR(1.2f);
 						
-			AirLevel = WaterLevel = 0;
+			AirLevel = WaterLevel = bottle_event = 0;
 			mode.Air=mode.Water=false;
-			_print("\r\n: bottle empty ?");
-			bottle_event=0;
-	
-			for(int t=0; t<=10 && kbhit == EOF; ++t) {
-				_wait(1000);
-				kbhit=getchar();
-				_print(".");
+			_print("\r\n: continue to spray setup (y/n)");
+
+			while(kbhit != 'y' && kbhit != 'n') {
+				_wait(100);
+				kbhit=getchar();				
 			}
 			
+			if(kbhit=='y')
+				kbhit=EOF;
+
 			for(AirLevel = 1; AirLevel<=10 && kbhit == EOF; ++AirLevel) {
 				mode.Air=mode.Water=false;
 				bottle_event=0;
@@ -396,6 +396,7 @@ void	*_SPRAY::Adjust() {
 			
 			if(kbhit == EOF && pFit && pFit->Compute()) {
 				_print("\r\n: finished\r\n");			
+				delete f;
 			} else {
 				_print("\r\n: aborted\r\n");
 				delete pFit;

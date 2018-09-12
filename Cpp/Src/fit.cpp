@@ -50,7 +50,7 @@ _FIT::_FIT(const _FIT &obj)
 			typ=obj.typ;
 			tp=new float[4*n*n]();
 			fp=new float[2*n]();
-			rp=new float[2*n]();		
+			rp=new float[2*n]();
 }
 /*******************************************************************************
 * Function Name	: 

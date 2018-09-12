@@ -160,10 +160,9 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idEM_ack:
-				_wait(1);
+//				_wait(1);
 				if(ioc->IOC_State.State == _ACTIVE) {
 					timeout=__time__ + _EC20_MAX_PERIOD;
-					ioc->IOC_FootAck.Send();
 //					if(__time__ > anime) {
 //						ioc->ws2812.Batch((char *)"@active.ws");
 //						anime = __time__ + 500;
@@ -173,6 +172,7 @@ void	_CAN::pollRx(void *v) {
 					timeout=0;
 					ioc->SetError(_energyMissing);			
 				}
+				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________
 			case idEC20_req:

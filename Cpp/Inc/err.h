@@ -20,10 +20,10 @@ typedef	enum {
 	_sprayNotReady		=1<<13,
 	_doorswDisabled		=1<<14,
 	_footswerror			=1<<15,
-//	_powerDLch0				=1<<16,
-//	_powerDLch1				=1<<17,
-//	_illegalEC20req		=1<<18,
-//	_illegalENMack		=1<<19
+//	_ch1DLpower			=1<<16,
+//	_ch2DLpower			=1<<17,
+//	_illEC20req			=1<<18,
+//	_illENMack			=1<<19
 } _err;
 
 inline _err operator ~(_err a)
