@@ -49,24 +49,7 @@ _buffer	*_buffer_close(_buffer	*p) {
 				}
 				return NULL;
 }
-//
-//			return number of succesfuly pushed items from q[] into buffer
-//______________________________________________________________________________________
-int			_buffer_pushhhh(_buffer *p, void *q, int n) {
-char		*r=q, *t=p->_push;
-int			i;
-				for(i=0; i<n; ++i) {
-					if((int)t - (int)p->_pull == p->size-1)
-						break;
-					if((int)p->_pull - (int)t == 1)
-						break;
-					*t++ = *r++;
-					if(t == &p->_buf[p->size])
-						t = p->_buf;
-				}
-				p->_push=t;
-				return(i);
-}
+//	return number of succesfuly pushed items from q[] into buffer
 //______________________________________________________________________________________
 int			_buffer_push(_buffer *p, void *q, int n) {
 char		*r=q, *t=p->_push;
@@ -81,7 +64,6 @@ int			i=0;
 				p->_push=t;
 				return(i);
 }
-//
 //			return number of succesfuly pulled items from buffer onto q[]
 //______________________________________________________________________________________
 int			_buffer_pull(_buffer *p, void *q, int n) {

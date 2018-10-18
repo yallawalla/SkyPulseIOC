@@ -1,6 +1,7 @@
 #include "proc.h"
 #include "misc.h"
-_buffer						*_proc_buf=NULL;
+#include "limits.h"
+_buffer	*_proc_buf=NULL;
 //______________________________________________________________________________
 _proc	*_proc_add(void *f,void *arg,char *name, int dt) {
 _proc	*p=malloc(sizeof(_proc));
@@ -28,18 +29,6 @@ int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
 				_buffer_push(_proc_buf,&p,sizeof(_proc *));
 			}
 			return q;
-}
-//______________________________________________________________________________
-void	_proc_remove(void  *f,void *arg) {
-			_proc	*p;
-int		i=_buffer_count(_proc_buf)/sizeof(_proc *);
-			while(i--) {
-				_buffer_pull(_proc_buf,&p,sizeof(_proc *));
-				if(f == p->f && arg == p->arg)
-					free(p);
-				else
-					_buffer_push(_proc_buf,&p,sizeof(_proc *));
-			}
 }
 //______________________________________________________________________________
 void	_proc_list(void) {

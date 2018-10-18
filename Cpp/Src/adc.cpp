@@ -24,7 +24,7 @@ _ADC::_ADC() {
 * Return				: None
 *******************************************************************************/
 int		_ADC::Th2o() {
-			return __fit(fval.T1,Rtab,Ttab);
+			return (__fit(fval.T1,Rtab,Ttab) + __fit(fval.T2,Rtab,Ttab))/2;
 }
 /*******************************************************************************
 * Function Name	:
@@ -106,8 +106,7 @@ void	HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 * Return				: None
 *******************************************************************************/
 _err _ADC::adcError() {
-_err e=_NOERR;
-
+_err	e=_NOERR;
 		if(_SYS_SHG_ENABLED && !_cwbBUTTON) {
 			if(!_cwbENGM)
 				e = e | _handpcDisabled;
@@ -126,6 +125,8 @@ _err e=_NOERR;
 				e = e | _V24;
 			if(Th2o() > 50*100)
 				e = e | _sysOverheat;
+			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x400)
+				e = e | _TsenseError;
 			}		
 		return e;
 	}

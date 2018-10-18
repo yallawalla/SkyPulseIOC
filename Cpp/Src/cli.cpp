@@ -6,7 +6,7 @@ DIR			_FS::dir;
 TCHAR		_FS::lfn[_MAX_LFN + 1];
 FILINFO	_FS::fno;
 //_________________________________________________________________________________
-void _CLI::Newline(void) {
+void	_CLI::Newline(void) {
 		_print("\r\n");
 		if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
 			if(lfn[strlen(lfn)-1]=='/')
@@ -17,7 +17,7 @@ void _CLI::Newline(void) {
 		_print("?:/"); 		
 }
 //_________________________________________________________________________________
-int	_CLI::Fkey(int t) {
+int _CLI::Fkey(int t) {
 		_IOC	*ioc=_IOC::parent;
 		switch(t) {
 			case __CtrlE: {
@@ -27,7 +27,8 @@ int	_CLI::Fkey(int t) {
 					_wait(2);
 				ioc->can.ioFsw=temp;
 				Newline();
-			} break;
+			} 
+			break;
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
@@ -82,6 +83,13 @@ int	_CLI::Fkey(int t) {
 					_print("... error settings file");		
 				Newline();
 			}
+			break;
+			case __f1:
+			case __F1:
+				_print("... entering standby status");		
+				Newline();
+				Decode((char *)"+D 2");
+				ioc->can.Decode((char *)"<200 00");
 			break;
 			default:
 				return t;

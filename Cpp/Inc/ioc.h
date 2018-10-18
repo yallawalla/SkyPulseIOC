@@ -75,14 +75,6 @@ typedef __packed struct _IOC_FootAck {
 	}
 } IOC_FootAck;
 //_____________________________________________________________________
-typedef __packed struct _IOC_Aux{
-	short Temp;
-	_IOC_Aux() : Temp(0)	{}	
-	void	Send() {
-		_CAN::Send(idIOC_AuxAck,(void *)&Temp,sizeof(_IOC_Aux));
-	}
-} IOC_Aux;
-//_____________________________________________________________________
 typedef __packed struct _IOC_SprayAck {
 	_Spray	Status;
 	_IOC_SprayAck() : Status(_SPRAY_NOT_READY)	{}	
@@ -109,6 +101,17 @@ typedef __packed struct _IOC_VersionAck {
 		_CAN::Send(idIOC_VersionAck,(void *)&version,sizeof(_IOC_VersionAck));
 	}
 } IOC_VersionAck;
+//_____________________________________________________________________
+typedef __packed struct _IOC_Aux{
+	uint16_t	Temp;
+	uint8_t		Flow;
+	uint8_t		Pump;
+	uint8_t		Fan;
+	_IOC_Aux() : Temp(0),Flow(0),Pump(0),Fan(0)	{}	
+	void	Send() {
+		_CAN::Send(idIOC_AuxAck,(void *)&Temp,sizeof(_IOC_Aux));
+	}
+} IOC_Aux;
 //_____________________________________________________________________
 //_____________________________________________________________________
 //_____________________________________________________________________
@@ -139,14 +142,15 @@ class _IOC : public _ADC {
 		_FSW						Fsw;
 		~_IOC();
 
+		void SetState(uint8_t *);
 		void SetState(_State);
 		void SetError(_err);
-		_err fswError(void);
 
 		static const string	ErrMsg[];
 		static void	*pollStatus(void *);
 		static void	taskRx(_IOC *me) {
 			me->can.pollRx(me);
 		}
+		_err fswError(void);
 };
 #endif

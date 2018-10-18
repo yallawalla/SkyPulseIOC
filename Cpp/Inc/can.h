@@ -12,7 +12,7 @@
 *******************************************************************************/
 class _CAN : public _TERM {
 private:
-	int		filter_count, timeout,anime;
+	int		filter_count, ecTimeout, dlTimeout,anime;
 	int		dl_ch1, dl_ch2;
 	_CLI	*remote;
 	static CAN_HandleTypeDef *hcan;

@@ -42,7 +42,7 @@ int			k=0;
 					ws[i].hsvp=&HSVbuf[k];
 					k+= ws[i].size;	
 				}
-				_proc_add((void *)proc_WS2812,this,(char *)"WS2812",20);
+				parse=_proc_add((void *)proc_WS2812,this,(char *)"WS2812",20);
 				idx=idxled=busy=0;
 				io->put=NULL;
 }
@@ -332,7 +332,7 @@ char		*c=strchr(p,'=');
 				p=strtok(p,",");
 				switch(*p) {
 					case 't':
-						_proc_find((void *)proc_WS2812,this)->dt=atoi(c);	
+						parse->dt=atoi(c);	
 					break;
 					default:
 						while(p) {

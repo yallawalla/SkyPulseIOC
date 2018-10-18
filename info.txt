@@ -53,11 +53,16 @@ col 2,5,+l
 	- boost mode, 
 	- problem detekcije diode, motnje na senz. linijah
 	- kapitalna: AutoRetransmission = ENABLE, tudi v bootloaderju :(
+	- manjka diagnostika za fuc T senzor
 	
-/v 0.21 Sep 11 2018 <AF4B6B12>
+/v 0.21 Sep 14 2018 <3DFB1E34>
 
 	- izvedba idEM_ack v can.cpp, zaradi možnosti err. maske; sistem vedno 
 	  pošlje IOC_FootAck
 	- Align() v spray.cpp; aktivacija z __Delete plus dodatna potrditev
 	- v vseh novih podsestavih in M321-8
 	
+	- manjka input za flow senzor, zaenkrat deluje tudi stari konektor na FAN2
+	- fan2 ???
+	- nastavitev za SYS_SHG ob resetu je on ( v CubeMX !!! )
+	- 

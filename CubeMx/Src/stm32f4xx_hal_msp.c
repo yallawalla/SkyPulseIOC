@@ -385,9 +385,10 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
     __HAL_RCC_DAC_CLK_ENABLE();
   
     /**DAC GPIO Configuration    
-    PA4     ------> DAC_OUT1 
+    PA4     ------> DAC_OUT1
+    PA5     ------> DAC_OUT2 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_4;
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -433,9 +434,10 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
     __HAL_RCC_DAC_CLK_DISABLE();
   
     /**DAC GPIO Configuration    
-    PA4     ------> DAC_OUT1 
+    PA4     ------> DAC_OUT1
+    PA5     ------> DAC_OUT2 
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5);
 
     /* DAC DMA DeInit */
     HAL_DMA_DeInit(hdac->DMA_Handle1);
@@ -493,14 +495,15 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     __HAL_RCC_TIM3_CLK_ENABLE();
   
     /**TIM3 GPIO Configuration    
-    PA6     ------> TIM3_CH1 
+    PA6     ------> TIM3_CH1
+    PA7     ------> TIM3_CH2 
     */
-    GPIO_InitStruct.Pin = PUMP_TACHO_Pin;
+    GPIO_InitStruct.Pin = PUMP_TACHO_Pin|FLOW_TACHO_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-    HAL_GPIO_Init(PUMP_TACHO_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* TIM3 interrupt Init */
     HAL_NVIC_SetPriority(TIM3_IRQn, 5, 0);
@@ -661,7 +664,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     */
     GPIO_InitStruct.Pin = _LED1_Pin|_LED2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
     HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
@@ -728,9 +731,10 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     __HAL_RCC_TIM3_CLK_DISABLE();
   
     /**TIM3 GPIO Configuration    
-    PA6     ------> TIM3_CH1 
+    PA6     ------> TIM3_CH1
+    PA7     ------> TIM3_CH2 
     */
-    HAL_GPIO_DeInit(PUMP_TACHO_GPIO_Port, PUMP_TACHO_Pin);
+    HAL_GPIO_DeInit(GPIOA, PUMP_TACHO_Pin|FLOW_TACHO_Pin);
 
     /* TIM3 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM3_IRQn);

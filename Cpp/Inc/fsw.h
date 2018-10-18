@@ -1,6 +1,15 @@
 #ifndef		FSW_H
 #define		FSW_H
 #include	"misc.h"
+/**
+  ******************************************************************************
+  * @file    fsw.h
+  * @brief	 _FSW class definition
+  *
+  */
+/** @addtogroup ootswitch
+* @{
+*/
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -31,4 +40,8 @@ class _FSW {
 		_FSW();
 		int Read(void);
 	};
+/**
+  * @}
+  */
+
 #endif

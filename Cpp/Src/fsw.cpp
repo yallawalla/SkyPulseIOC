@@ -1,17 +1,24 @@
 /**
   ******************************************************************************
   * @file    fsw.cpp
-  * @author  Fotona d.d.
-  * @version V1
-  * @date    30-Sept-2013
-  * @brief	 DA & DMA converters initialization
+  * @brief	 _FSW class members
   *
   */
-/** @addtogroup
+/** @addtogroup footswitch
 * @{
 */
 #include "fsw.h"
 #include "misc.h"
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+_FSW::_FSW(void) {
+			timeout=0;
+			key=__FSW_OFF;			
+}
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -33,16 +40,7 @@ int		_FSW::Read() {
 			}
 			return EOF;
 }
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-_FSW::_FSW(void) {
-			timeout=0;
-			key=__FSW_OFF;			
-}
+
 /**
 * @}
 */ 

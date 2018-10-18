@@ -13,7 +13,7 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	canBuffer	=	_io_init(100*(sizeof(CAN_RxHeaderTypeDef)+8), 100*(sizeof(CAN_TxHeaderTypeDef)+8));
 	hcan = handle;
 	
-	filter_count=timeout=anime=0;
+	filter_count=ecTimeout=dlTimeout=anime=0;
 	
 	canFilterCfg(idIOC_State,	0x7C0, idBOOT,			0x7ff);
 	canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
@@ -125,15 +125,12 @@ void	_CAN::pollRx(void *v) {
 		switch(rx.StdId) {
 			case idIOC_State:
 				if(rx.DLC) {
-					ioc->SetState((_State)data[0]);
+					ioc->SetState(data);
 					if(ioc->IOC_State.State == _ACTIVE)
-						timeout=__time__ + _DL_POLL_DELAY;
+						ecTimeout=dlTimeout=__time__ + _DL_POLL_DELAY;
 					else {
-						timeout=0;
-						ioc->DL.dx[0]=
-						ioc->DL.dx[1]=
-						ioc->DL.x[0]=
-						ioc->DL.x[1]=0;
+						ecTimeout=dlTimeout=0;
+						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
 					}
 				}
 				ioc->IOC_State.Send();
@@ -152,6 +149,9 @@ void	_CAN::pollRx(void *v) {
 //______________________________________________________________________________________
 			case idIOC_AuxReq:
 				ioc->IOC_Aux.Temp = ioc->Th2o();
+				ioc->IOC_Aux.Flow = ioc->pump.Flow/(2200/300);
+				ioc->IOC_Aux.Pump = ioc->pump.Rpm(100);
+				ioc->IOC_Aux.Fan = ioc->fan.Rpm(100);
 				ioc->IOC_Aux.Send();
 			break;
 //______________________________________________________________________________________
@@ -160,27 +160,28 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idEM_ack:
-//				_wait(1);
 				if(ioc->IOC_State.State == _ACTIVE) {
-					timeout=__time__ + _EC20_MAX_PERIOD;
+					ecTimeout=__time__ + _EC20_MAX_PERIOD;
 //					if(__time__ > anime) {
 //						ioc->ws2812.Batch((char *)"@active.ws");
 //						anime = __time__ + 500;
 //					}
 
 				} else {
-					timeout=0;
-					ioc->SetError(_energyMissing);			
+					ecTimeout=0;
+					ioc->SetError(_illENMack);			
 				}
 				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________
 			case idEC20_req:
-				if(ioc->IOC_State.State == _ACTIVE)
-					timeout=__time__ + _EC20_ENM_DELAY;
+				if(ioc->IOC_State.State == _ACTIVE) {
+					ecTimeout=__time__ + _EC20_ENM_DELAY;
+					dlTimeout=0;
+				}
 				else {
-					timeout=0;
-					ioc->SetError(_energyMissing);	
+					ecTimeout=0;
+					ioc->SetError(_illEC20req);	
 				}
 			break;
 //______________________________________________________________________________________
@@ -188,7 +189,8 @@ void	_CAN::pollRx(void *v) {
 				ioc->DL_Limits.Limit[0] =data[0] + (data[1]<<8);
 				ioc->DL_Limits.Limit[1] =data[2] + (data[3]<<8);
 				if(ioc->IOC_State.State == _ACTIVE) {
-					timeout=__time__ + _DL_POLL_DELAY;
+					dlTimeout=__time__ + _DL_POLL_DELAY;
+					ecTimeout=0;
 //					if(__time__ > anime) {
 //						ioc->ws2812.Batch((char *)"@active.ws");
 //						anime = __time__ + 500;
@@ -233,34 +235,45 @@ void	_CAN::pollRx(void *v) {
 			break;
 		}
 	}
-//______________________________________________________________________________________					
-	if(timeout && __time__ > timeout) {
-		timeout=0;
-		ioc->SetError(_energyMissing);	
+//______________________________________________________________________________________
+//______________________________________________________________________________________
+//______________________________________________________________________________________
+//__EC20 timeout check__________________________________________________________________					
+	if(ecTimeout && __time__ > ecTimeout) {
+		ecTimeout=0;
+		ioc->SetError(_ENMtimeout);	
+	}
+//__DL timeout check____________________________________________________________________					
+	if(dlTimeout && __time__ > dlTimeout) {
+		dlTimeout=0;
+		ioc->SetError(_DLtimeout);	
+	}
+//__diode levels check__________________________________________________________________
+	if(ioc->IOC_State.State == _ACTIVE) {
+		if((int)ioc->DL.x[0] > ioc->DL_Limits.Limit[0] + _DL_OFFSET)
+			ioc->SetError(_DLpowerCh1);	
+		if((int)ioc->DL.x[1] > ioc->DL_Limits.Limit[1] + 5*_DL_OFFSET)
+			ioc->SetError(_DLpowerCh2);	
+	} else {
+		if(ioc->IOC_State.State != _ERROR && (int)ioc->DL.x[0] >  + _DL_OFFSET)
+			ioc->SetError(_DLpowerCh1);	
+		if(ioc->IOC_State.State != _ERROR && (int)ioc->DL.x[1] >  + 5*_DL_OFFSET)
+			ioc->SetError(_DLpowerCh2);	
 	}
 //______________________________________________________________________________________
+//______________________________________________________________________________________
+//______________________________________________________________________________________
+//__forcing filter loop (unit test only, adc not active________________________________
+	if(HAL_IS_BIT_CLR(hadc2.Instance->CR2, ADC_CR2_ADON)) {
+		_ADC::diodeFilter(0);
+		_ADC::diodeFilter(1);
+	}
+//__CAN console processing______________________________________________________________
 	if(remote) {
 		uint8_t	data[8],n;
 		n=_buffer_pull(remote->io->tx,data,8);
 		if(n)
 			Send(idCOM2CAN,data,n);
-	}
-//______________________________________________________________________________________
-	if(HAL_IS_BIT_CLR(hadc2.Instance->CR2, ADC_CR2_ADON)) {
-		_ADC::diodeFilter(0);
-		_ADC::diodeFilter(1);
-	}
-//______________________________________________________________________________________
-	if(ioc->IOC_State.State == _ACTIVE) {
-		if((int)ioc->DL.x[0] > ioc->DL_Limits.Limit[0] + _DL_OFFSET)
-			ioc->SetError(_energyMissing);	
-		if((int)ioc->DL.x[1] > ioc->DL_Limits.Limit[1] + _DL_OFFSET)
-			ioc->SetError(_energyMissing);	
-	} else {
-		if((int)ioc->DL.x[0] >  + _DL_OFFSET)
-			ioc->SetError(_energyMissing);	
-		if((int)ioc->DL.x[1] >  + _DL_OFFSET)
-			ioc->SetError(_energyMissing);	
 	}
 }
 /*******************************************************************************
@@ -322,7 +335,7 @@ FRESULT	_CAN::Decode(char *c) {
 			hcan->Init.Mode = CAN_MODE_LOOPBACK;
 			HAL_CAN_Init(hcan);
 				
-			filter_count=timeout=0;
+			filter_count=ecTimeout=dlTimeout=0;
 			canFilterCfg(idIOC_State,	0x780, idBOOT,			0x7ff);
 			canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
 			HAL_CAN_ActivateNotification(hcan,CAN_IT_RX_FIFO0_MSG_PENDING);

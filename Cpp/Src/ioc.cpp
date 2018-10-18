@@ -112,7 +112,7 @@ _err	_IOC::fswError() {
 					break;
 				default:
 					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch error\r\n:");		
-					return _footswerror;			
+					return _footswError;			
 			}
 			return _NOERR;
 }
@@ -131,6 +131,35 @@ _err	e = me->pump.Status();
 			e = e | me->fswError();
 			me->SetError(e);
 			return me;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+void	_IOC::SetState(uint8_t *data) {
+			pump.mode &= ~_PUMP_BOOST;
+			fan.mode &= ~_FAN_BOOST;
+			SetState((_State)data[0]);
+	
+			switch(IOC_State.State) {
+				case	_STANDBY:
+					break;
+				case	_READY:
+				case	_ACTIVE:
+					if(data[1] & _PUMP_BOOST)
+						pump.mode |= _PUMP_BOOST;
+					else
+						pump.mode &= ~_PUMP_BOOST;
+					break;
+				case	_ERROR:
+					if(data[1] & _FAN_BOOST)
+						fan.mode |= _FAN_BOOST;
+					else
+						fan.mode &= ~_FAN_BOOST;
+					break;
+			}
 }
 /*******************************************************************************
 * Function Name	:
@@ -161,11 +190,9 @@ void	_IOC::SetState(_State s) {
 				case	_ERROR:
 					if(IOC_State.State != _ERROR) {
 						IOC_State.State = _ERROR;
-//						ws2812.Batch((char *)"@error.ws");
-						_SYS_SHG_DISABLE;
+						ws2812.Batch((char *)"@error.ws");
+						_SYS_SHG_DISABLE;	
 					}
-					break;
-				default:
 					break;
 				}
 }
@@ -184,6 +211,7 @@ int		e = (err ^ IOC_State.Error) & err & ~error_mask;
 						pump.Disable();
 					SetState(_ERROR);
 				}
+				
 				if(e | w) {
 					IOC_State.Error = (_err)((IOC_State.Error | e) ^ w );
 					IOC_State.Send();
@@ -222,7 +250,7 @@ const string _IOC::ErrMsg[] = {
 			
 			"cooler temperature",
 			"pump rate out of range",
-			"pump pressure out of range",
+			"DL timeout",
 			"pump current out of range",
 			
 			"fan rate out of range",
@@ -230,13 +258,16 @@ const string _IOC::ErrMsg[] = {
 			"handpiece crowbar fail",
 			"flow rate out of range",
 			
-			"energy report timeout",
+			"ENM timeout",
 			"spray not ready",
 			"doorswitch crowbar fail",
 			"footswitch error",
 
-			"DL power, channel 0",
+			"illegal EC20 req.",
+			"illegal ENM ack",
 			"DL power, channel 1",
-			"EC20 req. illegal",
-			"ENM ack. illegal"
+			"DL power, channel 2",
+			
+			"Temp. sensor error"
 };
+

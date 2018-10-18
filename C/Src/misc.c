@@ -112,6 +112,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
 		if(pumpTacho++ % 50 == 0)
 			__BLUE1(50);
 	}
+	if(htim->Instance==TIM3 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_2) {
+		if(flowTacho++ % 200 == 0)
+			__GREEN1(50);
+	}
 	if(htim->Instance==TIM9 && htim->Channel==HAL_TIM_ACTIVE_CHANNEL_1) {
 		if(fanTacho++ % 50 == 0)
 			__YELLOW1(50);
@@ -204,10 +208,11 @@ void	Watchdog_init(int t) {
 			HAL_IWDG_Init(&hiwdg);
 }
 /*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
+* Function Name	: ff_pack
+* Description		: packing flash dile system sectors
+* Input					: mode flag, 0-analyze, 1-rewrite
+* Output				: 
+* Return				: percentage of number of sectors reduced
 *******************************************************************************/
 int		ff_pack(int mode) {
 int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];

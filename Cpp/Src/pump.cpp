@@ -25,8 +25,8 @@ _PUMP::_PUMP()  {
 			gain.cooler=_BAR(1);
 			idx=0;
 			timeout=__time__ + _PUMP_ERR_DELAY;
-			mode=(1<<PUMP_FLOW);
-			tacho_limit=curr_limit=flow_limit=flow=speed=0;
+			mode=_PUMP_FLOW;
+			tacho_limit=curr_limit=flow_limit=speed=Flow=0;
 }
 /*******************************************************************************/
 /**
@@ -91,7 +91,11 @@ int		_PUMP::Fkey(int t) {
 	*/
 /*******************************************************************************/
 int		_PUMP::Rpm(int fsc) {
-			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
+			if(mode & _PUMP_BOOST)
+				return fph*fsc/100;
+			else
+				return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
+
 }
 /*******************************************************************************/
 /**
@@ -131,10 +135,12 @@ void		_PUMP::Disable() {
 _err	_PUMP::Status(void) {	
 int		e=_NOERR;
 			if(speed) {
-				if(pump_drive < Rpm(1<<12))
-					++pump_drive;
-				else
-					--pump_drive;
+				if(__time__ % 2 == 0) {
+					if(pump_drive > Rpm(1<<12))
+						--pump_drive;
+					else
+						++pump_drive;
+				}
 			} else
 				pump_drive=0;
 			
@@ -149,7 +155,7 @@ int		e=_NOERR;
 				
 				if(speed)
 					speed=pumpTacho-__pumpTacho;
-				flow=flowTacho-__flowTacho;
+				Flow=flowTacho-__flowTacho;
 				__pumpTacho=pumpTacho;
 				__flowTacho=flowTacho;
 			} 	
@@ -167,7 +173,7 @@ void 	_PUMP::Increment(int a, int b)	{
 			switch(idx) {
 				case 0:
 					if(a)
-						mode ^= (1<<PUMP_FLOW);
+						mode ^= _PUMP_FLOW;
 					break;
 				case 1:
 					fpl= std::min(std::max(fpl+a,5),fph);
@@ -193,8 +199,8 @@ void 	_PUMP::Increment(int a, int b)	{
 /*******************************************************************************/
 void	_PUMP::Newline(void) {
 int		k, i=fval.Ipump*3300/4096.0/2.1/16;
-			if(mode & (1<<PUMP_FLOW))
-				k=flow/(2200/300);
+			if(mode & _PUMP_FLOW)
+				k=Flow/(2200/300);
 			else
 				k=10*(fval.cooler-offset.cooler)/gain.cooler;
 			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
@@ -217,16 +223,20 @@ bool	_PUMP::Setup(void) {
 				_print("\r\npump errors disabled ...\r\n");
 				tacho_limit=flow_limit=curr_limit=0;
 			} else {
-int 		i=fph;
+int 		i=fph, cmax=0;
 				fph=fpl;
-				_wait(2500);
+				_wait(5000);	
 				tacho_limit=speed/2;
-				flow_limit=flow/2;
+				flow_limit=Flow/2;
 				fph=i;
 				i=fpl;
 				fpl=fph;
-				_wait(2500);
-				curr_limit=(fval.Ipump * 6)/5;
+
+				for(int t=__time__ + 5000; __time__ < t;_wait(2))
+					if(fval.Ipump > cmax)
+						cmax=fval.Ipump;
+					
+				curr_limit=(cmax * 6)/5;
 				fpl=i;
 				_print("\r\npump errors enabled ...\r\n");
 			}

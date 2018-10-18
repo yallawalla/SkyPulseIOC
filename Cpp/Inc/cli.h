@@ -5,6 +5,7 @@
 #include "term.h"
 #include "misc.h"
 #include "proc.h"
+#include "limits.h"
 
 class _FS {
 	public:	
@@ -26,7 +27,7 @@ class _CLI : public _TERM, public _FS {
 		virtual FRESULT	DecodePlus(char *),
 										DecodeMinus(char *),
 										DecodeInq(char *),
-										DecodeEq(char *);
+										DecodeEq(char *);	
 	public:	
 		_io			*io;
 		virtual void		Newline(void);
@@ -37,7 +38,7 @@ class _CLI : public _TERM, public _FS {
 			me->Parse(me->io);
 		}
 
-		_CLI()	{
+		_CLI() {
 			io=ioUsart(NULL,__RXLEN,__TXLEN);
 			_proc_add((void *)parseTask,this,(char *)"Cli",0);
 		};
@@ -48,10 +49,10 @@ class _CLI : public _TERM, public _FS {
 		};
 		
 		_CLI(USBD_HandleTypeDef *usbd) {
-			_proc_add((void *)parseTask,this,(char *)"Usb Cli",0);
 			_proc_add((void *)CDC_Poll_FS,&io,(char *)"Tx VCP",0);
+			_proc_add((void *)parseTask,this,(char *)"Usb Cli",0);
 		};
-
+		
 		~_CLI(void)	{};
 };
 #endif

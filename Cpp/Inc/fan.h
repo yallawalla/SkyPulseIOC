@@ -8,7 +8,7 @@
 #include	<algorithm>
 #define	__ramp(x,x1,x2,y1,y2)	std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
 
-extern TIM_HandleTypeDef htim10;
+extern	TIM_HandleTypeDef htim10;
 
 class	_FAN : public _TERM, public _ADC {
 	private:
@@ -22,7 +22,7 @@ class	_FAN : public _TERM, public _ADC {
 		virtual void	Newline(void);
 		virtual int		Fkey(int);
 		void		Increment(int, int);
-		int			Rpm(int);
+		int			Rpm(int),mode;
 		bool		Setup(void);
 		_err		Status(void);
 };

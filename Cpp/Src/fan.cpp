@@ -21,7 +21,7 @@
 /*******************************************************************************/
 _FAN::_FAN()  {
 			ftl=30; fth=40; fpl=20; fph=95;
-			idx=speed=tacho_limit=0;
+			idx=speed=tacho_limit=mode=0;
 			timeout=__time__ + _FAN_ERR_DELAY;
 }
 /*******************************************************************************/
@@ -87,7 +87,10 @@ int		_FAN::Fkey(int t) {
 	*/
 /*******************************************************************************/
 int		_FAN::Rpm(int fsc) {
-			return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
+			if(mode & _FAN_BOOST)
+				return fph*fsc/100;
+			else
+				return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
 }
 /*******************************************************************************/
 /**
@@ -96,12 +99,12 @@ int		_FAN::Rpm(int fsc) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-_err	_FAN::Status(void) {	
+_err	_FAN::Status(void) {
 int		e=_NOERR;
-			if(fan_drive < Rpm(__PWMRATE))
-				++fan_drive;
-			else
+			if(fan_drive > Rpm(__PWMRATE))
 				--fan_drive;
+			else
+				++fan_drive;
 
 			if(__time__ > timeout) {
 				if(tacho_limit && (fanTacho-__fanTacho) <= tacho_limit)

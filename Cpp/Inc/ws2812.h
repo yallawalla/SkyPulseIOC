@@ -42,6 +42,8 @@ class	_WS : public _CLI {
 		static 	ws2812 	ws[];
 		static	HSV	HSVbuf[];
 		static	uint8_t	modh, mods,modv,modt;
+		_proc		*parse;
+	
 	public:
 		_WS(void);
 		~_WS(void);

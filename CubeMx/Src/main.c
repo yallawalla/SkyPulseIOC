@@ -179,6 +179,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
+	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);
 	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim9,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim10,TIM_CHANNEL_1);
@@ -495,13 +496,11 @@ static void MX_CAN2_Init(void)
 /* CRC init function */
 static void MX_CRC_Init(void)
 {
-
   hcrc.Instance = CRC;
   if (HAL_CRC_Init(&hcrc) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
 }
 
 /* DAC init function */
@@ -523,6 +522,14 @@ static void MX_DAC_Init(void)
   sConfig.DAC_Trigger = DAC_TRIGGER_T4_TRGO;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**DAC channel OUT2 config 
+    */
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -633,6 +640,11 @@ static void MX_TIM3_Init(void)
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
   sConfigIC.ICFilter = 15;
   if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
@@ -975,10 +987,7 @@ static void MX_GPIO_Init(void)
                           |_RED2_Pin|_GREEN2_Pin|_YELLOW2_Pin|_BLUE2_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(_12Voff_GPIO_Port, _12Voff_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(_SYS_SHG_GPIO_Port, _SYS_SHG_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, _12Voff_Pin|_SYS_SHG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : FSW2_Pin FSW3_Pin FSW0_Pin FSW1_Pin */
   GPIO_InitStruct.Pin = FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin;

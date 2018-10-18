@@ -67,7 +67,7 @@
 #define __TH 94
 #define __TL 36
 #define __TP 130
-#define SW_version 21
+#define SW_version 22
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
@@ -91,6 +91,8 @@
 #define _5V_GPIO_Port GPIOA
 #define PUMP_TACHO_Pin GPIO_PIN_6
 #define PUMP_TACHO_GPIO_Port GPIOA
+#define FLOW_TACHO_Pin GPIO_PIN_7
+#define FLOW_TACHO_GPIO_Port GPIOA
 #define DLsense1_Pin GPIO_PIN_4
 #define DLsense1_GPIO_Port GPIOC
 #define DLsense2_Pin GPIO_PIN_5
