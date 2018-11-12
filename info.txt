@@ -65,4 +65,8 @@ col 2,5,+l
 	- manjka input za flow senzor, zaenkrat deluje tudi stari konektor na FAN2
 	- fan2 ???
 	- nastavitev za SYS_SHG ob resetu je on ( v CubeMX !!! )
-	- 
+
+/v 0.22 Nov  7 2018 <6232A467>
+	- offset za diodo ob vklopu
+	- 500 ms delay za polling
+	

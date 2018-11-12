@@ -39,6 +39,7 @@ extern CAN_HandleTypeDef	hcan2;
 extern RTC_HandleTypeDef 	hrtc;
 extern ADC_HandleTypeDef	hadc1;
 extern ADC_HandleTypeDef	hadc2;
+extern DAC_HandleTypeDef	hdac;
 extern TIM_HandleTypeDef	htim4;
 extern IWDG_HandleTypeDef hiwdg;
 extern CRC_HandleTypeDef 	hcrc;

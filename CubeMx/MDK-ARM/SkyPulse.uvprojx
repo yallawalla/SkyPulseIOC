@@ -335,7 +335,7 @@
               <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx, __REENT=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                                                                                                                                            ../Drivers/STM32F4xx_HAL_Driver/Inc;                                                                                                                                            ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                                                                                                                            ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                                                                                                                            ../Middlewares/Third_Party/FatFs/src;                                                                                                                                            ../Drivers/CMSIS/Include;                                                                                                                                            ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                                                                                                                            ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                                                                                                                            ..\..\C\Inc;                                                                                                                                            ..\..\Cpp\Inc;                                                                                                                                            ..\..\lcd\src;                                                                                                       ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;                                                                                                       ../Middlewares/Third_Party/FreeRTOS/Source/include;                                                                                                       ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
+              <IncludePath>../Inc;                                                                                                                                             ../Drivers/STM32F4xx_HAL_Driver/Inc;                                                                                                                                             ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                                                                                                                             ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                                                                                                                             ../Middlewares/Third_Party/FatFs/src;                                                                                                                                             ../Drivers/CMSIS/Include;                                                                                                                                             ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                                                                                                                             ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                                                                                                                             ..\..\C\Inc;                                                                                                                                             ..\..\Cpp\Inc;                                                                                                                                             ..\..\lcd\src;                                                                                                        ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;                                                                                                        ../Middlewares/Third_Party/FreeRTOS/Source/include;                                                                                                        ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -650,11 +650,6 @@
               <FilePath>../Src/main.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_desc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usbd_desc.c</FilePath>
-            </File>
-            <File>
               <FileName>usbd_cdc_if.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/usbd_cdc_if.c</FilePath>
@@ -668,6 +663,11 @@
               <FileName>usb_device.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/usb_device.c</FilePath>
+            </File>
+            <File>
+              <FileName>usbd_desc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usbd_desc.c</FilePath>
             </File>
             <File>
               <FileName>fatfs.c</FileName>

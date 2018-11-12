@@ -123,6 +123,8 @@
 #define _AIR_GPIO_Port GPIOC
 #define _WATER_Pin GPIO_PIN_9
 #define _WATER_GPIO_Port GPIOC
+#define cwbOVRD_Pin GPIO_PIN_8
+#define cwbOVRD_GPIO_Port GPIOA
 #define _RED1_Pin GPIO_PIN_0
 #define _RED1_GPIO_Port GPIOD
 #define _GREEN1_Pin GPIO_PIN_1

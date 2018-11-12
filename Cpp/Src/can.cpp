@@ -12,6 +12,7 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	remote = new _CLI();
 	canBuffer	=	_io_init(100*(sizeof(CAN_RxHeaderTypeDef)+8), 100*(sizeof(CAN_TxHeaderTypeDef)+8));
 	hcan = handle;
+	error = _NOERR;
 	
 	filter_count=ecTimeout=dlTimeout=anime=0;
 	
@@ -64,6 +65,26 @@ int 	_CAN::SendRemote(int stdid) {
 	if(n)
 		Send(stdid,data,n);
 	return m;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+_err 	_CAN::Status() {
+	_err e=error;
+	error=_NOERR;
+	return e;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+void 	_CAN::Status(_err e) {
+	error = error | e;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -127,7 +148,7 @@ void	_CAN::pollRx(void *v) {
 				if(rx.DLC) {
 					ioc->SetState(data);
 					if(ioc->IOC_State.State == _ACTIVE)
-						ecTimeout=dlTimeout=__time__ + _DL_POLL_DELAY;
+						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
 					else {
 						ecTimeout=dlTimeout=0;
 						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
@@ -169,7 +190,7 @@ void	_CAN::pollRx(void *v) {
 
 				} else {
 					ecTimeout=0;
-					ioc->SetError(_illENMack);			
+					Status(_illENMack);			
 				}
 				ioc->IOC_FootAck.Send();
 			break;
@@ -181,13 +202,13 @@ void	_CAN::pollRx(void *v) {
 				}
 				else {
 					ecTimeout=0;
-					ioc->SetError(_illEC20req);	
+					Status(_illEC20req);	
 				}
 			break;
 //______________________________________________________________________________________
 			case idDL_Limits:
-				ioc->DL_Limits.Limit[0] =data[0] + (data[1]<<8);
-				ioc->DL_Limits.Limit[1] =data[2] + (data[3]<<8);
+				ioc->DL_Limits.L1 =data[0] + (data[1]<<8);
+				ioc->DL_Limits.L2 =data[2] + (data[3]<<8);
 				if(ioc->IOC_State.State == _ACTIVE) {
 					dlTimeout=__time__ + _DL_POLL_DELAY;
 					ecTimeout=0;
@@ -236,34 +257,45 @@ void	_CAN::pollRx(void *v) {
 		}
 	}
 //______________________________________________________________________________________
+//
+//	DL & EC20 timeout check
 //______________________________________________________________________________________
-//______________________________________________________________________________________
-//__EC20 timeout check__________________________________________________________________					
 	if(ecTimeout && __time__ > ecTimeout) {
 		ecTimeout=0;
-		ioc->SetError(_ENMtimeout);	
+		Status(_ENMtimeout);	
 	}
-//__DL timeout check____________________________________________________________________					
+//______________________________________________________________________________________
+//
+//	DL timeout check
+//______________________________________________________________________________________
 	if(dlTimeout && __time__ > dlTimeout) {
 		dlTimeout=0;
-		ioc->SetError(_DLtimeout);	
-	}
-//__diode levels check__________________________________________________________________
-	if(ioc->IOC_State.State == _ACTIVE) {
-		if((int)ioc->DL.x[0] > ioc->DL_Limits.Limit[0] + _DL_OFFSET)
-			ioc->SetError(_DLpowerCh1);	
-		if((int)ioc->DL.x[1] > ioc->DL_Limits.Limit[1] + 5*_DL_OFFSET)
-			ioc->SetError(_DLpowerCh2);	
-	} else {
-		if(ioc->IOC_State.State != _ERROR && (int)ioc->DL.x[0] >  + _DL_OFFSET)
-			ioc->SetError(_DLpowerCh1);	
-		if(ioc->IOC_State.State != _ERROR && (int)ioc->DL.x[1] >  + 5*_DL_OFFSET)
-			ioc->SetError(_DLpowerCh2);	
+		Status(_DLtimeout);	
 	}
 //______________________________________________________________________________________
+//
+//	DL levels check
 //______________________________________________________________________________________
+	switch(ioc->IOC_State.State) {
+		case _STANDBY:
+		case _READY:
+			if(ioc->DL.x[0] > ioc->DL.offset[0] + _DL_OFFSET_THR)
+				Status(_DLpowerCh1);	
+			if(ioc->DL.x[1] > ioc->DL.offset[1] + _DL_OFFSET_THR)
+				Status(_DLpowerCh2);	
+			break;
+		case _ACTIVE:
+			if(ioc->DL.x[0] > ioc->DL.offset[0] + (10*std::max((int)ioc->DL_Limits.L1, _DL_OFFSET_THR)/10))
+				Status(_DLpowerCh1);	
+			if(ioc->DL.x[1] > ioc->DL.offset[1] + (10*std::max((int)ioc->DL_Limits.L2, _DL_OFFSET_THR)/10))
+				Status(_DLpowerCh2);	
+			break;
+		case _ERROR:
+			break;
+	}
 //______________________________________________________________________________________
-//__forcing filter loop (unit test only, adc not active________________________________
+//__forcing filter loop (unit test only, adc not active
+//
 	if(HAL_IS_BIT_CLR(hadc2.Instance->CR2, ADC_CR2_ADON)) {
 		_ADC::diodeFilter(0);
 		_ADC::diodeFilter(1);

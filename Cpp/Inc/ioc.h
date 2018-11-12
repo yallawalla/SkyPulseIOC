@@ -84,9 +84,10 @@ typedef __packed struct _IOC_SprayAck {
 } IOC_SprayAck;
 //_____________________________________________________________________
 typedef __packed struct _DL_Limits {
-	short Limit[2];
+	short L1,L2;
+	_DL_Limits() : L1(30),L2(30)	{}
 	void	Send() {
-		_CAN::Send(idDL_Limits,(void *)Limit,sizeof(_DL_Limits));
+		_CAN::Send(idDL_Limits,(void *)&L1,sizeof(_DL_Limits));
 	}
 } DL_Limits;
 //_____________________________________________________________________
@@ -144,7 +145,7 @@ class _IOC : public _ADC {
 
 		void SetState(uint8_t *);
 		void SetState(_State);
-		void SetError(_err);
+		void pollError();
 
 		static const string	ErrMsg[];
 		static void	*pollStatus(void *);

@@ -103,8 +103,9 @@ int _CLI::Fkey(int t) {
 //_________________________________________________________________________________
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
+//
+//
 //_________________________________________________________________________________
-
 FRESULT _CLI::DecodePlus(char *c) {
 	_IOC	*ioc=_IOC::parent;
 	switch(*++c) {
@@ -120,6 +121,9 @@ FRESULT _CLI::DecodePlus(char *c) {
 		case 'W':
 		for(c=strchr(c,' '); c && *c;)
 			ioc->warn_mask = (_err)(ioc->warn_mask | (1<<strtoul(++c,&c,10)));
+		break;
+		case 'c':
+			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_RESET);
 		break;
 		default:
 			return FR_INVALID_NAME;
@@ -143,6 +147,9 @@ FRESULT _CLI::DecodeMinus(char *c) {
 		for(c=strchr(c,' '); c && *c;)
 			ioc->warn_mask = (_err)(ioc->warn_mask & ~(1<<strtoul(++c,&c,10)));
 		break;
+		case 'c':
+			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET);
+		break;
 		default:
 			return FR_INVALID_NAME;
 	}
@@ -154,7 +161,7 @@ FRESULT _CLI::DecodeEq(char *c) {
 	switch(*++c) {
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
-			ioc->SetError((_err)(1<<strtoul(++c,&c,10)));
+			ioc->can.Status((_err)(1<<strtoul(++c,&c,10)));
 		break;
 		default:
 			return FR_INVALID_NAME;
@@ -168,11 +175,10 @@ FRESULT _CLI::DecodeInq(char *c) {
 		case 'E':
 		{
 			dbgio=io;
-			_err e = ioc->IOC_State.Error;
 			_dbg d = debug;
 			debug = (_dbg)(d | DBG_ERR);
+			ioc->can.Status(ioc->IOC_State.Error);
 			ioc->IOC_State.Error=_NOERR;
-			ioc->SetError(e);
 			debug = d;
 		}
 			break;	

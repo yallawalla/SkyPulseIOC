@@ -191,6 +191,7 @@ int main(void)
 
 	HAL_TIM_DMABurst_WriteStart(&htim8,TIM_DMABASE_CCR1,TIM_DMA_UPDATE,(uint32_t *)valve_drive,TIM_DMABURSTLENGTH_4TRANSFERS);
 	HAL_DAC_Start_DMA(&hdac,DAC_CHANNEL_1,(uint32_t *)&pump_drive,1,DAC_ALIGN_12B_R);
+	HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim4,TIM_CHANNEL_2);
@@ -496,11 +497,13 @@ static void MX_CAN2_Init(void)
 /* CRC init function */
 static void MX_CRC_Init(void)
 {
+
   hcrc.Instance = CRC;
   if (HAL_CRC_Init(&hcrc) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+
 }
 
 /* DAC init function */
@@ -983,6 +986,9 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOD, _RED1_Pin|_GREEN1_Pin|_YELLOW1_Pin|_BLUE1_Pin 
                           |_RED2_Pin|_GREEN2_Pin|_YELLOW2_Pin|_BLUE2_Pin, GPIO_PIN_SET);
 
@@ -1000,6 +1006,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : cwbOVRD_Pin */
+  GPIO_InitStruct.Pin = cwbOVRD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(cwbOVRD_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : _RED1_Pin _GREEN1_Pin _YELLOW1_Pin _BLUE1_Pin 
                            _RED2_Pin _GREEN2_Pin _YELLOW2_Pin _BLUE2_Pin */
