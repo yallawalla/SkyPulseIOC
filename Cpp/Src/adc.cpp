@@ -7,13 +7,20 @@ adc		_ADC::val[16]	={},
 			_ADC::offset={},
 			_ADC::gain={};
 /*******************************************************************************
-* Function Name	:
-* Description		: 
+* Function Name	: ADC constructor
+* Description		: 2-APB2 clock divider
+*								: 4-ADC prescaler
+*								: 26-sample cycles, 12-conversion cycles
+*								: 2 channels concversion
+*								: 154 pairs DMA block
 * Output				:
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			DL.k=0.0006250f*10.0f;	// 1-10 ms
+			float fo=SystemCoreClock/2/4/(12+56)/2;
+			float fi=fo/(sizeof(DL.dma)/sizeof(short)/2);
+			DL.k=5*2.0*M_PI/fo;
+			DL.ton=DL.toff=DL.__ton=DL.__toff=0;
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
@@ -56,18 +63,20 @@ void	_ADC::adcFilter() {
 void	_ADC::diodeFilter(int k) {
 unsigned short *p;
 int		n=sizeof(DL.dma)/sizeof(short)/4;
+	
 			if(k)
 				p=&DL.dma[n][0];
 			else
 				p=&DL.dma[0][0];
+			
 			while(n--) {
 				DL.dx[0] += DL.k*(p[0] - DL.x[0]-DL.dx[0]-DL.dx[0]);
 				DL.x[0] += DL.k*DL.dx[0];	
 				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
 				DL.x[1] += DL.k*DL.dx[1];	
-				
+
 				++p;++p;
-			}
+
 				if(DL.x[0]>DL.max[0])
 					DL.max[0]=DL.x[0];
 				if(DL.x[1]>DL.max[1])
@@ -76,17 +85,39 @@ int		n=sizeof(DL.dma)/sizeof(short)/4;
 					DL.min[0]=DL.x[0];
 				if(DL.x[1]<DL.min[1])
 					DL.min[1]=DL.x[1];
-				if(__time__ % 10 == 0) {
-					if(DL.max[0] > 0) --DL.max[0]; 
-					if(DL.max[1] > 0) --DL.max[1]; 
-					if(DL.min[0] < 100) ++DL.min[0]; 
-					if(DL.min[1] < 100) ++DL.min[1]; 
+				
+				DL.drefx += DL.k*(DL.ref - DL.refx-2*DL.drefx);
+				DL.refx += DL.k*DL.drefx;		
+			}
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.refx);
+
+			if(__time__ % 10 == 0) {
+				if(DL.max[0] > 0) --DL.max[0]; 
+				if(DL.max[1] > 0) --DL.max[1]; 
+				if(DL.min[0] < 4096) ++DL.min[0]; 
+				if(DL.min[1] < 4096) ++DL.min[1]; 
+			}
+
+			if(__time__ < _DL_OFFSET_DELAY) {
+				DL.offset[0]=DL.x[0];
+				DL.offset[1]=DL.x[1];
+			}
+			
+			if(DL.ton && DL.toff) {
+				if(__time__ > DL.__ton) {
+						DL.ref=DL.limit[0];
+						DL.__toff=__time__+DL.ton;
+						DL.__ton=DL.__toff+DL.toff;
+						DL.refmin=DL.refx;
 				}
-				if(__time__ < _DL_OFFSET_DELAY) {
-					DL.offset[0]=DL.x[0];
-					DL.offset[1]=DL.x[1];
+				if(__time__ > DL.__toff) {
+						DL.ref=DL.offset[0];
+						DL.__ton=__time__+DL.toff;
+						DL.__toff=DL.__ton+DL.ton;
+						DL.refmax=DL.refx;
 				}
-}
+			}
+		}
 /*******************************************************************************
 * Function Name	: 
 * Description		: 
@@ -133,9 +164,9 @@ _err	e=_NOERR;
 				e = e | _V12;
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 				e = e | _V24;
-			if(Th2o() > 50*100)
+			if(Th2o() > 61*100)
 				e = e | _sysOverheat;
-			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x400)
+			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0400)
 				e = e | _TsenseError;
 			}		
 		return e;

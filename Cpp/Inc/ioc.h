@@ -23,6 +23,7 @@ typedef enum {
 	idIOC_AuxReq			=0x203,
 	idIOC_VersionReq	=0x204,
 	idDL_Limits				=0x21F,
+	idDL_Timing				=0x602,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
@@ -83,14 +84,6 @@ typedef __packed struct _IOC_SprayAck {
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
-typedef __packed struct _DL_Limits {
-	short L1,L2;
-	_DL_Limits() : L1(30),L2(30)	{}
-	void	Send() {
-		_CAN::Send(idDL_Limits,(void *)&L1,sizeof(_DL_Limits));
-	}
-} DL_Limits;
-//_____________________________________________________________________
 typedef __packed struct _IOC_VersionAck {
 	uint16_t version;
 	uint32_t hash;
@@ -114,6 +107,17 @@ typedef __packed struct _IOC_Aux{
 	}
 } IOC_Aux;
 //_____________________________________________________________________
+typedef __packed struct _DL_Timing {
+	unsigned short Pavg;
+	unsigned Ton:24,Toff:24;
+	_DL_Timing() : Pavg(0),Ton(0),Toff(0)	{}
+} DL_Timing;
+//_____________________________________________________________________
+typedef __packed struct _DL_Limits {
+	unsigned short L0,L1;
+	_DL_Limits() : L0(30),L1(30)	{}
+} DL_Limits;
+//_____________________________________________________________________
 //_____________________________________________________________________
 //_____________________________________________________________________
 //_____________________________________________________________________
@@ -130,7 +134,6 @@ class _IOC : public _ADC {
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
-		_DL_Limits			DL_Limits;
 		_IOC_VersionAck	IOC_VersionAck;
 	
 		_CAN						can;

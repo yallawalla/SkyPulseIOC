@@ -43,8 +43,15 @@ typedef struct	{
 						dx[2],
 						max[2],
 						min[2],
+						ref,
+						refx,
+						drefx,
+						refmax,
+						refmin,
 						k;
-			unsigned short	dma[16*10][2];
+			unsigned short	dma[154][2];
+			unsigned short	limit[2];
+			unsigned int 		ton,toff,__ton,__toff;
 		} diode;
 
 class	_ADC {

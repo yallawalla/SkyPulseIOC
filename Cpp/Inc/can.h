@@ -13,7 +13,7 @@
 *******************************************************************************/
 class _CAN : public _TERM {
 private:
-	int		filter_count, ecTimeout, dlTimeout,anime;
+	int		filter_count, ecTimeout, dlTimeout;
 	int		dl_ch1, dl_ch2;
 	_CLI	*remote;
 	_err	error;
