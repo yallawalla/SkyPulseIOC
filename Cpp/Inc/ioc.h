@@ -118,9 +118,6 @@ typedef __packed struct _DL_Limits {
 	_DL_Limits() : L0(30),L1(30)	{}
 } DL_Limits;
 //_____________________________________________________________________
-//_____________________________________________________________________
-//_____________________________________________________________________
-//_____________________________________________________________________
 class _IOC : public _ADC {
 	private:
 		int key,temp;
@@ -129,6 +126,7 @@ class _IOC : public _ADC {
 		static _IOC			*parent;
 		_IOC();
 		_err 						error_mask,warn_mask;
+		_err						DLstatus();
 	
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;

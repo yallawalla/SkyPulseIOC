@@ -152,7 +152,7 @@ void	_CAN::pollRx(void *v) {
 						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
 					else {
 						ecTimeout=dlTimeout=0;
-						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
+//						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
 					}
 				}
 				ioc->IOC_State.Send();
@@ -274,27 +274,6 @@ void	_CAN::pollRx(void *v) {
 	if(dlTimeout && __time__ > dlTimeout) {
 		dlTimeout=0;
 		Status(_DLtimeout);	
-	}
-//______________________________________________________________________________________
-//
-//	DL levels check
-//______________________________________________________________________________________
-	switch(ioc->IOC_State.State) {
-		case _STANDBY:
-		case _READY:
-			if(ioc->DL.x[0] > ioc->DL.offset[0] + _DL_OFFSET_THR)
-				Status(_DLpowerCh1);	
-			if(ioc->DL.x[1] > ioc->DL.offset[1] + _DL_OFFSET_THR)
-				Status(_DLpowerCh2);	
-			break;
-		case _ACTIVE:
-			if(ioc->DL.x[0] > ioc->DL.offset[0] + std::max((int)ioc->DL.limit[0], _DL_OFFSET_THR))
-				Status(_DLpowerCh1);	
-			if(ioc->DL.x[1] > ioc->DL.offset[1] + std::max((int)ioc->DL.limit[1], _DL_OFFSET_THR))
-				Status(_DLpowerCh2);	
-			break;
-		case _ERROR:
-			break;
 	}
 //__CAN console processing______________________________________________________________
 	if(remote) {

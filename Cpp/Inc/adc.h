@@ -19,9 +19,10 @@
 #define	_V12to16X					(int)(12.0/_UREF*_Rdiv(820.0,3300.0)*65535.0+0.5)			
 #define	_V24to16X					(int)(24.0/_UREF*_Rdiv(820.0,6800.0)*65535.0+0.5)			
 #define	_BAR(a)					 ((int)((a)*16384.0f))
+#define	_PI								3.141592653589793
 
-__inline 
-int			__fit(int to, const int t[], const int ft[]) {
+			__inline 
+int		__fit(int to, const int t[], const int ft[]) {
 int			f3=(ft[3]*(t[0]-to)-ft[0]*(t[3]-to)) / (t[0]-t[3]);
 int			f2=(ft[2]*(t[0]-to)-ft[0]*(t[2]-to)) / (t[0]-t[2]);
 int			f1=(ft[1]*(t[0]-to)-ft[0]*(t[1]-to)) / (t[0]-t[1]);
@@ -36,25 +37,49 @@ const	int Rtab[]={ (0xffff*_Rdiv(18813.0,5100.0)), (0xffff*_Rdiv(10000.0,5100.0)
 typedef struct	{
 			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
+		
+struct lopass {
+	private:
+		struct _lopass {
+			private:
+				float x,dx,k;
+			public:
+				_lopass(float fo, float fs) {
+					x=dx=0;
+					k=2*_PI*fo/fs;
+				}				
+				float eval(float inp) {
+					float _dx = inp-x-dx-dx;
+					x += k*dx;	
+					dx += k*_dx;	
+					return x;
+				}
+				float max,min;
+		} ch1,ch2;
+	public:
+		float X[2];
+		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {}
+		void eval(float in0,float in1) {
+			X[0]=ch1.eval(in0);
+			X[1]=ch2.eval(in1);
+		}	
+};
 
-typedef struct	{
+
+typedef struct _diode {
 			float offset[2],
-						x[2],
-						dx[2],
 						max[2],
 						min[2],
-						ref,
-						refx,
-						drefx,
-						refmax,
-						refmin,
-						k;
+						inp[2];
 			unsigned short	dma[154][2];
-			unsigned short	limit[2];
 			unsigned int 		ton,toff,__ton,__toff;
+			unsigned short	limit[2];
+			
+			lopass	filterHi, filterLow;
+			_diode():filterHi(150, SystemCoreClock/2/4/(12+56)/2),filterLow(5, 1000) {}
 		} diode;
 
-class	_ADC {
+		class	_ADC {
 	private:
 	public:
 	_ADC();

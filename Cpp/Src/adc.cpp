@@ -1,7 +1,7 @@
 #include	"adc.h"
 #include	"misc.h"
 
-diode	_ADC::DL={};
+diode	_ADC::DL;
 adc		_ADC::val[16]	={},
 			_ADC::fval={},
 			_ADC::offset={},
@@ -17,9 +17,6 @@ adc		_ADC::val[16]	={},
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			float fo=SystemCoreClock/2/4/(12+56)/2;
-			float fi=fo/(sizeof(DL.dma)/sizeof(short)/2);
-			DL.k=5*2.0*M_PI/fo;
 			DL.ton=DL.toff=DL.__ton=DL.__toff=0;
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
@@ -63,60 +60,52 @@ void	_ADC::adcFilter() {
 void	_ADC::diodeFilter(int k) {
 unsigned short *p;
 int		n=sizeof(DL.dma)/sizeof(short)/4;
-	
+
 			if(k)
 				p=&DL.dma[n][0];
 			else
 				p=&DL.dma[0][0];
 			
 			while(n--) {
-				DL.dx[0] += DL.k*(p[0] - DL.x[0]-DL.dx[0]-DL.dx[0]);
-				DL.x[0] += DL.k*DL.dx[0];	
-				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
-				DL.x[1] += DL.k*DL.dx[1];	
-
+				DL.filterHi.eval(p[0],p[1]);
 				++p;++p;
-
-				if(DL.x[0]>DL.max[0])
-					DL.max[0]=DL.x[0];
-				if(DL.x[1]>DL.max[1])
-					DL.max[1]=DL.x[1];
-				if(DL.x[0]<DL.min[0])
-					DL.min[0]=DL.x[0];
-				if(DL.x[1]<DL.min[1])
-					DL.min[1]=DL.x[1];
-				
-				DL.drefx += DL.k*(DL.ref - DL.refx-2*DL.drefx);
-				DL.refx += DL.k*DL.drefx;		
 			}
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.refx);
-
-			if(__time__ % 10 == 0) {
-				if(DL.max[0] > 0) --DL.max[0]; 
-				if(DL.max[1] > 0) --DL.max[1]; 
-				if(DL.min[0] < 4096) ++DL.min[0]; 
-				if(DL.min[1] < 4096) ++DL.min[1]; 
-			}
-
 			if(__time__ < _DL_OFFSET_DELAY) {
-				DL.offset[0]=DL.x[0];
-				DL.offset[1]=DL.x[1];
+				DL.offset[0]=DL.filterHi.X[0];
+				DL.offset[1]=DL.filterHi.X[1];
 			}
-			
-			if(DL.ton && DL.toff) {
-				if(__time__ > DL.__ton) {
-						DL.ref=DL.limit[0];
-						DL.__toff=__time__+DL.ton;
-						DL.__ton=DL.__toff+DL.toff;
-						DL.refmin=DL.refx;
-				}
-				if(__time__ > DL.__toff) {
-						DL.ref=DL.offset[0];
-						DL.__ton=__time__+DL.toff;
-						DL.__toff=DL.__ton+DL.ton;
-						DL.refmax=DL.refx;
-				}
-			}
+//				DL.dx[0] += DL.k*(p[0] - DL.x[0]-DL.dx[0]-DL.dx[0]);
+//				DL.x[0] += DL.k*DL.dx[0];	
+//				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
+//				DL.x[1] += DL.k*DL.dx[1];	
+
+//				++p;++p;
+
+//				if(DL.x[0]>DL.max[0])
+//					DL.max[0]=DL.x[0];
+//				if(DL.x[1]>DL.max[1])
+//					DL.max[1]=DL.x[1];
+//				if(DL.x[0]<DL.min[0])
+//					DL.min[0]=DL.x[0];
+//				if(DL.x[1]<DL.min[1])
+//					DL.min[1]=DL.x[1];
+				
+//				DL.drefx += DL.k*(DL.ref - DL.refx-2*DL.drefx);
+//				DL.refx += DL.k*DL.drefx;		
+//			}
+//			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.refx);
+
+//			if(__time__ % 10 == 0) {
+//				if(DL.max[0] > 0) --DL.max[0]; 
+//				if(DL.max[1] > 0) --DL.max[1]; 
+//				if(DL.min[0] < 4096) ++DL.min[0]; 
+//				if(DL.min[1] < 4096) ++DL.min[1]; 
+//			}
+
+//			if(__time__ < _DL_OFFSET_DELAY) {
+//				DL.offset[0]=DL.x[0];
+//				DL.offset[1]=DL.x[1];
+//			}
 		}
 /*******************************************************************************
 * Function Name	: 

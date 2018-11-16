@@ -130,13 +130,13 @@ void	*_IOC::pollStatus(void *v) {
 			static_cast<_IOC *>(v)->pollError();
 
 			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.x[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterHi.X[0]);
 			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.dx[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterHi.X[1]);
 			if(_TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.x[1]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterLow.X[0]);
 			if(_TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.dx[1]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterLow.X[1]);
 
 			return v;
 }
@@ -184,6 +184,7 @@ _err	err = can.Status();
 			err = err | spray.Status();
 			err = err | adcError();
 			err = err | fswError();
+			err = err | DLstatus();
 	
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
@@ -212,6 +213,51 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 			}
 			
 			_SYS_SHG_ENABLED ? __GREEN2(200) : __RED2(200);
+}
+//______________________________________________________________________________________
+//
+//	DL levels check
+//______________________________________________________________________________________
+_err	_IOC::DLstatus() {
+_err e=_NOERR;
+	switch(IOC_State.State) {
+	case _STANDBY:
+	case _READY:
+		if(DL.filterHi.X[0] > DL.offset[0] + _DL_OFFSET_THR)
+			e = e | _DLpowerCh1;	
+		if(DL.filterHi.X[1] > DL.offset[1] + _DL_OFFSET_THR)
+			e = e | _DLpowerCh2;	
+			if(DL.ton && DL.toff) {
+			if(__time__ > DL.__ton) {
+				DL.inp[0]=DL.limit[0]+DL.offset[0];
+				DL.inp[1]=DL.limit[1]+DL.offset[1];
+				DL.__toff=__time__+DL.ton;
+				DL.__ton=DL.__toff+DL.toff;
+				DL.min[0]=DL.filterLow.X[0];
+				DL.min[1]=DL.filterLow.X[1];
+			}
+			if(__time__ > DL.__toff) {
+				DL.inp[0]=DL.offset[0];
+				DL.inp[1]=DL.offset[1];
+				DL.__ton=__time__+DL.toff;
+				DL.__toff=DL.__ton+DL.ton;
+				DL.max[0]=DL.filterLow.X[0];
+				DL.max[1]=DL.filterLow.X[1];
+			}
+		}		
+		DL.filterLow.eval(DL.inp[0],DL.inp[1]);
+		break;
+	case _ACTIVE:
+		DL.filterLow.eval(DL.filterHi.X[0],DL.filterHi.X[1]);
+		if(DL.filterLow.X[0] > DL.max[0])
+			e = e | _DLpowerCh1;	
+		if(DL.filterLow.X[1] > DL.max[1])
+			e = e | _DLpowerCh2;	
+		break;
+	case _ERROR:
+		break;
+	}
+	return e;
 }
 /*******************************************************************************
 * Function Name	:
