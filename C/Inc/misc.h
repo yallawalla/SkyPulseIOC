@@ -20,7 +20,8 @@
 	
 HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
-int								ff_pack(int );
+int				ff_pack(int );
+char 			*trim(char **);
 
 void	pollUsart(_io *);
 _io* 	ioUsart(UART_HandleTypeDef *, int, int);

@@ -76,6 +76,7 @@ int _CLI::Fkey(int t) {
 					ioc->fan.SaveSettings(f);
 					ioc->spray.SaveSettings(f);
 					ioc->ws2812.SaveSettings(f);
+					f_printf(f,"%08X,%08X                       /.. error, warning mask\r\n",ioc->error_mask,ioc->warn_mask);
 					_print("... saved");
 					f_close(f);
 					delete f;
@@ -108,7 +109,7 @@ typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
 FRESULT _CLI::DecodePlus(char *c) {
 	_IOC	*ioc=_IOC::parent;
-	switch(*++c) {
+	switch(*trim(&++c)) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
 			debug = (_dbg)(debug | (1<<strtoul(++c,&c,10)));
@@ -133,7 +134,7 @@ FRESULT _CLI::DecodePlus(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeMinus(char *c) {
 	_IOC	*ioc=_IOC::parent;
-	switch(*++c) {
+	switch(*trim(&++c)) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
 			debug = (_dbg)(debug & ~(1<<strtoul(++c,&c,10)));
@@ -158,7 +159,7 @@ FRESULT _CLI::DecodeMinus(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeEq(char *c) {
 	_IOC	*ioc=_IOC::parent;
-	switch(*++c) {
+	switch(*trim(&++c)) {
 		case 'E':
 		for(c=strchr(c,' '); c && *c;)
 			ioc->can.Status((_err)(1<<strtoul(++c,&c,10)));
@@ -171,7 +172,7 @@ FRESULT _CLI::DecodeEq(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeInq(char *c) {
 	_IOC	*ioc=_IOC::parent;
-	switch(*++c) {
+	switch(*trim(&++c)) {
 		case 'E':
 		{
 			dbgio=io;
