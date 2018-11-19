@@ -109,6 +109,7 @@ typedef enum  { _LIST, _ERASE } _FACT;
 //_________________________________________________________________________________
 FRESULT _CLI::DecodePlus(char *c) {
 	_IOC	*ioc=_IOC::parent;
+	int n=0;
 	switch(*trim(&++c)) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
@@ -116,12 +117,16 @@ FRESULT _CLI::DecodePlus(char *c) {
 		dbgio=io;
 		break;
 		case 'E':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
+		if(!n)
+			ioc->error_mask = _NOERR;
 		break;
 		case 'W':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->warn_mask = (_err)(ioc->warn_mask | (1<<strtoul(++c,&c,10)));
+		if(!n)
+			ioc->warn_mask = ~_NOERR;
 		break;
 		case 'c':
 			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_RESET);
@@ -134,6 +139,7 @@ FRESULT _CLI::DecodePlus(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeMinus(char *c) {
 	_IOC	*ioc=_IOC::parent;
+	int n=0;
 	switch(*trim(&++c)) {
 		case 'D':
 		for(c=strchr(c,' '); c && *c;)
@@ -141,12 +147,16 @@ FRESULT _CLI::DecodeMinus(char *c) {
 		dbgio=io;
 		break;
 		case 'E':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->error_mask = (_err)(ioc->error_mask | (1<<strtoul(++c,&c,10)));
+		if(!n)
+			ioc->error_mask = ~_NOERR;
 		break;
 		case 'W':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->warn_mask = (_err)(ioc->warn_mask & ~(1<<strtoul(++c,&c,10)));
+		if(!n)
+			ioc->warn_mask = _NOERR;
 		break;
 		case 'c':
 			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET);

@@ -50,7 +50,8 @@ char		c[128];
 				fan.LoadSettings(&f);
 				spray.LoadSettings(&f);
 				ws2812.LoadSettings(&f);
-				sscanf(c,"%X,%X",&error_mask,&warn_mask);
+				if(f_gets(c,sizeof(c),&f))
+					sscanf(c,"%X,%X",&error_mask,&warn_mask);
 				while(!f_eof(&f))
 					com1.Parse(&f);	
 				f_close(&f);
