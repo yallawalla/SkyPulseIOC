@@ -213,11 +213,11 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idDL_Timing: {
-				DL_Timing *p=(DL_Timing *)data;
-				ioc->DL.ton=p->Ton/1000;
-				ioc->DL.toff=p->Toff/1000;
-				ioc->DL.__ton=ioc->DL.__toff=__time__;
-				ioc->DL.__toff += p->Ton;	}
+				ioc->DL_Timing=*(DL_Timing *)data;
+				ioc->DL_Timing.Ton /= 1000;
+				ioc->DL_Timing.Toff /= 1000;
+				ioc->DL.ton=ioc->DL.toff=__time__;
+				ioc->DL.toff += ioc->DL_Timing.Ton;	}
 			break;				
 //______________________________________________________________________________________
 			case idIOC_Footreq:

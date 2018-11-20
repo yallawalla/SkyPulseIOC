@@ -230,25 +230,25 @@ _err e=_NOERR;
 			e = e | _DLpowerCh1;	
 		if(DL.filterHi.X[1] > DL.offset[1] + _DL_OFFSET_THR)
 			e = e | _DLpowerCh2;	
-			if(DL.ton && DL.toff) {
-			if(__time__ > DL.__ton) {
-				DL.inp[0]=DL.limit[0]+DL.offset[0];
-				DL.inp[1]=DL.limit[1]+DL.offset[1];
-				DL.__toff=__time__+DL.ton;
-				DL.__ton=DL.__toff+DL.toff;
+			if(DL_Timing.Ton && DL_Timing.Toff) {
+			if(__time__ > DL.ton) {
+				DL.ref[0]=DL_Limits.L0+DL.offset[0];
+				DL.ref[1]=DL_Limits.L1+DL.offset[1];
+				DL.toff=__time__+DL_Timing.Ton;
+				DL.ton=DL.toff+DL_Timing.Toff;
 				DL.min[0]=DL.filterLow.X[0];
 				DL.min[1]=DL.filterLow.X[1];
 			}
-			if(__time__ > DL.__toff) {
-				DL.inp[0]=DL.offset[0];
-				DL.inp[1]=DL.offset[1];
-				DL.__ton=__time__+DL.toff;
-				DL.__toff=DL.__ton+DL.ton;
+			if(__time__ > DL.toff) {
+				DL.ref[0]=DL.offset[0];
+				DL.ref[1]=DL.offset[1];
+				DL.ton=__time__+DL_Timing.Toff;
+				DL.toff=DL.ton+DL_Timing.Ton;
 				DL.max[0]=DL.filterLow.X[0];
 				DL.max[1]=DL.filterLow.X[1];
 			}
 		}		
-		DL.filterLow.eval(DL.inp[0],DL.inp[1]);
+		DL.filterLow.eval(DL.ref[0],DL.ref[1]);
 		break;
 	case _ACTIVE:
 		DL.filterLow.eval(DL.filterHi.X[0],DL.filterHi.X[1]);

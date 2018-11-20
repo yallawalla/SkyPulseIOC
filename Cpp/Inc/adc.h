@@ -37,7 +37,7 @@ const	int Rtab[]={ (0xffff*_Rdiv(18813.0,5100.0)), (0xffff*_Rdiv(10000.0,5100.0)
 typedef struct	{
 			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
-		
+
 struct lopass {
 	private:
 		struct _lopass {
@@ -47,11 +47,11 @@ struct lopass {
 				_lopass(float fo, float fs) {
 					x=dx=0;
 					k=2*_PI*fo/fs;
-				}				
+				}
 				float eval(float inp) {
 					float _dx = inp-x-dx-dx;
-					x += k*dx;	
-					dx += k*_dx;	
+					x += k*dx;
+					dx += k*_dx;
 					return x;
 				}
 				void reset() {
@@ -77,11 +77,9 @@ typedef struct _diode {
 			float offset[2],
 						max[2],
 						min[2],
-						inp[2];
+						ref[2];
 			unsigned short	dma[154][2];
-			unsigned int 		ton,toff,__ton,__toff;
-			unsigned short	limmit[2];
-			
+			unsigned int 		ton,toff;
 			lopass	filterHi, filterLow;
 			_diode():filterHi(150, SystemCoreClock/2/4/(12+56)/2),filterLow(5, 1000) {}
 		} diode;
@@ -95,7 +93,7 @@ typedef struct _diode {
 	static	void adcFilter(),diodeFilter(int);
 	static	adc val[], fval, gain, offset;
 	static	diode DL;
-	static	int Th2o(void);
+	static	int Th2o(void),Th2o(int);
 	
 };
 #endif

@@ -17,7 +17,7 @@ adc		_ADC::val[16]	={},
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			DL.ton=DL.toff=DL.__ton=DL.__toff=0;
+			DL.ton=DL.toff=0;
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
@@ -29,6 +29,18 @@ _ADC::_ADC() {
 *******************************************************************************/
 int		_ADC::Th2o() {
 			return (__fit(fval.T1,Rtab,Ttab) + __fit(fval.T2,Rtab,Ttab))/2;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		: 
+* Output				:
+* Return				: None
+*******************************************************************************/
+int		_ADC::Th2o(int n) {
+				if(n)
+					return __fit(fval.T2,Rtab,Ttab);
+				else
+					return __fit(fval.T1,Rtab,Ttab);
 }
 /*******************************************************************************
 * Function Name	:
@@ -153,9 +165,9 @@ _err	e=_NOERR;
 				e = e | _V12;
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 				e = e | _V24;
-			if(Th2o() > 61*100)
+			if(Th2o() > 55*100)
 				e = e | _sysOverheat;
-			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0400)
+			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
 				e = e | _TsenseError;
 			}		
 		return e;
