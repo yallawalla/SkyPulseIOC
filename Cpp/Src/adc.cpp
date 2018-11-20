@@ -133,7 +133,7 @@ _err	e=_NOERR;
 				e = e | _V12;
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 				e = e | _V24;
-			if(Th2o() > 50*100)
+			if(Th2o() > 55*100)
 				e = e | _sysOverheat;
 			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x400)
 				e = e | _TsenseError;
