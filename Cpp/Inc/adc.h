@@ -54,6 +54,9 @@ struct lopass {
 					dx += k*_dx;	
 					return x;
 				}
+				void reset() {
+					x=dx=0;
+				}
 				float max,min;
 		} ch1,ch2;
 	public:
@@ -62,6 +65,10 @@ struct lopass {
 		void eval(float in0,float in1) {
 			X[0]=ch1.eval(in0);
 			X[1]=ch2.eval(in1);
+		}	
+		void reset() {
+			ch1.reset();
+			ch2.reset();
 		}	
 };
 
@@ -73,7 +80,7 @@ typedef struct _diode {
 						inp[2];
 			unsigned short	dma[154][2];
 			unsigned int 		ton,toff,__ton,__toff;
-			unsigned short	limit[2];
+			unsigned short	limmit[2];
 			
 			lopass	filterHi, filterLow;
 			_diode():filterHi(150, SystemCoreClock/2/4/(12+56)/2),filterLow(5, 1000) {}

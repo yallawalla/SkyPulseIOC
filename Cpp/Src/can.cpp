@@ -203,10 +203,7 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idDL_Limits: {
-				DL_Limits *p=(DL_Limits *)data;
-				ioc->DL.limit[0]=p->L0;
-				ioc->DL.limit[1]=p->L1;
-
+				ioc->DL_Limits=*(DL_Limits *)data;
 				if(ioc->IOC_State.State == _ACTIVE) {
 					dlTimeout=__time__ + _DL_POLL_DELAY;
 					ecTimeout=0;

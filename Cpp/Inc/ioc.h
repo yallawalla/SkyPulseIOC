@@ -133,6 +133,8 @@ class _IOC : public _ADC {
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
 		_IOC_VersionAck	IOC_VersionAck;
+		_DL_Limits			DL_Limits;
+		_DL_Timing			DL_Timing;
 	
 		_CAN						can;
 		_SPRAY 					spray;

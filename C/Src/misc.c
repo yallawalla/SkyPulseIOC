@@ -307,6 +307,21 @@ void	led_poll(void) {
 * Output				:
 * Return				:
 *******************************************************************************/
+char *trim(char **c) {
+	if(!c)
+		return NULL;
+	if(*c) {
+		while(**c==' ') ++*c;
+		for(char *cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
+	}
+	return *c;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void __RED1(int32_t t)			{ leds.timeout[0]=t+HAL_GetTick(); };
 void __GREEN1(int32_t t)		{ leds.timeout[1]=t+HAL_GetTick(); };
 void __YELLOW1(int32_t t)		{ leds.timeout[2]=t+HAL_GetTick(); };

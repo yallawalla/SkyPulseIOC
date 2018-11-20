@@ -45,10 +45,13 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
 			
 			FIL f;
 			if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
+char		c[128];
 				pump.LoadSettings(&f);
 				fan.LoadSettings(&f);
 				spray.LoadSettings(&f);
 				ws2812.LoadSettings(&f);
+				if(f_gets(c,sizeof(c),&f))
+					sscanf(c,"%X,%X",&error_mask,&warn_mask);
 				while(!f_eof(&f))
 					com1.Parse(&f);	
 				f_close(&f);
@@ -312,6 +315,7 @@ void	_IOC::SetState(_State s) {
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
+					DL.filterLow.reset();
 					ws2812.Batch((char *)"@active.ws");
 					break;
 				case	_ERROR:

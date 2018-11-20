@@ -285,7 +285,7 @@ void	_SPRAY::SaveSettings(FIL *f) {
 int		a=pFit->rp[0];
 int		b=pFit->rp[1]*1e4f;
 int		c=pFit->rp[2]*1e8f;
-			f_printf(f,"%5d,%5d,%5d                       /.. pressur fit coeff.\r\n",a,b,c);
+			f_printf(f,"%5d,%5d,%5d                       /.. pressure fit coeff.\r\n",a,b,c);
 }
 /*******************************************************************************/
 /**
