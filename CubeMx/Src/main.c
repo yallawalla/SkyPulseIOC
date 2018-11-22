@@ -117,9 +117,7 @@ static void MX_CRC_Init(void);
 static void MX_TIM12_Init(void);
 void StartDefaultTask(void const * argument);
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-                                
-                                
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);                               
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/

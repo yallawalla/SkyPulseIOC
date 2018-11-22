@@ -236,16 +236,21 @@ _err e=_NOERR;
 				DL.ref[1]=DL_Limits.L1+DL.offset[1];
 				DL.toff=__time__+DL_Timing.Ton;
 				DL.ton=DL.toff+DL_Timing.Toff;
-				DL.min[0]=DL.filterLow.X[0];
-				DL.min[1]=DL.filterLow.X[1];
+				if(__time__ > DL.filterLow.timeout) {
+					DL.min[0]=DL.filterLow.X[0];
+					DL.min[1]=DL.filterLow.X[1];
+				}
 			}
+			
 			if(__time__ > DL.toff) {
 				DL.ref[0]=DL.offset[0];
 				DL.ref[1]=DL.offset[1];
 				DL.ton=__time__+DL_Timing.Toff;
 				DL.toff=DL.ton+DL_Timing.Ton;
-				DL.max[0]=DL.filterLow.X[0];
-				DL.max[1]=DL.filterLow.X[1];
+				if(__time__ > DL.filterLow.timeout) {
+					DL.max[0]=DL.filterLow.X[0];
+					DL.max[1]=DL.filterLow.X[1];
+				}
 			}
 		}		
 		DL.filterLow.eval(DL.ref[0],DL.ref[1]);
@@ -298,6 +303,15 @@ void	_IOC::SetState(uint8_t *data) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetState(_State s) {
+			DL.filterLow.reset();
+			DL.filterLow.timeout=__time__+300;
+			DL.ton=DL.toff=0;
+//			if(s != _ACTIVE) {
+//				DL.max[0]=DL_Limits.L0;
+//				DL.max[1]=DL_Limits.L1;
+//				DL.min[0]=DL.offset[0];
+//				DL.min[1]=DL.offset[1];
+//			}
 			switch(s) {
 				case	_STANDBY:
 					if(IOC_State.State == _ERROR)
@@ -315,7 +329,6 @@ void	_IOC::SetState(_State s) {
 				case	_ACTIVE:
 					IOC_State.State = _ACTIVE;
 					pump.Enable();
-					DL.filterLow.reset();
 					ws2812.Batch((char *)"@active.ws");
 					break;
 				case	_ERROR:

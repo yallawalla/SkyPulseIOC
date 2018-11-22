@@ -152,7 +152,6 @@ void	_CAN::pollRx(void *v) {
 						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
 					else {
 						ecTimeout=dlTimeout=0;
-//						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
 					}
 				}
 				ioc->IOC_State.Send();

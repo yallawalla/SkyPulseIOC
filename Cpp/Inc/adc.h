@@ -61,7 +61,10 @@ struct lopass {
 		} ch1,ch2;
 	public:
 		float X[2];
-		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {}
+		unsigned int timeout;
+		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {
+			timeout=0;
+		}
 		void eval(float in0,float in1) {
 			X[0]=ch1.eval(in0);
 			X[1]=ch2.eval(in1);
@@ -84,7 +87,7 @@ typedef struct _diode {
 			_diode():filterHi(150, SystemCoreClock/2/4/(12+56)/2),filterLow(5, 1000) {}
 		} diode;
 
-		class	_ADC {
+class	_ADC {
 	private:
 	public:
 	_ADC();
