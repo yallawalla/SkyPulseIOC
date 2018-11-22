@@ -57,7 +57,6 @@ struct lopass {
 				void reset() {
 					x=dx=0;
 				}
-				float max,min;
 		} ch1,ch2;
 	public:
 		float X[2];
@@ -72,6 +71,7 @@ struct lopass {
 		void reset() {
 			ch1.reset();
 			ch2.reset();
+			X[0]=X[1]=0;
 		}	
 };
 
@@ -83,8 +83,12 @@ typedef struct _diode {
 						ref[2];
 			unsigned short	dma[154][2];
 			unsigned int 		ton,toff;
-			lopass	filterHi, filterLow;
-			_diode():filterHi(150, SystemCoreClock/2/4/(12+56)/2),filterLow(5, 1000) {}
+			lopass	filter, filterRef;
+			void reset() {
+				filterRef.reset();
+				ton=toff=0;
+			}	
+			_diode():filter(5, SystemCoreClock/2/4/(12+56)/2),filterRef(5, SystemCoreClock/2/4/(12+56)/2) {}
 		} diode;
 
 class	_ADC {

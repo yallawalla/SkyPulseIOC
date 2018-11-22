@@ -79,12 +79,13 @@ int		n=sizeof(DL.dma)/sizeof(short)/4;
 				p=&DL.dma[0][0];
 			
 			while(n--) {
-				DL.filterHi.eval(p[0],p[1]);
+				DL.filterRef.eval(DL.ref[0],DL.ref[1]);
+				DL.filter.eval(p[0],p[1]);
 				++p;++p;
 			}
 			if(__time__ < _DL_OFFSET_DELAY) {
-				DL.offset[0]=DL.filterHi.X[0];
-				DL.offset[1]=DL.filterHi.X[1];
+				DL.offset[0]=DL.filter.X[0];
+				DL.offset[1]=DL.filter.X[1];
 			}
 		}
 /*******************************************************************************

@@ -133,47 +133,16 @@ void	*_IOC::pollStatus(void *v) {
 			static_cast<_IOC *>(v)->pollError();
 
 			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterHi.X[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filter.X[0]);
 			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterHi.X[1]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filter.X[1]);
 			if(_TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterLow.X[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterRef.X[0]);
 			if(_TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterLow.X[1]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterRef.X[1]);
 
 			return v;
 }
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-//void	_IOC::SetError(_err err) {
-//			err = err ^ IOC_State.Error;
-//			if(err == _NOERR || __time__ < 3000)
-//				return;
-//			if(int e = err & ~error_mask & ~IOC_State.Error) {
-//				if(e & (_pumpCurrent | _flowTacho))
-//					pump.Disable();
-//				SetState(_ERROR);
-//				IOC_State.Error = (_err)(IOC_State.Error | e);
-//				IOC_State.Send();
-//				for(int n=0; n<32; ++n)
-//					if(e & (1<<n))
-//						_TERM::Debug(DBG_ERR,"\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
-//			} else if(int w = err & warn_mask) {
-//				IOC_State.Error = (_err)(IOC_State.Error  ^ w);
-//				IOC_State.Send();
-//				for(int n=0; n<32; ++n)
-//					if(w & (1<<n)) {
-//						if(w & IOC_State.Error)
-//							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
-//						else
-//							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: ...",n);
-//					}
-//				}
-//}
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -222,50 +191,48 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 //	DL levels check
 //______________________________________________________________________________________
 _err	_IOC::DLstatus() {
-_err e=_NOERR;
-	switch(IOC_State.State) {
-	case _STANDBY:
-	case _READY:
-		if(DL.filterHi.X[0] > DL.offset[0] + _DL_OFFSET_THR)
-			e = e | _DLpowerCh1;	
-		if(DL.filterHi.X[1] > DL.offset[1] + _DL_OFFSET_THR)
-			e = e | _DLpowerCh2;	
+_err 	e=_NOERR;
+	
 			if(DL_Timing.Ton && DL_Timing.Toff) {
-			if(__time__ > DL.ton) {
-				DL.ref[0]=DL_Limits.L0+DL.offset[0];
-				DL.ref[1]=DL_Limits.L1+DL.offset[1];
-				DL.toff=__time__+DL_Timing.Ton;
-				DL.ton=DL.toff+DL_Timing.Toff;
-				if(__time__ > DL.filterLow.timeout) {
-					DL.min[0]=DL.filterLow.X[0];
-					DL.min[1]=DL.filterLow.X[1];
+					int to=DL_Timing.Ton + DL_Timing.Toff;
+				if(to > 500) {
+						DL_Timing.Ton=500*DL_Timing.Ton/to;
+						DL_Timing.Toff=500*DL_Timing.Toff/to;
 				}
-			}
-			
-			if(__time__ > DL.toff) {
-				DL.ref[0]=DL.offset[0];
-				DL.ref[1]=DL.offset[1];
-				DL.ton=__time__+DL_Timing.Toff;
-				DL.toff=DL.ton+DL_Timing.Ton;
-				if(__time__ > DL.filterLow.timeout) {
-					DL.max[0]=DL.filterLow.X[0];
-					DL.max[1]=DL.filterLow.X[1];
+				if(__time__ > DL.ton) {
+					DL.ref[0]=DL_Limits.L0+DL.offset[0];
+					DL.ref[1]=DL_Limits.L1+DL.offset[1];
+					DL.toff=__time__+DL_Timing.Ton;
+					DL.ton=DL.toff+DL_Timing.Toff;
+					DL.min[0]=DL.filterRef.X[0];
+					DL.min[1]=DL.filterRef.X[1];
+				} else if(__time__ > DL.toff) {
+					DL.ref[0]=DL.offset[0];
+					DL.ref[1]=DL.offset[1];
+					DL.ton=__time__+DL_Timing.Toff;
+					DL.toff=DL.ton+DL_Timing.Ton;
+					DL.max[0]=DL.filterRef.X[0];
+					DL.max[1]=DL.filterRef.X[1];		
 				}
+			}				
+			switch(IOC_State.State) {
+			case _STANDBY:
+			case _READY:
+				if(DL.filter.X[0] > DL.offset[0] + _DL_OFFSET_THR)
+					e = e | _DLpowerCh1;	
+				if(DL.filter.X[1] > DL.offset[1] + _DL_OFFSET_THR)
+					e = e | _DLpowerCh2;	
+				break;
+			case _ACTIVE:
+				if(DL.filter.X[0] > DL.max[0])
+					e = e | _DLpowerCh1;	
+				if(DL.filter.X[1] > DL.max[1])
+					e = e | _DLpowerCh2;	
+				break;
+			case _ERROR:
+				break;
 			}
-		}		
-		DL.filterLow.eval(DL.ref[0],DL.ref[1]);
-		break;
-	case _ACTIVE:
-		DL.filterLow.eval(DL.filterHi.X[0],DL.filterHi.X[1]);
-		if(DL.filterLow.X[0] > DL.max[0])
-			e = e | _DLpowerCh1;	
-		if(DL.filterLow.X[1] > DL.max[1])
-			e = e | _DLpowerCh2;	
-		break;
-	case _ERROR:
-		break;
-	}
-	return e;
+			return e;
 }
 /*******************************************************************************
 * Function Name	:
@@ -303,15 +270,6 @@ void	_IOC::SetState(uint8_t *data) {
 * Return				:
 *******************************************************************************/
 void	_IOC::SetState(_State s) {
-			DL.filterLow.reset();
-			DL.filterLow.timeout=__time__+300;
-			DL.ton=DL.toff=0;
-//			if(s != _ACTIVE) {
-//				DL.max[0]=DL_Limits.L0;
-//				DL.max[1]=DL_Limits.L1;
-//				DL.min[0]=DL.offset[0];
-//				DL.min[1]=DL.offset[1];
-//			}
 			switch(s) {
 				case	_STANDBY:
 					if(IOC_State.State == _ERROR)

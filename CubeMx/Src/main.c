@@ -117,7 +117,9 @@ static void MX_CRC_Init(void);
 static void MX_TIM12_Init(void);
 void StartDefaultTask(void const * argument);
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);                               
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+                                
+                                
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -872,7 +874,7 @@ static void MX_TIM12_Init(void)
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
+  sConfigIC.ICFilter = 15;
   if (HAL_TIM_IC_ConfigChannel(&htim12, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     _Error_Handler(__FILE__, __LINE__);
