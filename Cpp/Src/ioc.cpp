@@ -129,17 +129,17 @@ _err	_IOC::fswError() {
 * Return				:
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
+_IOC	*ioc = static_cast<_IOC *>(v);
+			ioc->pollError();
 
-			static_cast<_IOC *>(v)->pollError();
-
-			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filter.X[0]);
-			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filter.X[1]);
-			if(_TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterRef.X[0]);
-			if(_TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterRef.X[1]);
+//			if(_TERM::debug & DBG_DL0)
+//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,ioc->DL.filter.X[0]);
+//			if(_TERM::debug & DBG_DL1)
+//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filter.X[1]);
+//			if(_TERM::debug & DBG_DL2)
+//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterRef.X[0]);
+//			if(_TERM::debug & DBG_DL3)
+//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterRef.X[1]);
 
 			return v;
 }
@@ -154,9 +154,9 @@ _err	err = can.Status();
 			err = err | pump.Status();
 			err = err | fan.Status();
 			err = err | spray.Status();
-			err = err | adcError();
+			err = err | _ADC::adcError();
 			err = err | fswError();
-			err = err | DLstatus();
+			err = err | diode.Status(IOC_State.State == _ACTIVE);
 	
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
@@ -185,54 +185,6 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 			}
 			
 			_SYS_SHG_ENABLED ? __GREEN2(200) : __RED2(200);
-}
-//______________________________________________________________________________________
-//
-//	DL levels check
-//______________________________________________________________________________________
-_err	_IOC::DLstatus() {
-_err 	e=_NOERR;
-	
-			if(DL_Timing.Ton && DL_Timing.Toff) {
-					int to=DL_Timing.Ton + DL_Timing.Toff;
-				if(to > 500) {
-						DL_Timing.Ton=500*DL_Timing.Ton/to;
-						DL_Timing.Toff=500*DL_Timing.Toff/to;
-				}
-				if(__time__ > DL.ton) {
-					DL.ref[0]=DL_Limits.L0+DL.offset[0];
-					DL.ref[1]=DL_Limits.L1+DL.offset[1];
-					DL.toff=__time__+DL_Timing.Ton;
-					DL.ton=DL.toff+DL_Timing.Toff;
-					DL.min[0]=DL.filterRef.X[0];
-					DL.min[1]=DL.filterRef.X[1];
-				} else if(__time__ > DL.toff) {
-					DL.ref[0]=DL.offset[0];
-					DL.ref[1]=DL.offset[1];
-					DL.ton=__time__+DL_Timing.Toff;
-					DL.toff=DL.ton+DL_Timing.Ton;
-					DL.max[0]=DL.filterRef.X[0];
-					DL.max[1]=DL.filterRef.X[1];		
-				}
-			}				
-			switch(IOC_State.State) {
-			case _STANDBY:
-			case _READY:
-				if(DL.filter.X[0] > DL.offset[0] + _DL_OFFSET_THR)
-					e = e | _DLpowerCh1;	
-				if(DL.filter.X[1] > DL.offset[1] + _DL_OFFSET_THR)
-					e = e | _DLpowerCh2;	
-				break;
-			case _ACTIVE:
-				if(DL.filter.X[0] > DL.max[0])
-					e = e | _DLpowerCh1;	
-				if(DL.filter.X[1] > DL.max[1])
-					e = e | _DLpowerCh2;	
-				break;
-			case _ERROR:
-				break;
-			}
-			return e;
 }
 /*******************************************************************************
 * Function Name	:
@@ -296,7 +248,7 @@ void	_IOC::SetState(_State s) {
 						_SYS_SHG_DISABLE;	
 					}
 					break;
-				}
+			}
 }
 /*******************************************************************************
 * Function Name	:

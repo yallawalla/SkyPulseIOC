@@ -804,6 +804,11 @@
               <FileType>8</FileType>
               <FilePath>..\..\Cpp\Src\fsw.cpp</FilePath>
             </File>
+            <File>
+              <FileName>dl.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\Cpp\Src\dl.cpp</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

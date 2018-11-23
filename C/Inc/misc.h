@@ -18,6 +18,8 @@
 #define		CLUSTER_SIZE	4*SECTOR_SIZE
 #define		SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + sizeof(uint32_t)))
 	
+#define		_PI 3.14159265358979323846
+
 HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
 int		ff_pack(int );

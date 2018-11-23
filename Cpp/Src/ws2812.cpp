@@ -17,7 +17,6 @@
 #include	"math.h"
 #include	"string.h"
 #include	"ctype.h"
-#define		_PI 3.14159265358979323846
 
 HSV			_WS::HSVbuf[__LEDS];
 ws2812	_WS::ws[] = 

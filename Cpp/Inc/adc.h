@@ -19,7 +19,6 @@
 #define	_V12to16X					(int)(12.0/_UREF*_Rdiv(820.0,3300.0)*65535.0+0.5)			
 #define	_V24to16X					(int)(24.0/_UREF*_Rdiv(820.0,6800.0)*65535.0+0.5)			
 #define	_BAR(a)					 ((int)((a)*16384.0f))
-#define	_PI								3.141592653589793
 
 			__inline 
 int		__fit(int to, const int t[], const int ft[]) {
@@ -38,69 +37,14 @@ typedef struct	{
 			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
 
-struct lopass {
-	private:
-		struct _lopass {
-			private:
-				float x,dx,k;
-			public:
-				_lopass(float fo, float fs) {
-					x=dx=0;
-					k=2*_PI*fo/fs;
-				}
-				float eval(float inp) {
-					float _dx = inp-x-dx-dx;
-					x += k*dx;
-					dx += k*_dx;
-					return x;
-				}
-				void reset() {
-					x=dx=0;
-				}
-		} ch1,ch2;
-	public:
-		float X[2];
-		unsigned int timeout;
-		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {
-			timeout=0;
-		}
-		void eval(float in0,float in1) {
-			X[0]=ch1.eval(in0);
-			X[1]=ch2.eval(in1);
-		}	
-		void reset() {
-			ch1.reset();
-			ch2.reset();
-			X[0]=X[1]=0;
-		}	
-};
-
-
-typedef struct _diode {
-			float offset[2],
-						max[2],
-						min[2],
-						ref[2];
-			unsigned short	dma[154][2];
-			unsigned int 		ton,toff;
-			lopass	filter, filterRef;
-			void reset() {
-				filterRef.reset();
-				ton=toff=0;
-			}	
-			_diode():filter(5, SystemCoreClock/2/4/(12+56)/2),filterRef(5, SystemCoreClock/2/4/(12+56)/2) {}
-		} diode;
-
 class	_ADC {
 	private:
 	public:
 	_ADC();
 	_err		adcError(void);
 	
-	static	void adcFilter(),diodeFilter(int);
+	static	void adcFilter();
 	static	adc val[], fval, gain, offset;
-	static	diode DL;
 	static	int Th2o(void),Th2o(int);
-	
 };
 #endif

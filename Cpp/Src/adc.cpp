@@ -1,7 +1,7 @@
 #include	"adc.h"
+#include	"dl.h"
 #include	"misc.h"
 
-diode	_ADC::DL;
 adc		_ADC::val[16]	={},
 			_ADC::fval={},
 			_ADC::offset={},
@@ -17,9 +17,7 @@ adc		_ADC::val[16]	={},
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			DL.ton=DL.toff=0;
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
-			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
 /*******************************************************************************
 * Function Name	:
@@ -69,36 +67,11 @@ void	_ADC::adcFilter() {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_ADC::diodeFilter(int k) {
-unsigned short *p;
-int		n=sizeof(DL.dma)/sizeof(short)/4;
-
-			if(k)
-				p=&DL.dma[n][0];
-			else
-				p=&DL.dma[0][0];
-			
-			while(n--) {
-				DL.filterRef.eval(DL.ref[0],DL.ref[1]);
-				DL.filter.eval(p[0],p[1]);
-				++p;++p;
-			}
-			if(__time__ < _DL_OFFSET_DELAY) {
-				DL.offset[0]=DL.filter.X[0];
-				DL.offset[1]=DL.filter.X[1];
-			}
-		}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 			if(hadc==&hadc1)
 					_ADC::adcFilter();
 			if(hadc==&hadc2)
-					_ADC::diodeFilter(1);
+					_DL::instance->filterCbk(1);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -108,7 +81,7 @@ void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 *******************************************************************************/
 void	HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 			if(hadc==&hadc2)
-					_ADC::diodeFilter(0);
+					_DL::instance->filterCbk(0);
 }
 /*******************************************************************************
 * Function Name	:

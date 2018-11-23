@@ -11,8 +11,8 @@
 #include "pump.h"
 #include "spray.h"
 #include "rtc.h"
+#include "dl.h"
 #include "ws2812.h"
-
 #include <string>
 #include <ctype.h>
 
@@ -110,12 +110,10 @@ typedef __packed struct _IOC_Aux{
 typedef __packed struct _DL_Timing {
 	unsigned short Pavg;
 	unsigned Ton:24,Toff:24;
-	_DL_Timing() : Pavg(0),Ton(0),Toff(0)	{}
 } DL_Timing;
 //_____________________________________________________________________
 typedef __packed struct _DL_Limits {
 	unsigned short L0,L1;
-	_DL_Limits() : L0(30),L1(30)	{}
 } DL_Limits;
 //_____________________________________________________________________
 class _IOC : public _ADC {
@@ -126,24 +124,22 @@ class _IOC : public _ADC {
 		static _IOC			*parent;
 		_IOC();
 		_err 						error_mask,warn_mask;
-		_err						DLstatus();
 	
 		_IOC_State 			IOC_State;
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
 		_IOC_VersionAck	IOC_VersionAck;
-		_DL_Limits			DL_Limits;
-		_DL_Timing			DL_Timing;
 	
 		_CAN						can;
 		_SPRAY 					spray;
 		_WS 						ws2812;
 		_PUMP 					pump;
 		_FAN 						fan;
+		_DL							diode;
 		_RTC						rtc;
-		_CLI						com1,com3,comUsb;
 		_FSW						Fsw;
+		_CLI						com1,com3,comUsb;
 		~_IOC();
 
 		void SetState(uint8_t *);

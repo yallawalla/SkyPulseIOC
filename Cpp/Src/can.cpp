@@ -1,5 +1,5 @@
-#include	"ioc.h"
 #include <stdlib.h>
+#include "ioc.h"
 CAN_HandleTypeDef *_CAN::hcan;
 _io 							*_CAN::io,*_CAN::ioFsw;
 /*******************************************************************************
@@ -202,25 +202,21 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idDL_Limits: {
-				ioc->DL_Limits=*(DL_Limits *)data;
+				DL_Limits *p=(DL_Limits *)data;
+				ioc->diode.setLimits(p->L0,p->L1);
+				
 				if(ioc->IOC_State.State == _ACTIVE) {
 					dlTimeout=__time__ + _DL_POLL_DELAY;
 					ecTimeout=0;
 				}
 				ioc->IOC_FootAck.Send();
-				ioc->DL.reset();
 			}
 			break;
 //______________________________________________________________________________________
-			case idDL_Timing:
-				ioc->DL_Timing=*(DL_Timing *)data;
-				ioc->DL_Timing.Ton /= 1000;
-				ioc->DL_Timing.Toff /= 1000;
-				if(!ioc->DL_Timing.Ton && !ioc->DL_Timing.Toff) {
-					ioc->DL_Timing.Ton=495;
-					ioc->DL_Timing.Toff=5;
-				}
-				ioc->DL.reset();
+			case idDL_Timing: {
+				DL_Timing *p=(DL_Timing *)data;
+				ioc->diode.setTiming(p->Ton,p->Toff);
+			}
 			break;				
 //______________________________________________________________________________________
 			case idIOC_Footreq:
