@@ -29,6 +29,12 @@ int _CLI::Fkey(int t) {
 				Newline();
 			} 
 			break;
+			case __f1:
+			case __F1:
+				ioc->diode.Newline();
+				while(ioc->diode.Parse()) 
+					_wait(2);
+				return __F12;
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
@@ -85,13 +91,7 @@ int _CLI::Fkey(int t) {
 				Newline();
 			}
 			break;
-			case __f1:
-			case __F1:
-				_print("... entering standby status");		
-				Newline();
-				Decode((char *)"+D 2");
-				ioc->can.Decode((char *)"<200 00");
-			break;
+
 			default:
 				return t;
 		}

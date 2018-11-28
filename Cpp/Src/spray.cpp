@@ -77,7 +77,8 @@ _SPRAY::_SPRAY() {
 #define	_P_THRESHOLD  0x8000
 
 _err	_SPRAY::Status() {
-_err	_err=_NOERR;
+//------------------------------------------------------------------------------
+_err	_err = adcError();
 //------------------------------------------------------------------------------
 			if(offsetTimeout && __time__ > offsetTimeout) {
 				offset.bottle += fval.air - offset.air;

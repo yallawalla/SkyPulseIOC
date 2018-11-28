@@ -70,3 +70,6 @@ col 2,5,+l
 	- offset za diodo ob vklopu
 	- 500 ms delay za polling
 	
+- v 0.24 Nov 23 2018 <B3168E65>
+- AVG filter na 2kHz, oba IIR filtra na frekv. callbacka- 
+- IOC objekt ne deduje vec ADC

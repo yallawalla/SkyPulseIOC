@@ -116,7 +116,7 @@ typedef __packed struct _DL_Limits {
 	unsigned short L0,L1;
 } DL_Limits;
 //_____________________________________________________________________
-class _IOC : public _ADC {
+class _IOC {
 	private:
 		int key,temp;
 	

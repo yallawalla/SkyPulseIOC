@@ -26,33 +26,30 @@ class lopass {
 				}
 		} ch1,ch2;
 	public:
-		float Val[2],Max[2],Min[2];
-		unsigned int timeout;
+		float val[2];
 		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {
-			Min[0]=Min[1]=Max[0]=Max[1]=Val[0]=Val[1]=0;
-			timeout=0;
+			val[0]=val[1]=0;
 		}
 		void eval(float in0,float in1) {
-			Val[0]=ch1.eval(in0);
-			Val[1]=ch2.eval(in1);
+			val[0]=ch1.eval(in0);
+			val[1]=ch2.eval(in1);
 		}	
 		void reset() {
 			ch1.reset();
 			ch2.reset();
-			Val[0]=Val[1]=0;
+			val[0]=val[1]=0;
 		}	
 };
 
 class	_DL  : public _TERM {
 		private:
-			bool	active;
-			float offset[2],
-						max[2],
-						ref[2];
+			bool	active,synced;
+			float offset[2];
 			unsigned short	dma[154][2];
-			unsigned int 		ton,toff;
-			unsigned int 		on,off;
-			lopass	filter, filterRef;
+			unsigned int 		ton,toff,timeout[2];
+			unsigned int 		on,off,lim[2],ref[2];
+			lopass	high, filter, filterRef;
+			unsigned int loffset, toffset;
 
 		public:
 			static _DL* instance;

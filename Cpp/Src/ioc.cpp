@@ -131,16 +131,6 @@ _err	_IOC::fswError() {
 void	*_IOC::pollStatus(void *v) {
 _IOC	*ioc = static_cast<_IOC *>(v);
 			ioc->pollError();
-
-//			if(_TERM::debug & DBG_DL0)
-//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,ioc->DL.filter.X[0]);
-//			if(_TERM::debug & DBG_DL1)
-//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filter.X[1]);
-//			if(_TERM::debug & DBG_DL2)
-//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.filterRef.X[0]);
-//			if(_TERM::debug & DBG_DL3)
-//				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.filterRef.X[1]);
-
 			return v;
 }
 /*******************************************************************************
@@ -154,7 +144,6 @@ _err	err = can.Status();
 			err = err | pump.Status();
 			err = err | fan.Status();
 			err = err | spray.Status();
-			err = err | _ADC::adcError();
 			err = err | fswError();
 			err = err | diode.Status(IOC_State.State == _ACTIVE);
 	
