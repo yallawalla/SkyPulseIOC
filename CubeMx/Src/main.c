@@ -173,7 +173,7 @@ int main(void)
   MX_TIM4_Init();
   MX_RTC_Init();
   MX_ADC2_Init();
-//  MX_IWDG_Init();
+  MX_IWDG_Init();
   MX_CRC_Init();
   MX_TIM12_Init();
   /* USER CODE BEGIN 2 */

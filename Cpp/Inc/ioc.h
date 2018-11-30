@@ -23,6 +23,7 @@ typedef enum {
 	idIOC_AuxReq			=0x203,
 	idIOC_VersionReq	=0x204,
 	idDL_Limits				=0x21F,
+	idDL_State				=0x601,
 	idDL_Timing				=0x602,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
@@ -42,7 +43,8 @@ typedef enum {
 	_STANDBY,
 	_READY,
 	_ACTIVE,
-	_ERROR
+	_ERROR,
+	_CALIBRATE
 } _State;
 
 typedef enum {
@@ -106,6 +108,10 @@ typedef __packed struct _IOC_Aux{
 		_CAN::Send(idIOC_AuxAck,(void *)&Temp,sizeof(_IOC_Aux));
 	}
 } IOC_Aux;
+//_____________________________________________________________________
+typedef __packed struct _DL_State {
+	_State 	State;
+} DL_State;
 //_____________________________________________________________________
 typedef __packed struct _DL_Timing {
 	unsigned short Pavg;

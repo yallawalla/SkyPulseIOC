@@ -57,39 +57,6 @@ void	_PUMP::SaveSettings(FIL *f) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_PUMP::Fkey(int t) {
-			switch(t) {
-				case __f5:
-				case __F5:
-					return __F12;
-				case __Up:
-					Increment(1,0);
-				break;
-				case __Down:
-					Increment(-1,0);
-				break;
-				case __Left:
-					Increment(0,-1);
-				break;
-				case __Right:
-					Increment(0,1);
-				break;
-				case __CtrlR:
-				Increment(0,0);
-				break;
-				case __Delete:
-				Setup();
-				break;
-			}
-			return EOF;
-}
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
 int		_PUMP::Rpm(int fsc) {
 			if(mode & _PUMP_BOOST)
 				return fph*fsc/100;
@@ -189,6 +156,39 @@ void 	_PUMP::Increment(int a, int b)	{
 					break;
 			}
 			Newline();
+}
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+int		_PUMP::Fkey(int t) {
+			switch(t) {
+				case __f5:
+				case __F5:
+					return __F12;
+				case __Up:
+					Increment(1,0);
+				break;
+				case __Down:
+					Increment(-1,0);
+				break;
+				case __Left:
+					Increment(0,-1);
+				break;
+				case __Right:
+					Increment(0,1);
+				break;
+				case __CtrlR:
+				Increment(0,0);
+				break;
+				case __Delete:
+				Setup();
+				break;
+			}
+			return EOF;
 }
 /*******************************************************************************/
 /**

@@ -21,7 +21,7 @@ _DL*	_DL::instance=NULL;
 	* @retval : None
 	*/
 /*******************************************************************************/
-_DL::_DL() : high(500,300000), filter(5, 2000),filterRef(5, 2000) {
+_DL::_DL() : high(300,150000), filter(5, 2000),filterRef(5, 2000) {
 			instance=this;
 			ton=toff=on=off=__time__;
 			active=synced=false;
@@ -53,7 +53,7 @@ int		n=sizeof(dma)/sizeof(short)/4;
 				offset[1]=high.val[1];
 			} else {
 				filterRef.eval(ref[0],ref[1]);
-				filter.eval(high.val[0]-offset[0],high.val[1]-offset[1]);
+				filter.eval(high.val[0]*(100-loffset)/100-offset[0],high.val[1]*(100-loffset)/100-offset[1]);
 			}
 
 			if(_TERM::debug & DBG_DL0)
@@ -87,10 +87,6 @@ void	_DL::setTiming(int t1, int t2) {
 				t1 /=1000;
 				t2 /=1000;
 			}
-//			if(t1 + t2 > 500) {
-//				t1=500*t1/(t1 + t2);
-//				t2=500*t2/(t1 + t2);
-//			}
 			on=t1;
 			off=t2;
 }
@@ -101,14 +97,14 @@ void	_DL::setTiming(int t1, int t2) {
 * Return				:
 *******************************************************************************/
 void	_DL::setLimits(int lim0, int lim1) {
-			lim[0]=lim0*5/6+loffset;
-			lim[1]=lim1*5/6+loffset;
+			lim[0]=lim0*5/6;
+			lim[1]=lim1*5/6;
 			if(active && !synced) {
 				ton=toff=__time__;
 				synced=true;
 			}
 }
-//_________________---___---___---___---___---__________________________________________
+//______________________________________________________________________________________
 //
 //	DL levels check
 //______________________________________________________________________________________
@@ -181,26 +177,49 @@ void	_DL::SaveSettings(FIL *f) {
 	* @retval : None
 	*/
 /*******************************************************************************/
+void 	_DL::Increment(int a, int b)	{
+			idx= std::min(std::max(idx+b,0),1);
+			switch(idx) {
+				case 0:
+					loffset= std::min(std::max(loffset+a,-100),100);
+					break;
+				case 1:
+					toffset += a;
+					break;
+			}
+			Newline();
+}
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
 int		_DL::Fkey(int t) {
 			switch(t) {
-				case __Up:
-					++loffset;
-				break;
-				case __Down:
-					--loffset;
-				break;
-				case __Left:
-					++toffset;
-				break;
-				case __Right:
-					--toffset;
-				break;
-				case __Delete:
-					toffset=loffset=0;
-				break;
 				case __f1:
 				case __F1:
 					return __F12;
+				case __Up:
+					Increment(1,0);
+				break;
+				case __Down:
+					Increment(-1,0);
+				break;
+				case __Left:
+					Increment(0,-1);
+				break;
+				case __Right:
+					Increment(0,1);
+				break;
+				case __Delete:
+					loffset=toffset=0;
+					Increment(0,0);
+				break;
+				case __CtrlR:
+				Increment(0,0);
+				break;
 			}
 			return EOF;
 }
@@ -212,8 +231,12 @@ int		_DL::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_DL::Newline(void) {
-
+//			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
+			_print("\r:dl    %3d%c,%3d%c",loffset,'%',toffset,'%');
+			for(int i=5*(1-idx)+2;i--;_print("\b")) {}
+			Repeat(200,__CtrlR);
 }
+
 /**
 * @}
 */ 

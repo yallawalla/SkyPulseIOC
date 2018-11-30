@@ -49,7 +49,7 @@ class	_DL  : public _TERM {
 			unsigned int 		ton,toff,timeout[2];
 			unsigned int 		on,off,lim[2],ref[2];
 			lopass	high, filter, filterRef;
-			unsigned int loffset, toffset;
+			int	idx,loffset, toffset;
 
 		public:
 			static _DL* instance;
@@ -62,6 +62,7 @@ class	_DL  : public _TERM {
 			void		LoadSettings(FIL *);
 			void		SaveSettings(FIL *);
 
+			void		Increment(int, int);
 			virtual void	Newline(void);
 			virtual int		Fkey(int);
 };
