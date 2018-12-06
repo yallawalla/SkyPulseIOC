@@ -203,7 +203,7 @@ void	_CAN::pollRx(void *v) {
 //______________________________________________________________________________________
 			case idDL_Limits: {
 				DL_Limits *p=(DL_Limits *)data;
-				ioc->diode.setLimits(p->L0,p->L1);
+				ioc->diode.setLimits(p->L0,p->L1,p->mode);
 				
 				if(ioc->IOC_State.State == _ACTIVE) {
 					dlTimeout=__time__ + _DL_POLL_DELAY;
@@ -216,7 +216,7 @@ void	_CAN::pollRx(void *v) {
 			case idDL_State: {
 				DL_State *p=(DL_State *)data;
 				if(p->State == _CALIBRATE) {
-					ioc->error_mask = ioc->error_mask | _DLpowerCh1 | _DLpowerCh1;
+					ioc->error_mask = ioc->error_mask | _DLpowerCh1 | _DLpowerCh1 | _ENMtimeout | _DLtimeout;
 				}
 			}
 			break;				

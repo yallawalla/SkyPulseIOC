@@ -43,13 +43,13 @@ class lopass {
 
 class	_DL  : public _TERM {
 		private:
-			bool	active,synced;
-			float offset[2];
+			bool						active,synced;
+			float 					offset[2];
 			unsigned short	dma[154][2];
-			unsigned int 		ton,toff,timeout[2];
-			unsigned int 		on,off,lim[2],ref[2];
-			lopass	high, filter, filterRef;
-			int	idx,loffset, toffset;
+			unsigned int 		ton,toff,timeout[2],ref[2];
+			unsigned int 		on,off,lim[2],mode;
+			lopass					high, filter, filterRef;
+			int							idx,dlscale[2];
 
 		public:
 			static _DL* instance;
@@ -57,7 +57,7 @@ class	_DL  : public _TERM {
 			_err		Status(bool);
 			void		filterCbk(int);
 			void 		setTiming(int,int);
-			void 		setLimits(int,int);
+			void 		setLimits(int,int,int);
 		
 			void		LoadSettings(FIL *);
 			void		SaveSettings(FIL *);

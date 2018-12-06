@@ -120,6 +120,7 @@ typedef __packed struct _DL_Timing {
 //_____________________________________________________________________
 typedef __packed struct _DL_Limits {
 	unsigned short L0,L1;
+	unsigned char mode;
 } DL_Limits;
 //_____________________________________________________________________
 class _IOC {

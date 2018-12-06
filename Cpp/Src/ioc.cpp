@@ -202,6 +202,8 @@ void	_IOC::SetState(uint8_t *data) {
 					else
 						fan.mode &= ~_FAN_BOOST;
 					break;
+				case	_CALIBRATE:
+					break;
 			}
 }
 /*******************************************************************************
@@ -236,6 +238,8 @@ void	_IOC::SetState(_State s) {
 						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;	
 					}
+					break;
+				case	_CALIBRATE:
 					break;
 			}
 }

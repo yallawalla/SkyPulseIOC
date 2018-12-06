@@ -73,3 +73,11 @@ col 2,5,+l
 - v 0.24 Nov 23 2018 <B3168E65>
 - AVG filter na 2kHz, oba IIR filtra na frekv. callbacka- 
 - IOC objekt ne deduje vec ADC
+
+/v 0.24 Dec  6 2018 <3CF656A1>
+- calibrate režim ta DL izklopi preverjanje omejitev in timinga
+- dodatek v 0x21f message: byte mode, oznacuje aktivni kanal,
+	drug kanal se smatra za crosstalk in se preverja samo zgornja meja
+- sprememba na DL timeout; prepreci error pri hitrem ponovnem pritisu FSW 
+- konzola za DL, F4
+

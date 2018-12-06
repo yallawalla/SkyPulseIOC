@@ -112,12 +112,21 @@ int		e=_NOERR;
 				pump_drive=0;
 			
 			if(__time__ > timeout) {
-				if(tacho_limit && (pumpTacho-__pumpTacho) <= tacho_limit)
-					e |= _pumpTacho;
-				if(curr_limit && fval.Ipump > curr_limit)
-					e |= _pumpCurrent;
-				if(flow_limit && (flowTacho-__flowTacho) <= flow_limit)
-					e |= _flowTacho;				
+				if(tacho_limit && flow_limit && curr_limit) {
+					if(pumpTacho-__pumpTacho <= tacho_limit)
+						e |= _pumpTacho;
+					if(flowTacho-__flowTacho <= flow_limit)
+						e |= _flowTacho;						
+					if(fval.Ipump > curr_limit)
+						e |= _pumpCurrent;
+				} else if(tacho_limit || flow_limit || curr_limit) {
+					if(!pumpTacho)
+						e |= _pumpTacho;
+					if(!flowTacho)
+						e |= _flowTacho;						
+					if(!fval.Ipump)
+						e |= _pumpCurrent;
+				}
 				timeout=__time__+100;
 				
 				if(speed)
@@ -220,7 +229,7 @@ int		k, i=fval.Ipump*3300/4096.0/2.1/16;
 	*/
 /*******************************************************************************/
 bool	_PUMP::Setup(void) {
-			if(tacho_limit) {
+			if(tacho_limit || flow_limit || curr_limit) {
 				_print("\r\npump errors disabled ...\r\n");
 				tacho_limit=flow_limit=curr_limit=0;
 			} else {

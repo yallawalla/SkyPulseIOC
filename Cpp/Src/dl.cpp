@@ -27,7 +27,7 @@ _DL::_DL() : high(300,150000), filter(5, 2000),filterRef(5, 2000) {
 			active=synced=false;
 			timeout[0]=timeout[1]=offset[0]=offset[1]=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
-			loffset=toffset=0;
+			dlscale[0]=dlscale[0]=0;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -53,7 +53,7 @@ int		n=sizeof(dma)/sizeof(short)/4;
 				offset[1]=high.val[1];
 			} else {
 				filterRef.eval(ref[0],ref[1]);
-				filter.eval(high.val[0]*(100-loffset)/100-offset[0],high.val[1]*(100-loffset)/100-offset[1]);
+				filter.eval(high.val[0]*(100-dlscale[0])/100-offset[0],high.val[1]*(100-dlscale[1])/100-offset[1]);
 			}
 
 			if(_TERM::debug & DBG_DL0)
@@ -96,9 +96,10 @@ void	_DL::setTiming(int t1, int t2) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_DL::setLimits(int lim0, int lim1) {
+void	_DL::setLimits(int lim0, int lim1,int m) {
 			lim[0]=lim0*5/6;
 			lim[1]=lim1*5/6;
+			mode=m;
 			if(active && !synced) {
 				ton=toff=__time__;
 				synced=true;
@@ -120,8 +121,8 @@ _err 	e=_NOERR;
 				if(__time__ > ton) {
 					ref[0]=lim[0];
 					ref[1]=lim[1];
-					toff=ton+on+toffset;
-					ton=toff+off+toffset;
+					toff=ton+on;
+					ton=toff+off;
 					if(high.val[0] < lim[0]/2+offset[0]) {
 						++ton;
 						++toff;
@@ -131,8 +132,8 @@ _err 	e=_NOERR;
 					}
 				} else if(__time__ > toff) {
 					ref[0]=ref[1]=0;
-					ton=toff+off+toffset;
-					toff=ton+on+toffset;
+					ton=toff+off;
+					toff=ton+on;
 				}
 			}				
 
@@ -141,11 +142,26 @@ _err 	e=_NOERR;
 			if(filter.val[0] < filterRef.val[0] - std::max((int)lim[0]/5,_DL_OFFSET_THR))
 				if(!timeout[0])
 					timeout[0]=__time__ + _DL_ERROR_DELAY;
-			if(timeout[0] && __time__ > timeout[0]) {
-				if(active)
-					e = e | _DLpowerCh1;
-				timeout[0]=0;
-			}
+			if(filter.val[1] > filterRef.val[1] + std::max((int)lim[1]/5,_DL_OFFSET_THR))
+					e = e | _DLpowerCh2;	
+			if(filter.val[1] < filterRef.val[1] - std::max((int)lim[1]/5,_DL_OFFSET_THR))
+				if(!timeout[1])
+					timeout[1]=__time__ + _DL_ERROR_DELAY;
+				
+			
+			if(active) {
+				if(timeout[0] && __time__ > timeout[0]) {
+					timeout[0]=0;
+					if(mode & 1)
+						e = e | _DLpowerCh1;
+				}
+				if(timeout[1] && __time__ > timeout[1]) {
+					timeout[1]=0;
+					if(mode & 2)
+						e = e | _DLpowerCh2;
+				}
+			} else
+				timeout[0]=timeout[1]=0;
 			return e;
 }
 /*******************************************************************************/
@@ -178,13 +194,18 @@ void	_DL::SaveSettings(FIL *f) {
 	*/
 /*******************************************************************************/
 void 	_DL::Increment(int a, int b)	{
-			idx= std::min(std::max(idx+b,0),1);
+			idx= std::min(std::max(idx+b,0),3);
 			switch(idx) {
 				case 0:
-					loffset= std::min(std::max(loffset+a,-100),100);
+					lim[0]= std::min(std::max((int)lim[0]+a,0),4095);
 					break;
 				case 1:
-					toffset += a;
+					lim[1]= std::min(std::max((int)lim[1]+a,0),4095);
+					break;
+				case 2:
+					dlscale[0]= std::min(std::max(dlscale[0]-a,-100),100);
+				case 3:
+					dlscale[1]= std::min(std::max(dlscale[1]-a,-100),100);
 					break;
 			}
 			Newline();
@@ -198,8 +219,8 @@ void 	_DL::Increment(int a, int b)	{
 /*******************************************************************************/
 int		_DL::Fkey(int t) {
 			switch(t) {
-				case __f1:
-				case __F1:
+				case __f4:
+				case __F4:
 					return __F12;
 				case __Up:
 					Increment(1,0);
@@ -214,7 +235,7 @@ int		_DL::Fkey(int t) {
 					Increment(0,1);
 				break;
 				case __Delete:
-					loffset=toffset=0;
+					dlscale[0]=dlscale[1]=0;
 					Increment(0,0);
 				break;
 				case __CtrlR:
@@ -232,8 +253,8 @@ int		_DL::Fkey(int t) {
 /*******************************************************************************/
 void	_DL::Newline(void) {
 //			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
-			_print("\r:dl    %3d%c,%3d%c",loffset,'%',toffset,'%');
-			for(int i=5*(1-idx)+2;i--;_print("\b")) {}
+			_print("\r:dl    %4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]));
+			for(int i=5*(3-idx)+1;i--;_print("\b")) {}
 			Repeat(200,__CtrlR);
 }
 

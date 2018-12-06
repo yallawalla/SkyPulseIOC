@@ -29,8 +29,8 @@ int _CLI::Fkey(int t) {
 				Newline();
 			} 
 			break;
-			case __f1:
-			case __F1:
+			case __f4:
+			case __F4:
 				ioc->diode.Newline();
 				while(ioc->diode.Parse()) 
 					_wait(2);
