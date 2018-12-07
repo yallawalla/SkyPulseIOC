@@ -81,3 +81,5 @@ col 2,5,+l
 - sprememba na DL timeout; prepreci error pri hitrem ponovnem pritisu FSW 
 - konzola za DL, F4
 
+V 0.24 Dec  7 2018 <163DF537>
+- bug pri sprejemu zahteve za _CALIBRATE; dvakrat je izklopil E18, ne pa tudi E19
