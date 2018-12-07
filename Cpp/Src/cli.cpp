@@ -190,6 +190,7 @@ FRESULT _CLI::DecodeInq(char *c) {
 			debug = (_dbg)(d | DBG_ERR);
 			ioc->can.Status(ioc->IOC_State.Error);
 			ioc->IOC_State.Error=_NOERR;
+			ioc->pollError();
 			debug = d;
 		}
 			break;	

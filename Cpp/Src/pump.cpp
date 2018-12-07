@@ -212,8 +212,7 @@ int		k, i=fval.Ipump*3300/4096.0/2.1/16;
 				k=Flow/(2200/300);
 			else
 				k=10*(fval.cooler-offset.cooler)/gain.cooler;
-//			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
-			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o(0)/100, Th2o(1)/100,k/10,k%10);
+			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
 			if(idx>0) {
 				_print("   %2d%c-%2d%c,%2d'-%2d',%d.%03dA",fpl,'%',fph,'%',ftl,fth,i/1000,i%1000);
 				for(int i=4*(6-idx)+2;idx && i--;_print("\b")) {}

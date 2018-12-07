@@ -83,3 +83,6 @@ col 2,5,+l
 
 V 0.24 Dec  7 2018 <163DF537>
 - bug pri sprejemu zahteve za _CALIBRATE; dvakrat je izklopil E18, ne pa tudi E19
+
+V 0.24 Dec  7 2018 <DCF3073D>
+- bug pri izpisu temp. na pumpi
