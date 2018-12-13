@@ -300,11 +300,13 @@ void	_SPRAY::Increment(int a, int b) {
 			switch(idx) {
 				case 0:
 					AirLevel 			= std::min(std::max(0,AirLevel+a),10);
-					readyTimeout	= __time__ + _SPRAY_READY_T;
+					if(a)
+						readyTimeout	= __time__ + _SPRAY_READY_T;
 					break;
 				case 1:
 					WaterLevel 		= std::min(std::max(0,WaterLevel+a),10);
-					readyTimeout	= __time__ + _SPRAY_READY_T;
+					if(a)
+						readyTimeout	= __time__ + _SPRAY_READY_T;
 					break;
 						case 2:
 							break;

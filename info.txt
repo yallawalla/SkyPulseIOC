@@ -86,3 +86,9 @@ V 0.24 Dec  7 2018 <163DF537>
 
 V 0.24 Dec  7 2018 <DCF3073D>
 - bug pri izpisu temp. na pumpi
+
+
+TODO: ugasni spray v errorju ???
+
+- v konzoli se readyTimeout sproži samo ob spremembu in ne kont. ob refreshu
+- spray se ugasne v ERROR stanju (proc. SetState)

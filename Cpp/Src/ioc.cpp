@@ -151,15 +151,12 @@ _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 
 			if(__time__ > 3000 && (e | w)) {
-
-				if(e) {
-					if(e & (_pumpCurrent | _flowTacho))
-						pump.Disable();
-					SetState(_ERROR);
-				}
-				
+			
 				IOC_State.Error = (IOC_State.Error | e) ^ w ;
 				IOC_State.Send();
+				
+				if(e)
+					SetState(_ERROR);
 
 				for(int n=0; n<32; ++n)
 					if(e & (1<<n))
@@ -237,6 +234,9 @@ void	_IOC::SetState(_State s) {
 						IOC_State.State = _ERROR;
 						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;	
+						spray.AirLevel=spray.WaterLevel=0;
+						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
+							pump.Disable();
 					}
 					break;
 				case	_CALIBRATE:
