@@ -180,28 +180,11 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 *******************************************************************************/
 void	_IOC::SetState(uint8_t *data) {
 			pump.mode &= ~_PUMP_BOOST;
-			fan.mode &= ~_FAN_BOOST;
+			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1);
 			SetState((_State)data[0]);
 	
-			switch(IOC_State.State) {
-				case	_STANDBY:
-					break;
-				case	_READY:
-				case	_ACTIVE:
-					if(data[1] & _PUMP_BOOST)
-						pump.mode |= _PUMP_BOOST;
-					else
-						pump.mode &= ~_PUMP_BOOST;
-					break;
-				case	_ERROR:
-					if(data[1] & _FAN_BOOST)
-						fan.mode |= _FAN_BOOST;
-					else
-						fan.mode &= ~_FAN_BOOST;
-					break;
-				case	_CALIBRATE:
-					break;
-			}
+			pump.mode |= data[1] & _PUMP_BOOST;
+			fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1);
 }
 /*******************************************************************************
 * Function Name	:

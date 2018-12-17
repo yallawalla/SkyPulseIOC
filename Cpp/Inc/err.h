@@ -35,8 +35,9 @@ typedef	enum {
 
 enum {
 	_PUMP_BOOST				= 1<<0,
-	_FAN_BOOST				= 1<<1,
-	_PUMP_FLOW				= 1<<2
+	_FAN_BOOST0				= 1<<1,
+	_FAN_BOOST1				= 1<<2,
+	_PUMP_FLOW				= 1<<3
 };
 			
 inline _err operator ~(_err a)

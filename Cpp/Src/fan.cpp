@@ -73,6 +73,8 @@ int		_FAN::Fkey(int t) {
 					case __CtrlR:
 					Increment(0,0);
 					break;
+					case __F1:
+					case __f1:
 					case __Delete:
 						Setup();
 					break;
@@ -87,10 +89,21 @@ int		_FAN::Fkey(int t) {
 	*/
 /*******************************************************************************/
 int		_FAN::Rpm(int fsc) {
-			if(mode & _FAN_BOOST)
-				return fph*fsc/100;
-			else
-				return __ramp(Th2o(),ftl*100,fth*100,fpl,fph)*fsc/100;
+			int plow;
+			switch(mode) {
+				case 0:
+					plow=fpl;
+					break;
+				case _FAN_BOOST0:
+					plow=(fph-fpl)/3 + fpl;
+					break;
+				case _FAN_BOOST1:
+					plow=((fph-fpl)*2)/3 + fpl;
+					break;
+				default:
+					plow=fph;
+				}
+			return __ramp(Th2o(),ftl*100,fth*100,plow,fph)*fsc/100;
 }
 /*******************************************************************************/
 /**
@@ -101,11 +114,12 @@ int		_FAN::Rpm(int fsc) {
 /*******************************************************************************/
 _err	_FAN::Status(void) {
 int		e=_NOERR;
-			if(fan_drive > Rpm(__PWMRATE))
-				--fan_drive;
-			else
-				++fan_drive;
-
+			if(__time__ % 4 == 0) {
+				if(fan_drive > Rpm(__PWMRATE))
+					--fan_drive;
+				else
+					++fan_drive;
+			}
 			if(__time__ > timeout) {
 				if(tacho_limit && (fanTacho-__fanTacho) <= tacho_limit)
 					e |= _fanTacho;

@@ -234,6 +234,8 @@ int		_DL::Fkey(int t) {
 				case __Right:
 					Increment(0,1);
 				break;
+				case __F1:
+				case __f1:
 				case __Delete:
 					dlscale[0]=dlscale[1]=0;
 					Increment(0,0);

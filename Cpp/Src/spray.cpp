@@ -248,6 +248,8 @@ int		_SPRAY::Fkey(int t) {
 							printf("\r\n: simulator active     ...\r\n:");
 						}
 						break;
+					case __F1:
+					case __f1:
 					case __Delete:
 						Adjust();
 						break;

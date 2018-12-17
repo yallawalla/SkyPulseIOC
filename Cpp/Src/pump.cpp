@@ -193,6 +193,8 @@ int		_PUMP::Fkey(int t) {
 				case __CtrlR:
 				Increment(0,0);
 				break;
+				case __F1:
+				case __f1:
 				case __Delete:
 				Setup();
 				break;
