@@ -153,10 +153,10 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 			if(__time__ > 3000 && (e | w)) {
 			
 				IOC_State.Error = (IOC_State.Error | e) ^ w ;
-				IOC_State.Send();
 				
 				if(e)
 					SetState(_ERROR);
+				IOC_State.Send();
 
 				for(int n=0; n<32; ++n)
 					if(e & (1<<n))

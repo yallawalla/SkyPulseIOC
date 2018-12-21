@@ -67,7 +67,7 @@
 #define __TH 94
 #define __TL 36
 #define __TP 130
-#define SW_version 26
+#define SW_version 27
 
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
