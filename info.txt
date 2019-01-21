@@ -92,4 +92,8 @@ V 0.24 Dec  7 2018 <DCF3073D>
 V 0.27 Dec 21 2018 <CFFB0DFD>
 - jeba v poll error: can message je šel ven preden se je zamenjalo stanje
 
+V 0.28 Jan 21 2019 <547C4E38>
+- bug v nastavitvi za crowbar override, napacen enum
+	test <200 00 08 mora izklopiti error
+- izklop pumpe ni delal, ce je ioc že v error state 
 

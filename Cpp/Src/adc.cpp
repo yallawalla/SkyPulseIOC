@@ -25,7 +25,7 @@ _ADC::_ADC() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-int		_ADC::Th2o() {
+int		_ADC::th2o() {
 			return (__fit(fval.T1,Rtab,Ttab) + __fit(fval.T2,Rtab,Ttab))/2;
 }
 /*******************************************************************************
@@ -34,7 +34,7 @@ int		_ADC::Th2o() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-int		_ADC::Th2o(int n) {
+int		_ADC::th2o(int n) {
 				if(n)
 					return __fit(fval.T2,Rtab,Ttab);
 				else
@@ -107,7 +107,7 @@ _err	e=_NOERR;
 				e = e | _V12;
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 				e = e | _V24;
-			if(Th2o() > 55*100)
+			if(th2o() > 55*100)
 				e = e | _sysOverheat;
 			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
 				e = e | _TsenseError;

@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -51,7 +51,6 @@
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
 #include "fatfs.h"
-#include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
 #include "misc.h"
@@ -1103,7 +1102,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
   if (htim->Instance == TIM2) {
-    led_poll();
+    pollLed();
   }
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM2) {

@@ -129,7 +129,7 @@ FRESULT _CLI::DecodePlus(char *c) {
 			ioc->warn_mask = ~_NOERR;
 		break;
 		case 'c':
-			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_RESET);
+			cwbarOn();
 		break;
 		default:
 			return FR_INVALID_NAME;
@@ -159,7 +159,7 @@ FRESULT _CLI::DecodeMinus(char *c) {
 			ioc->warn_mask = _NOERR;
 		break;
 		case 'c':
-			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET);
+			cwbarOff();
 		break;
 		default:
 			return FR_INVALID_NAME;

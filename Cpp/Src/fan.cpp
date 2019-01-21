@@ -88,7 +88,7 @@ int		_FAN::Fkey(int t) {
 	* @retval : None
 	*/
 /*******************************************************************************/
-int		_FAN::Rpm(int fsc) {
+int		_FAN::rpm(int fsc) {
 			int plow;
 			switch(mode) {
 				case 0:
@@ -103,7 +103,7 @@ int		_FAN::Rpm(int fsc) {
 				default:
 					plow=fph;
 				}
-			return __ramp(Th2o(),ftl*100,fth*100,plow,fph)*fsc/100;
+			return __ramp(th2o(),ftl*100,fth*100,plow,fph)*fsc/100;
 }
 /*******************************************************************************/
 /**
@@ -115,7 +115,7 @@ int		_FAN::Rpm(int fsc) {
 _err	_FAN::Status(void) {
 int		e=_NOERR;
 			if(__time__ % 4 == 0) {
-				if(fan_drive > Rpm(__PWMRATE))
+				if(fan_drive > rpm(__PWMRATE))
 					--fan_drive;
 				else
 					++fan_drive;
@@ -163,7 +163,7 @@ void 	_FAN::Increment(int a, int b)	{
 	*/
 /*******************************************************************************/
 void	_FAN::Newline(void) {
-			_print("\r:fan   %3d%c,%2d.%d'C",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10);
+			_print("\r:fan   %3d%c,%2d.%d'C",rpm(100),'%',th2o()/100,(th2o()%100)/10);
 			if(idx>0)
 				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);
 			for(int i=4*(4-idx)+3;idx && i--;_print("\b"));

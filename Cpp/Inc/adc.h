@@ -45,6 +45,6 @@ class	_ADC {
 	
 	static	void adcFilter();
 	static	adc val[], fval, gain, offset;
-	static	int Th2o(void),Th2o(int);
+	static	int th2o(void),th2o(int);
 };
 #endif

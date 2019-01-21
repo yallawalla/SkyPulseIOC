@@ -38,7 +38,7 @@ _IOC*	_IOC::parent			= NULL;
 * Output				:
 * Return				:
 *******************************************************************************/
-_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
+_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(pollVcp) {
 			parent=this;
 			error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 			SetState(_STANDBY);	
@@ -181,10 +181,12 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 void	_IOC::SetState(uint8_t *data) {
 			pump.mode &= ~_PUMP_BOOST;
 			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1);
-			SetState((_State)data[0]);
 	
 			pump.mode |= data[1] & _PUMP_BOOST;
 			fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1);
+			data[1] & _CWBAR_ON ? cwbarOn() : cwbarOff();			
+			
+			SetState((_State)data[0]);
 }
 /*******************************************************************************
 * Function Name	:
@@ -218,8 +220,8 @@ void	_IOC::SetState(_State s) {
 						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;	
 						spray.AirLevel=spray.WaterLevel=0;
-						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
-							pump.Disable();
+//						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
+//							pump.Disable();
 					}
 					break;
 				case	_CALIBRATE:

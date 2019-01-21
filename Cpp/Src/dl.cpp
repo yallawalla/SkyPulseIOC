@@ -254,8 +254,8 @@ int		_DL::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_DL::Newline(void) {
-//			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",Rpm(100),'%',Th2o()/100,(Th2o()%100)/10,k/10,k%10);
-			_print("\r:dl    %4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]));
+//			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",rpm(100),'%',th2o()/100,(th2o()%100)/10,k/10,k%10);
+			_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
 			for(int i=5*(3-idx)+1;i--;_print("\b")) {}
 			Repeat(200,__CtrlR);
 }

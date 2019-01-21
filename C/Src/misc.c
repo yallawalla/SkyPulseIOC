@@ -294,7 +294,7 @@ struct {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	led_poll(void) {
+void	pollLed(void) {
 	for(int i = 0; i < sizeof(leds.pin)/sizeof(uint32_t); ++i)
 		if(HAL_GetTick() < leds.timeout[i])	
 			HAL_GPIO_WritePin(leds.gpio[i],leds.pin[i], GPIO_PIN_RESET);

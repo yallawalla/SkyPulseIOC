@@ -169,10 +169,10 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idIOC_AuxReq:
-				ioc->IOC_Aux.Flow = ioc->pump.Flow/(2200/300);
-				ioc->IOC_Aux.Pump = ioc->pump.Rpm(100);
-				ioc->IOC_Aux.Temp = ioc->pump.Th2o();
-				ioc->IOC_Aux.Fan = ioc->fan.Rpm(100);
+				ioc->IOC_Aux.Flow = ioc->pump.flow/(2200/300);
+				ioc->IOC_Aux.Pump = ioc->pump.rpm(100);
+				ioc->IOC_Aux.Temp = ioc->pump.th2o();
+				ioc->IOC_Aux.Fan = ioc->fan.rpm(100);
 				ioc->IOC_Aux.Send();
 			break;
 //______________________________________________________________________________________

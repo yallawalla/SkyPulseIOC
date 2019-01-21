@@ -48,8 +48,8 @@ class _CLI : public _TERM, public _FS {
 			_proc_add((void *)parseTask,this,(char *)"Usart Cli",0);
 		};
 		
-		_CLI(USBD_HandleTypeDef *usbd) {
-			_proc_add((void *)CDC_Poll_FS,&io,(char *)"Tx VCP",0);
+		_CLI(void (*usb)(void *)) {
+			_proc_add((void *)usb,&io,(char *)"Tx VCP",0);
 			_proc_add((void *)parseTask,this,(char *)"Usb Cli",0);
 		};
 		
