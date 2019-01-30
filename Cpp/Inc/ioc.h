@@ -11,8 +11,8 @@
 #include "pump.h"
 #include "spray.h"
 #include "rtc.h"
+#include "dl.h"
 #include "ws2812.h"
-
 #include <string>
 #include <ctype.h>
 
@@ -23,6 +23,8 @@ typedef enum {
 	idIOC_AuxReq			=0x203,
 	idIOC_VersionReq	=0x204,
 	idDL_Limits				=0x21F,
+	idDL_State				=0x601,
+	idDL_Timing				=0x602,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
@@ -41,7 +43,8 @@ typedef enum {
 	_STANDBY,
 	_READY,
 	_ACTIVE,
-	_ERROR
+	_ERROR,
+	_CALIBRATE
 } _State;
 
 typedef enum {
@@ -83,14 +86,6 @@ typedef __packed struct _IOC_SprayAck {
 	}
 } IOC_SprayAck;
 //_____________________________________________________________________
-typedef __packed struct _DL_Limits {
-	short L1,L2;
-	_DL_Limits() : L1(30),L2(30)	{}
-	void	Send() {
-		_CAN::Send(idDL_Limits,(void *)&L1,sizeof(_DL_Limits));
-	}
-} DL_Limits;
-//_____________________________________________________________________
 typedef __packed struct _IOC_VersionAck {
 	uint16_t version;
 	uint32_t hash;
@@ -114,10 +109,21 @@ typedef __packed struct _IOC_Aux{
 	}
 } IOC_Aux;
 //_____________________________________________________________________
+typedef __packed struct _DL_State {
+	_State 	State;
+} DL_State;
 //_____________________________________________________________________
+typedef __packed struct _DL_Timing {
+	unsigned short Pavg;
+	unsigned Ton:24,Toff:24;
+} DL_Timing;
 //_____________________________________________________________________
+typedef __packed struct _DL_Limits {
+	unsigned short L0,L1;
+	unsigned char mode;
+} DL_Limits;
 //_____________________________________________________________________
-class _IOC : public _ADC {
+class _IOC {
 	private:
 		int key,temp;
 	
@@ -130,7 +136,6 @@ class _IOC : public _ADC {
 		_IOC_FootAck		IOC_FootAck;
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
-		_DL_Limits			DL_Limits;
 		_IOC_VersionAck	IOC_VersionAck;
 	
 		_CAN						can;
@@ -138,9 +143,10 @@ class _IOC : public _ADC {
 		_WS 						ws2812;
 		_PUMP 					pump;
 		_FAN 						fan;
+		_DL							diode;
 		_RTC						rtc;
-		_CLI						com1,com3,comUsb;
 		_FSW						Fsw;
+		_CLI						com1,com3,comUsb;
 		~_IOC();
 
 		void SetState(uint8_t *);

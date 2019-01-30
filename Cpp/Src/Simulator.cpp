@@ -126,7 +126,7 @@ _IOC		*ioc = static_cast<_IOC *>(v);
 	fval.V12	= _V12to16X;
 	fval.V24	= _V24to16X;
 
-	fval.T2=(unsigned short)0xafff;
+//	fval.T2=(unsigned short)0xafff;
 	
 	if(__time__ > rate) {
 		rate = __time__ + 10;

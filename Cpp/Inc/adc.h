@@ -20,8 +20,8 @@
 #define	_V24to16X					(int)(24.0/_UREF*_Rdiv(820.0,6800.0)*65535.0+0.5)			
 #define	_BAR(a)					 ((int)((a)*16384.0f))
 
-__inline 
-int			__fit(int to, const int t[], const int ft[]) {
+			__inline 
+int		__fit(int to, const int t[], const int ft[]) {
 int			f3=(ft[3]*(t[0]-to)-ft[0]*(t[3]-to)) / (t[0]-t[3]);
 int			f2=(ft[2]*(t[0]-to)-ft[0]*(t[2]-to)) / (t[0]-t[2]);
 int			f1=(ft[1]*(t[0]-to)-ft[0]*(t[1]-to)) / (t[0]-t[1]);
@@ -37,26 +37,14 @@ typedef struct	{
 			unsigned short	Ipump,T1,T2,V5,V12,V24,cooler,bottle,compressor,air;
 		} adc;
 
-typedef struct	{
-			float offset[2],
-						x[2],
-						dx[2],
-						max[2],
-						min[2],
-						k;
-			unsigned short	dma[16*10][2];
-		} diode;
-
 class	_ADC {
 	private:
 	public:
 	_ADC();
 	_err		adcError(void);
 	
-	static	void adcFilter(),diodeFilter(int);
+	static	void adcFilter();
 	static	adc val[], fval, gain, offset;
-	static	diode DL;
-	static	int Th2o(void);
-	
+	static	int th2o(void),th2o(int);
 };
 #endif

@@ -1,5 +1,5 @@
-#include	"ioc.h"
 #include <stdlib.h>
+#include "ioc.h"
 CAN_HandleTypeDef *_CAN::hcan;
 _io 							*_CAN::io,*_CAN::ioFsw;
 /*******************************************************************************
@@ -14,10 +14,11 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	hcan = handle;
 	error = _NOERR;
 	
-	filter_count=ecTimeout=dlTimeout=anime=0;
+	filter_count=ecTimeout=dlTimeout=0;
 	
 	canFilterCfg(idIOC_State,	0x7C0, idBOOT,			0x7ff);
 	canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
+	canFilterCfg(idDL_Timing,	0x7f0, idDL_Timing,	0x7f0);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_RX_FIFO0_MSG_PENDING);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_Start(hcan);
@@ -151,7 +152,6 @@ void	_CAN::pollRx(void *v) {
 						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
 					else {
 						ecTimeout=dlTimeout=0;
-						ioc->DL.dx[0]=ioc->DL.dx[1]=ioc->DL.x[0]=ioc->DL.x[1]=0;
 					}
 				}
 				ioc->IOC_State.Send();
@@ -169,10 +169,10 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________
 			case idIOC_AuxReq:
-				ioc->IOC_Aux.Temp = ioc->Th2o();
-				ioc->IOC_Aux.Flow = ioc->pump.Flow/(2200/300);
-				ioc->IOC_Aux.Pump = ioc->pump.Rpm(100);
-				ioc->IOC_Aux.Fan = ioc->fan.Rpm(100);
+				ioc->IOC_Aux.Flow = ioc->pump.flow/(2200/300);
+				ioc->IOC_Aux.Pump = ioc->pump.rpm(100);
+				ioc->IOC_Aux.Temp = ioc->pump.th2o();
+				ioc->IOC_Aux.Fan = ioc->fan.rpm(100);
 				ioc->IOC_Aux.Send();
 			break;
 //______________________________________________________________________________________
@@ -183,11 +183,6 @@ void	_CAN::pollRx(void *v) {
 			case idEM_ack:
 				if(ioc->IOC_State.State == _ACTIVE) {
 					ecTimeout=__time__ + _EC20_MAX_PERIOD;
-//					if(__time__ > anime) {
-//						ioc->ws2812.Batch((char *)"@active.ws");
-//						anime = __time__ + 500;
-//					}
-
 				} else {
 					ecTimeout=0;
 					Status(_illENMack);			
@@ -206,19 +201,31 @@ void	_CAN::pollRx(void *v) {
 				}
 			break;
 //______________________________________________________________________________________
-			case idDL_Limits:
-				ioc->DL_Limits.L1 =data[0] + (data[1]<<8);
-				ioc->DL_Limits.L2 =data[2] + (data[3]<<8);
+			case idDL_Limits: {
+				DL_Limits *p=(DL_Limits *)data;
+				ioc->diode.setLimits(p->L0,p->L1,p->mode);
+				
 				if(ioc->IOC_State.State == _ACTIVE) {
 					dlTimeout=__time__ + _DL_POLL_DELAY;
 					ecTimeout=0;
-//					if(__time__ > anime) {
-//						ioc->ws2812.Batch((char *)"@active.ws");
-//						anime = __time__ + 500;
-//					}
 				}
 				ioc->IOC_FootAck.Send();
+			}
 			break;
+//______________________________________________________________________________________
+			case idDL_State: {
+				DL_State *p=(DL_State *)data;
+				if(p->State == _CALIBRATE) {
+					ioc->error_mask = ioc->error_mask | _DLpowerCh1 | _DLpowerCh2 | _ENMtimeout | _DLtimeout;
+				}
+			}
+			break;				
+//______________________________________________________________________________________
+			case idDL_Timing: {
+				DL_Timing *p=(DL_Timing *)data;
+				ioc->diode.setTiming(p->Ton,p->Toff);
+			}
+			break;				
 //______________________________________________________________________________________
 			case idIOC_Footreq:
 				ioc->IOC_FootAck.Send();
@@ -271,34 +278,6 @@ void	_CAN::pollRx(void *v) {
 	if(dlTimeout && __time__ > dlTimeout) {
 		dlTimeout=0;
 		Status(_DLtimeout);	
-	}
-//______________________________________________________________________________________
-//
-//	DL levels check
-//______________________________________________________________________________________
-	switch(ioc->IOC_State.State) {
-		case _STANDBY:
-		case _READY:
-			if(ioc->DL.x[0] > ioc->DL.offset[0] + _DL_OFFSET_THR)
-				Status(_DLpowerCh1);	
-			if(ioc->DL.x[1] > ioc->DL.offset[1] + _DL_OFFSET_THR)
-				Status(_DLpowerCh2);	
-			break;
-		case _ACTIVE:
-			if(ioc->DL.x[0] > ioc->DL.offset[0] + (10*std::max((int)ioc->DL_Limits.L1, _DL_OFFSET_THR)/10))
-				Status(_DLpowerCh1);	
-			if(ioc->DL.x[1] > ioc->DL.offset[1] + (10*std::max((int)ioc->DL_Limits.L2, _DL_OFFSET_THR)/10))
-				Status(_DLpowerCh2);	
-			break;
-		case _ERROR:
-			break;
-	}
-//______________________________________________________________________________________
-//__forcing filter loop (unit test only, adc not active
-//
-	if(HAL_IS_BIT_CLR(hadc2.Instance->CR2, ADC_CR2_ADON)) {
-		_ADC::diodeFilter(0);
-		_ADC::diodeFilter(1);
 	}
 //__CAN console processing______________________________________________________________
 	if(remote) {
@@ -391,19 +370,6 @@ FRESULT	_CAN::Decode(char *c) {
 
 			break;
 				
-		case 'd': 
-			HAL_ADC_Stop_DMA(&hadc2);
-			for(c=strchr(c,' '); c && *c;) {
-				_IOC*	ioc = _IOC::parent;
-				int i=strtoul(++c,&c,16);
-				int j=strtoul(++c,&c,16);
-				for(int n=0; n< sizeof(ioc->DL.dma)/sizeof(uint16_t)/2; ++n) {
-					ioc->DL.dma[n][0]=i;
-					ioc->DL.dma[n][1]=j;
-				}
-			}
-		break;
-			
 		case 'w': 
 			_wait(atoi(++c));
 		break;		

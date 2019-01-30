@@ -1,21 +1,23 @@
 #include	"adc.h"
+#include	"dl.h"
 #include	"misc.h"
 
-diode	_ADC::DL={};
 adc		_ADC::val[16]	={},
 			_ADC::fval={},
 			_ADC::offset={},
 			_ADC::gain={};
 /*******************************************************************************
-* Function Name	:
-* Description		: 
+* Function Name	: ADC constructor
+* Description		: 2-APB2 clock divider
+*								: 4-ADC prescaler
+*								: 26-sample cycles, 12-conversion cycles
+*								: 2 channels concversion
+*								: 154 pairs DMA block
 * Output				:
 * Return				: None
 *******************************************************************************/
 _ADC::_ADC() {
-			DL.k=0.0006250f*10.0f;	// 1-10 ms
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&val, sizeof(val)/sizeof(uint16_t));
-			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&DL.dma, sizeof(DL.dma)/sizeof(uint16_t));
 }
 /*******************************************************************************
 * Function Name	:
@@ -23,8 +25,20 @@ _ADC::_ADC() {
 * Output				:
 * Return				: None
 *******************************************************************************/
-int		_ADC::Th2o() {
+int		_ADC::th2o() {
 			return (__fit(fval.T1,Rtab,Ttab) + __fit(fval.T2,Rtab,Ttab))/2;
+}
+/*******************************************************************************
+* Function Name	:
+* Description		: 
+* Output				:
+* Return				: None
+*******************************************************************************/
+int		_ADC::th2o(int n) {
+				if(n)
+					return __fit(fval.T2,Rtab,Ttab);
+				else
+					return __fit(fval.T1,Rtab,Ttab);
 }
 /*******************************************************************************
 * Function Name	:
@@ -53,51 +67,11 @@ void	_ADC::adcFilter() {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_ADC::diodeFilter(int k) {
-unsigned short *p;
-int		n=sizeof(DL.dma)/sizeof(short)/4;
-			if(k)
-				p=&DL.dma[n][0];
-			else
-				p=&DL.dma[0][0];
-			while(n--) {
-				DL.dx[0] += DL.k*(p[0] - DL.x[0]-DL.dx[0]-DL.dx[0]);
-				DL.x[0] += DL.k*DL.dx[0];	
-				DL.dx[1] += DL.k*(p[1] - DL.x[1]-DL.dx[1]-DL.dx[1]);
-				DL.x[1] += DL.k*DL.dx[1];	
-				
-				++p;++p;
-			}
-				if(DL.x[0]>DL.max[0])
-					DL.max[0]=DL.x[0];
-				if(DL.x[1]>DL.max[1])
-					DL.max[1]=DL.x[1];
-				if(DL.x[0]<DL.min[0])
-					DL.min[0]=DL.x[0];
-				if(DL.x[1]<DL.min[1])
-					DL.min[1]=DL.x[1];
-				if(__time__ % 10 == 0) {
-					if(DL.max[0] > 0) --DL.max[0]; 
-					if(DL.max[1] > 0) --DL.max[1]; 
-					if(DL.min[0] < 100) ++DL.min[0]; 
-					if(DL.min[1] < 100) ++DL.min[1]; 
-				}
-				if(__time__ < _DL_OFFSET_DELAY) {
-					DL.offset[0]=DL.x[0];
-					DL.offset[1]=DL.x[1];
-				}
-}
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
 void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 			if(hadc==&hadc1)
 					_ADC::adcFilter();
 			if(hadc==&hadc2)
-					_ADC::diodeFilter(1);
+					_DL::instance->filterCbk(1);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -107,7 +81,7 @@ void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 *******************************************************************************/
 void	HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 			if(hadc==&hadc2)
-					_ADC::diodeFilter(0);
+					_DL::instance->filterCbk(0);
 }
 /*******************************************************************************
 * Function Name	:
@@ -133,9 +107,9 @@ _err	e=_NOERR;
 				e = e | _V12;
 			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 				e = e | _V24;
-			if(Th2o() > 55*100)
+			if(th2o() > 55*100)
 				e = e | _sysOverheat;
-			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x400)
+			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
 				e = e | _TsenseError;
 			}		
 		return e;

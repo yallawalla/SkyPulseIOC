@@ -29,6 +29,12 @@ int _CLI::Fkey(int t) {
 				Newline();
 			} 
 			break;
+			case __f4:
+			case __F4:
+				ioc->diode.Newline();
+				while(ioc->diode.Parse()) 
+					_wait(2);
+				return __F12;
 			case __f5:
 			case __F5:
 				ioc->pump.Newline();
@@ -85,13 +91,7 @@ int _CLI::Fkey(int t) {
 				Newline();
 			}
 			break;
-			case __f1:
-			case __F1:
-				_print("... entering standby status");		
-				Newline();
-				Decode((char *)"+D 2");
-				ioc->can.Decode((char *)"<200 00");
-			break;
+
 			default:
 				return t;
 		}
@@ -119,8 +119,8 @@ FRESULT _CLI::DecodePlus(char *c) {
 		case 'E':
 		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
-		if(!n)
-			ioc->error_mask = _NOERR;
+//		if(!n)
+//			ioc->error_mask = _NOERR;
 		break;
 		case 'W':
 		for(c=strchr(c,' '); c && *c; ++n)
@@ -129,7 +129,7 @@ FRESULT _CLI::DecodePlus(char *c) {
 			ioc->warn_mask = ~_NOERR;
 		break;
 		case 'c':
-			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_RESET);
+			cwbarOn();
 		break;
 		default:
 			return FR_INVALID_NAME;
@@ -142,9 +142,11 @@ FRESULT _CLI::DecodeMinus(char *c) {
 	int n=0;
 	switch(*trim(&++c)) {
 		case 'D':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			debug = (_dbg)(debug & ~(1<<strtoul(++c,&c,10)));
 		dbgio=io;
+		if(!n)
+			debug = DBG_OFF;
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c; ++n)
@@ -159,7 +161,7 @@ FRESULT _CLI::DecodeMinus(char *c) {
 			ioc->warn_mask = _NOERR;
 		break;
 		case 'c':
-			HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET);
+			cwbarOff();
 		break;
 		default:
 			return FR_INVALID_NAME;
@@ -190,6 +192,7 @@ FRESULT _CLI::DecodeInq(char *c) {
 			debug = (_dbg)(d | DBG_ERR);
 			ioc->can.Status(ioc->IOC_State.Error);
 			ioc->IOC_State.Error=_NOERR;
+			ioc->pollError();
 			debug = d;
 		}
 			break;	

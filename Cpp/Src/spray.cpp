@@ -77,7 +77,8 @@ _SPRAY::_SPRAY() {
 #define	_P_THRESHOLD  0x8000
 
 _err	_SPRAY::Status() {
-_err	_err=_NOERR;
+//------------------------------------------------------------------------------
+_err	_err = adcError();
 //------------------------------------------------------------------------------
 			if(offsetTimeout && __time__ > offsetTimeout) {
 				offset.bottle += fval.air - offset.air;
@@ -247,6 +248,8 @@ int		_SPRAY::Fkey(int t) {
 							printf("\r\n: simulator active     ...\r\n:");
 						}
 						break;
+					case __F1:
+					case __f1:
 					case __Delete:
 						Adjust();
 						break;
@@ -299,11 +302,13 @@ void	_SPRAY::Increment(int a, int b) {
 			switch(idx) {
 				case 0:
 					AirLevel 			= std::min(std::max(0,AirLevel+a),10);
-					readyTimeout	= __time__ + _SPRAY_READY_T;
+					if(a)
+						readyTimeout	= __time__ + _SPRAY_READY_T;
 					break;
 				case 1:
 					WaterLevel 		= std::min(std::max(0,WaterLevel+a),10);
-					readyTimeout	= __time__ + _SPRAY_READY_T;
+					if(a)
+						readyTimeout	= __time__ + _SPRAY_READY_T;
 					break;
 						case 2:
 							break;

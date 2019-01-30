@@ -1,8 +1,6 @@
 #include		"fit.h"
 #include		<math.h>
 #include		<stdlib.h>
-
-#define 		M_PI	3.141592653589793
 /*******************************************************************************
 * Function Name	: 
 * Description		: Izracun determinante matrike reda n x n, p=element (0,0)

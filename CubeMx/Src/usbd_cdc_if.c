@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -330,7 +330,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 * Output				:
 * Return				:
 *******************************************************************************/
-void	*CDC_Poll_FS(void *v) {
+void	pollVcp(void *v) {
 	*(_io **)v=_VCP;
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
 	if(_VCP && hcdc->TxState ==  0) {
@@ -338,7 +338,6 @@ void	*CDC_Poll_FS(void *v) {
 		if(len)
 			CDC_Transmit_FS(UserTxBufferFS, len);
 	}
-	return v;
 }
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

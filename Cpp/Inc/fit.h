@@ -1,6 +1,6 @@
-#ifndef					FIT_H
-#define					FIT_H
-
+#ifndef	FIT_H
+#define	FIT_H
+#define	M_PI	3.141592653589793
 enum _fittype		{FIT_POW, FIT_TRIG, FIT_EXP, FIT_NEXP};
 
 class _FIT {

@@ -15,7 +15,7 @@ class	_PUMP : public _TERM, public _ADC {
 	private:
 		int 		fpl,fph,ftl,fth;
 		int			idx,timeout,__pumpTacho,__flowTacho;
-		int			speed, tacho_limit,curr_limit, flow_limit;
+		int			tacho_limit,curr_limit, flow_limit;
 
 	public:
 		_PUMP();
@@ -26,7 +26,8 @@ class	_PUMP : public _TERM, public _ADC {
 		virtual int		Fkey(int);
 		void		Increment(int, int);
 		void		Enable(void),Disable(void);
-		int			Rpm(int),Flow,mode;
+		int			rpm(int),mode;
+		int			speed, flow;
 		bool		Setup(void),Enabled(void);
 		_err		Status(void);
 };

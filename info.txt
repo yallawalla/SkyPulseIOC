@@ -70,3 +70,39 @@ col 2,5,+l
 	- offset za diodo ob vklopu
 	- 500 ms delay za polling
 	
+- v 0.24 Nov 23 2018 <B3168E65>
+- AVG filter na 2kHz, oba IIR filtra na frekv. callbacka- 
+- IOC objekt ne deduje vec ADC
+
+/v 0.24 Dec  6 2018 <3CF656A1>
+- calibrate režim ta DL izklopi preverjanje omejitev in timinga
+- dodatek v 0x21f message: byte mode, oznacuje aktivni kanal,
+	drug kanal se smatra za crosstalk in se preverja samo zgornja meja
+- sprememba na DL timeout; prepreci error pri hitrem ponovnem pritisu FSW 
+- konzola za DL, F4
+
+V 0.24 Dec  7 2018 <163DF537>
+- bug pri sprejemu zahteve za _CALIBRATE; dvakrat je izklopil E18, ne pa tudi E19
+
+V 0.24 Dec  7 2018 <DCF3073D>
+- bug pri izpisu temp. na pumpi
+- v konzoli se readyTimeout sproži samo ob spremembu in ne kont. ob refreshu
+- spray se ugasne v ERROR stanju (proc. SetState)
+
+V 0.27 Dec 21 2018 <CFFB0DFD>
+- jeba v poll error: can message je šel ven preden se je zamenjalo stanje
+
+V 0.28 Jan 21 2019 <547C4E38>
+- bug v nastavitvi za crowbar override, napacen enum
+	test <200 00 08 mora izklopiti error
+- izklop pumpe ni delal, ce je ioc že v error state 
+
+V 0.29 Jan 30 2019 <6ED63AD6>
+- bug pri sinhronizaciji ref. signala pri dvokanalni diodi; sinhronizacija na 
+  trenutno aktivni kanal, dolocen v CAN 0x21F msg (limite)
+- v konzoli odstranjena možnost vklopa vseh err. hkrati   +E<enter>. Možnost izklopa ostaja.
+- v konzoli dodana možnost izklopa debug. -D<enter>
+
+- STM32CubeMX Version 5.0.1
+- STM32Cube FW_F4 V1.23.0
+

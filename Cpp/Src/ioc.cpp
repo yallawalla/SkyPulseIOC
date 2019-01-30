@@ -38,7 +38,7 @@ _IOC*	_IOC::parent			= NULL;
 * Output				:
 * Return				:
 *******************************************************************************/
-_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(&hUsbDeviceFS) {
+_IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(pollVcp) {
 			parent=this;
 			error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 			SetState(_STANDBY);	
@@ -129,51 +129,10 @@ _err	_IOC::fswError() {
 * Return				:
 *******************************************************************************/
 void	*_IOC::pollStatus(void *v) {
-
-			static_cast<_IOC *>(v)->pollError();
-
-			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.x[0]);
-			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.dx[0]);
-			if(_TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,DL.x[1]);
-			if(_TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,2000+DL.dx[1]);
-
+_IOC	*ioc = static_cast<_IOC *>(v);
+			ioc->pollError();
 			return v;
 }
-/*******************************************************************************
-* Function Name	:
-* Description		:
-* Output				:
-* Return				:
-*******************************************************************************/
-//void	_IOC::SetError(_err err) {
-//			err = err ^ IOC_State.Error;
-//			if(err == _NOERR || __time__ < 3000)
-//				return;
-//			if(int e = err & ~error_mask & ~IOC_State.Error) {
-//				if(e & (_pumpCurrent | _flowTacho))
-//					pump.Disable();
-//				SetState(_ERROR);
-//				IOC_State.Error = (_err)(IOC_State.Error | e);
-//				IOC_State.Send();
-//				for(int n=0; n<32; ++n)
-//					if(e & (1<<n))
-//						_TERM::Debug(DBG_ERR,"\r\nerror   %04d: %s",n, ErrMsg[n].c_str());	
-//			} else if(int w = err & warn_mask) {
-//				IOC_State.Error = (_err)(IOC_State.Error  ^ w);
-//				IOC_State.Send();
-//				for(int n=0; n<32; ++n)
-//					if(w & (1<<n)) {
-//						if(w & IOC_State.Error)
-//							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: %s",n, ErrMsg[n].c_str());
-//						else
-//							_TERM::Debug(DBG_ERR,"\r\nwarning %04d: ...",n);
-//					}
-//				}
-//}
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -185,21 +144,18 @@ _err	err = can.Status();
 			err = err | pump.Status();
 			err = err | fan.Status();
 			err = err | spray.Status();
-			err = err | adcError();
 			err = err | fswError();
+			err = err | diode.Status(IOC_State.State == _ACTIVE);
 	
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 
 			if(__time__ > 3000 && (e | w)) {
-
-				if(e) {
-					if(e & (_pumpCurrent | _flowTacho))
-						pump.Disable();
-					SetState(_ERROR);
-				}
-				
+			
 				IOC_State.Error = (IOC_State.Error | e) ^ w ;
+				
+				if(e)
+					SetState(_ERROR);
 				IOC_State.Send();
 
 				for(int n=0; n<32; ++n)
@@ -224,26 +180,13 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 *******************************************************************************/
 void	_IOC::SetState(uint8_t *data) {
 			pump.mode &= ~_PUMP_BOOST;
-			fan.mode &= ~_FAN_BOOST;
-			SetState((_State)data[0]);
+			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1);
 	
-			switch(IOC_State.State) {
-				case	_STANDBY:
-					break;
-				case	_READY:
-				case	_ACTIVE:
-					if(data[1] & _PUMP_BOOST)
-						pump.mode |= _PUMP_BOOST;
-					else
-						pump.mode &= ~_PUMP_BOOST;
-					break;
-				case	_ERROR:
-					if(data[1] & _FAN_BOOST)
-						fan.mode |= _FAN_BOOST;
-					else
-						fan.mode &= ~_FAN_BOOST;
-					break;
-			}
+			pump.mode |= data[1] & _PUMP_BOOST;
+			fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1);
+			data[1] & _CWBAR_ON ? cwbarOn() : cwbarOff();			
+			
+			SetState((_State)data[0]);
 }
 /*******************************************************************************
 * Function Name	:
@@ -276,9 +219,14 @@ void	_IOC::SetState(_State s) {
 						IOC_State.State = _ERROR;
 						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;	
+						spray.AirLevel=spray.WaterLevel=0;
+//						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
+//							pump.Disable();
 					}
 					break;
-				}
+				case	_CALIBRATE:
+					break;
+			}
 }
 /*******************************************************************************
 * Function Name	:
