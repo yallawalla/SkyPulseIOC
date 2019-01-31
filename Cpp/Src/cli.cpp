@@ -119,8 +119,8 @@ FRESULT _CLI::DecodePlus(char *c) {
 		case 'E':
 		for(c=strchr(c,' '); c && *c; ++n)
 			ioc->error_mask = (_err)(ioc->error_mask & ~(1<<strtoul(++c,&c,10)));
-		if(!n)
-			ioc->error_mask = _NOERR;
+//		if(!n)
+//			ioc->error_mask = _NOERR;
 		break;
 		case 'W':
 		for(c=strchr(c,' '); c && *c; ++n)
@@ -142,9 +142,11 @@ FRESULT _CLI::DecodeMinus(char *c) {
 	int n=0;
 	switch(*trim(&++c)) {
 		case 'D':
-		for(c=strchr(c,' '); c && *c;)
+		for(c=strchr(c,' '); c && *c; ++n)
 			debug = (_dbg)(debug & ~(1<<strtoul(++c,&c,10)));
 		dbgio=io;
+		if(!n)
+			debug = DBG_OFF;
 		break;
 		case 'E':
 		for(c=strchr(c,' '); c && *c; ++n)

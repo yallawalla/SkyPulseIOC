@@ -97,3 +97,12 @@ V 0.28 Jan 21 2019 <547C4E38>
 	test <200 00 08 mora izklopiti error
 - izklop pumpe ni delal, ce je ioc že v error state 
 
+V 0.29 Jan 30 2019 <6ED63AD6>
+- bug pri sinhronizaciji ref. signala pri dvokanalni diodi; sinhronizacija na 
+  trenutno aktivni kanal, dolocen v CAN 0x21F msg (limite)
+- v konzoli odstranjena možnost vklopa vseh err. hkrati +E<enter>.
+	Možnost izklopa ostaja.
+- v konzoli dodana možnost izklopa debug. -D<enter>
+
+
+

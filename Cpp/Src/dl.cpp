@@ -28,6 +28,7 @@ _DL::_DL() : high(300,150000), filter(5, 2000),filterRef(5, 2000) {
 			timeout[0]=timeout[1]=offset[0]=offset[1]=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
+			scale=10;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -57,21 +58,18 @@ int		n=sizeof(dma)/sizeof(short)/4;
 			}
 
 			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filter.val[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[mode-1]);			//filter
+			
 			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filterRef.val[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[mode-1]);		// ref
+			
 			if(k && _TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filter.val[0]);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[mode-1]);			// razlika
 			if(!k && _TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filterRef.val[0]);
-			if(k && _TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filter.val[0]*50);
-			if(!k && _TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, filterRef.val[0]*50);
-			if(_TERM::debug & DBG_DL4)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, high.val[0]);
-			if(_TERM::debug & DBG_DL5)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, high.val[0]*50);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[mode-1]);
+			
+			if(_TERM::debug & DBG_DL3)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*high.val[mode-1]);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -123,12 +121,12 @@ _err 	e=_NOERR;
 					ref[1]=lim[1];
 					toff=ton+on;
 					ton=toff+off;
-					if(high.val[0] < lim[0]/2+offset[0]) {
-						++ton;
-						++toff;
-					} else {
-						--ton;
-						--toff;
+					if(mode) {
+						if(high.val[mode-1] < lim[mode-1]/2+offset[mode-1]) {
+							++ton; ++toff;
+						} else {
+							--ton; --toff;
+						}
 					}
 				} else if(__time__ > toff) {
 					ref[0]=ref[1]=0;
@@ -242,6 +240,12 @@ int		_DL::Fkey(int t) {
 				break;
 				case __CtrlR:
 				Increment(0,0);
+				break;
+				case __PageUp:
+				scale=std::min(scale+1,100);
+				break;
+				case __PageDown:
+				scale=std::max(scale-1,1);
 				break;
 			}
 			return EOF;
