@@ -310,7 +310,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>4</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -335,7 +335,7 @@
               <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F405xx, __REENT=1</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                                                                                                                                                        ../Drivers/STM32F4xx_HAL_Driver/Inc;                                                                                                                                                        ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                                                                                                                                        ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                                                                                                                                        ../Middlewares/Third_Party/FatFs/src;                                                                                                                                                        ../Drivers/CMSIS/Include;                                                                                                                                                        ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                                                                                                                                        ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                                                                                                                                        ..\..\C\Inc;                                                                                                                                                        ..\..\Cpp\Inc;                                                                                                                                                        ..\..\lcd\src;                                                                                                                   ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;                                                                                                                   ../Middlewares/Third_Party/FreeRTOS/Source/include;                                                                                                                   ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
+              <IncludePath>../Inc;                                                                                                                                                               ../Drivers/STM32F4xx_HAL_Driver/Inc;                                                                                                                                                               ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;                                                                                                                                                               ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;                                                                                                                                                               ../Middlewares/Third_Party/FatFs/src;                                                                                                                                                               ../Drivers/CMSIS/Include;                                                                                                                                                               ../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;                                                                                                                                                               ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;                                                                                                                                                               ..\..\C\Inc;                                                                                                                                                               ..\..\Cpp\Inc;                                                                                                                                                               ..\..\lcd\src;                                                                                                                          ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;                                                                                                                          ../Middlewares/Third_Party/FreeRTOS/Source/include;                                                                                                                          ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -380,9 +380,9 @@
           <GroupName>Middlewares/FatFs</GroupName>
           <Files>
             <File>
-              <FileName>ff_gen_drv.c</FileName>
+              <FileName>diskio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/diskio.c</FilePath>
             </File>
             <File>
               <FileName>ff.c</FileName>
@@ -390,9 +390,9 @@
               <FilePath>../Middlewares/Third_Party/FatFs/src/ff.c</FilePath>
             </File>
             <File>
-              <FileName>diskio.c</FileName>
+              <FileName>ff_gen_drv.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FatFs/src/diskio.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</FilePath>
             </File>
             <File>
               <FileName>syscall.c</FileName>
@@ -415,29 +415,9 @@
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/croutine.c</FilePath>
             </File>
             <File>
-              <FileName>cmsis_os.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</FilePath>
-            </File>
-            <File>
-              <FileName>queue.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/queue.c</FilePath>
-            </File>
-            <File>
-              <FileName>port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c</FilePath>
-            </File>
-            <File>
               <FileName>event_groups.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/event_groups.c</FilePath>
-            </File>
-            <File>
-              <FileName>tasks.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/tasks.c</FilePath>
             </File>
             <File>
               <FileName>list.c</FileName>
@@ -445,120 +425,40 @@
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/list.c</FilePath>
             </File>
             <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>tasks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/tasks.c</FilePath>
+            </File>
+            <File>
               <FileName>timers.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/timers.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmsis_os.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</FilePath>
             </File>
             <File>
               <FileName>heap_2.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_2.c</FilePath>
             </File>
+            <File>
+              <FileName>port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/port.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Drivers/STM32F4xx_HAL_Driver</GroupName>
           <Files>
-            <File>
-              <FileName>stm32f4xx_hal_flash.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_flash_ramfunc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_cortex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_can.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_adc_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_tim.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_pwr_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_tim_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_flash_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dma_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_rcc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_rcc_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_dac_ex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_pwr.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c</FilePath>
-            </File>
             <File>
               <FileName>stm32f4xx_hal_pcd.c</FileName>
               <FileType>1</FileType>
@@ -575,14 +475,34 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c</FilePath>
             </File>
             <File>
-              <FileName>stm32f4xx_hal_rtc_ex.c</FileName>
+              <FileName>stm32f4xx_hal_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.c</FilePath>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c</FilePath>
             </File>
             <File>
-              <FileName>stm32f4xx_hal_rtc.c</FileName>
+              <FileName>stm32f4xx_hal_adc_ex.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c</FilePath>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_can.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_crc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_crc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_dac_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dac_ex.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_hal_iwdg.c</FileName>
@@ -590,9 +510,89 @@
               <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c</FilePath>
             </File>
             <File>
-              <FileName>stm32f4xx_hal_crc.c</FileName>
+              <FileName>stm32f4xx_hal_rtc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_crc.c</FilePath>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_rtc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_tim_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_rcc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_rcc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_flash_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_flash_ramfunc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_dma_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_pwr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_pwr_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal_cortex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f4xx_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -602,7 +602,7 @@
             <File>
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..//Src/system_stm32f4xx.c</FilePath>
+              <FilePath>../Src/system_stm32f4xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -620,11 +620,6 @@
           <GroupName>Middlewares/USB_Device_Library</GroupName>
           <Files>
             <File>
-              <FileName>usbd_cdc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c</FilePath>
-            </File>
-            <File>
               <FileName>usbd_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c</FilePath>
@@ -639,6 +634,11 @@
               <FileType>1</FileType>
               <FilePath>../Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c</FilePath>
             </File>
+            <File>
+              <FileName>usbd_cdc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -650,14 +650,19 @@
               <FilePath>../Src/main.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_cdc_if.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/usbd_cdc_if.c</FilePath>
-            </File>
-            <File>
               <FileName>user_diskio.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/user_diskio.c</FilePath>
+            </File>
+            <File>
+              <FileName>fatfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/fatfs.c</FilePath>
+            </File>
+            <File>
+              <FileName>freertos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/freertos.c</FilePath>
             </File>
             <File>
               <FileName>usb_device.c</FileName>
@@ -665,14 +670,19 @@
               <FilePath>../Src/usb_device.c</FilePath>
             </File>
             <File>
+              <FileName>usbd_conf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/usbd_conf.c</FilePath>
+            </File>
+            <File>
               <FileName>usbd_desc.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/usbd_desc.c</FilePath>
             </File>
             <File>
-              <FileName>fatfs.c</FileName>
+              <FileName>usbd_cdc_if.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Src/fatfs.c</FilePath>
+              <FilePath>../Src/usbd_cdc_if.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_it.c</FileName>
@@ -685,19 +695,9 @@
               <FilePath>../Src/stm32f4xx_hal_msp.c</FilePath>
             </File>
             <File>
-              <FileName>usbd_conf.c</FileName>
+              <FileName>stm32f4xx_hal_timebase_tim.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Src/usbd_conf.c</FilePath>
-            </File>
-            <File>
-              <FileName>freertos.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/freertos.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f4xx_hal_timebase_TIM.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/stm32f4xx_hal_timebase_TIM.c</FilePath>
+              <FilePath>../Src/stm32f4xx_hal_timebase_tim.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -49,7 +49,7 @@ class	_DL  : public _TERM {
 			unsigned int 		ton,toff,timeout[2],ref[2];
 			unsigned int 		on,off,lim[2],mode;
 			lopass					high, filter, filterRef;
-			int							idx,dlscale[2];
+			int							idx,dlscale[2],scale;
 
 		public:
 			static _DL* instance;

@@ -1,3 +1,4 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   *  FatFs - Generic FAT file system module  R0.12c (C)ChaN, 2017
@@ -44,6 +45,7 @@
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 #ifndef _FFCONF
 #define _FFCONF 68300	/* Revision ID */
@@ -51,6 +53,7 @@
 /*-----------------------------------------------------------------------------/
 / Additional user header to be used  
 /-----------------------------------------------------------------------------*/
+#include "main.h"
 #include "stm32f4xx_hal.h"
 #include "cmsis_os.h"    /* _FS_REENTRANT set to 1 */
 
