@@ -7,7 +7,6 @@
 #include	"ff.h"
 #include	"fit.h"
 #include	<algorithm>
-#include	"lcd.h"
 #include "simulator.h"
 
 #define		_SPRAY_READY_T	500
