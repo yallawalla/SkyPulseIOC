@@ -106,3 +106,7 @@ V 0.29 Jan 30 2019 <6ED63AD6>
 - STM32CubeMX Version 5.0.1
 - STM32Cube FW_F4 V1.23.0
 
+v 1.00 Aug 27 2019 <CFF31952>
+- hitrejši vklop pumpe (ms ni vec deljena)
+- blowjob mode, aktiviran s voda/zrak ff/ff (!sic)
+

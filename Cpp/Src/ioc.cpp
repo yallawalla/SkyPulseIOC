@@ -94,30 +94,30 @@ _err	_IOC::fswError() {
 				case __FSW_OFF:
 					IOC_FootAck.State=_OFF;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch disconnected \r\n:");					
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch disconnected");					
 					break;
 				case __FSW_1:
 					IOC_FootAck.State=_1;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 1\r\n:");					
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch state 1");					
 					break;
 				case __FSW_2:
 					IOC_FootAck.State=_2;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 2\r\n:");					
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch state 2");					
 					break;
 				case __FSW_3:
 					IOC_FootAck.State=_3;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 3\r\n:");					
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch state 3");					
 					break;
 				case __FSW_4:
 					IOC_FootAck.State=_4;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch state 4\r\n:");										
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch state 4");										
 					break;
 				default:
-					_TERM::Debug(DBG_INFO,"\r\n:\r\n:footswitch error\r\n:");		
+					_TERM::Debug(DBG_INFO,"\r\n:footswitch error");		
 					return _footswError;			
 			}
 			return _NOERR;

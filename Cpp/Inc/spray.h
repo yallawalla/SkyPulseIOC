@@ -7,14 +7,14 @@
 #include	"ff.h"
 #include	"fit.h"
 #include	<algorithm>
-#include	"lcd.h"
 #include "simulator.h"
 
-#define		_SPRAY_READY_T	500
+#define		_SPRAY_READY_T	1500
 				
 typedef	struct {
 	bool	Air:1;
 	bool	Water:1;
+	bool	BlowJob:1;
 	bool	Vibrate:1;
 	bool	Setup:1;
 }	mode;
