@@ -54,9 +54,10 @@ _SPRAY::_SPRAY() {
 			AirLevel=WaterLevel=0;
 			Bottle_ref=Air_ref=													_BAR(1.0f);
 
-			mode.Vibrate=false;
 			mode.Water=false;
 			mode.Air=false;
+			mode.BlowJob=false;
+			mode.Vibrate=false;
 			idx=0;
 			
 			readyTimeout=0;
@@ -92,6 +93,14 @@ _err	_err = adcError();
 //			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
 //			Bottle_ref	= offset.bottle + AirLevel*waterGain*(100+4*WaterLevel)/100/10;
 //------------------------------------------------------------------------------
+			if(mode.BlowJob) {
+				Water->Open();
+				Air->Open();
+				BottleIn->Close();
+				BottleOut->Open();
+				return _NOERR;
+			}				
+
 			if(AirLevel || WaterLevel) {
 				Bottle_P += (Bottle_ref - (int)fval.bottle)/16;
 				if(Bottle_P < -_P_THRESHOLD) {
@@ -121,12 +130,13 @@ _err	_err = adcError();
 				_err = _err | _sprayNotReady;
 			else
 				readyTimeout=0;
-
+			
+			
 			if(mode.Water)
 				Water->Open();
 			else
 				Water->Close();	
-
+			
 			if(AirLevel && mode.Air) {
 				if(Air_ref > (int)fval.air)
 					Air_P=std::min(__PWMRATE, ++Air_P);
@@ -210,6 +220,12 @@ int		_SPRAY::Fkey(int t) {
 							mode.Vibrate=false;
 						else
 							mode.Vibrate=true;
+						break;
+					case __CtrlP:
+						if(mode.BlowJob)
+							mode.BlowJob=false;
+						else
+							mode.BlowJob=true;
 						break;
 						
 //					case __Delete:

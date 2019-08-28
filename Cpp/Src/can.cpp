@@ -158,14 +158,19 @@ void	_CAN::pollRx(void *v) {
 				break;
 //______________________________________________________________________________________
 			case idIOC_SprayParm:
-				ioc->spray.AirLevel		= std::min(10,(int)data[0]);
-				ioc->spray.WaterLevel	= std::min(10,(int)data[1]);
-				if(data[2]==0) {
-					if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
-						ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
+				if((int)data[0] == 0xff && (int)data[1] == 0xff)
+					ioc->spray.mode.BlowJob = true;
+				else {
+					ioc->spray.AirLevel		= std::min(10,(int)data[0]);
+					ioc->spray.WaterLevel	= std::min(10,(int)data[1]);
+					if(data[2]==0) {
+						if(ioc->spray.mode.Air==false && ioc->spray.mode.Water==false)
+							ioc->spray.readyTimeout=__time__ + _SPRAY_READY_T;
+					}
+					ioc->spray.mode.Air=data[2] & 0x01;
+					ioc->spray.mode.Water=data[2] & 0x02;
+					ioc->spray.mode.BlowJob = false;
 				}
-				ioc->spray.mode.Air=data[2] & 1;
-				ioc->spray.mode.Water=data[2] & 2;
 			break;
 //______________________________________________________________________________________
 			case idIOC_AuxReq:
