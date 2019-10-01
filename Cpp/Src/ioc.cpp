@@ -201,8 +201,8 @@ void	_IOC::SetState(_State s) {
 						IOC_State.Error = _NOERR;
 					IOC_State.State = _STANDBY;
 					pump.Enable();
-					ws2812.Batch((char *)"@standby.ws");
 					_SYS_SHG_ENABLE;
+					ws2812.Batch((char *)"@standby.ws");
 					break;
 				case	_READY:
 					IOC_State.State = _READY;
@@ -217,11 +217,10 @@ void	_IOC::SetState(_State s) {
 				case	_ERROR:
 					if(IOC_State.State != _ERROR) {
 						IOC_State.State = _ERROR;
-						ws2812.Batch((char *)"@error.ws");
 						_SYS_SHG_DISABLE;	
-						spray.AirLevel=spray.WaterLevel=0;
-//						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
-//							pump.Disable();
+						spray.mode.Air=false;
+						spray.mode.Water=false;
+						ws2812.Batch((char *)"@error.ws");
 					}
 					break;
 				case	_CALIBRATE:

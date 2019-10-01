@@ -101,12 +101,14 @@ void		_PUMP::Disable() {
 /*******************************************************************************/
 _err	_PUMP::Status(void) {	
 int		e=_NOERR;
-//			if(pump_drive && __time__ % 2 == 0) {
-					if(pump_drive > rpm(1<<12))
-						--pump_drive;
-					else
-						++pump_drive;
-//			}
+	
+			if(pump_drive != 0) {
+				if(pump_drive > rpm(1<<12))
+					--pump_drive;
+				else
+					++pump_drive;
+			}
+
 			if(__time__ > timeout) {
 				if(tacho_limit && flow_limit && curr_limit) {
 					if(pumpTacho-__pumpTacho <= tacho_limit)

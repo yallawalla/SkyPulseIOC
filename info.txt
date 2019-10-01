@@ -110,3 +110,7 @@ v 1.00 Aug 27 2019 <CFF31952>
 - hitrejši vklop pumpe (ms ni vec deljena)
 - blowjob mode, aktiviran s voda/zrak ff/ff (!sic)
 
+v 1.01 Oct  1 2019 <4931597B>
+- error state ne sprazni flaše
+- pump_drive se lahko spreminja samo ce razlicen od 0; 
+	indikator za Enabled/Disabled !!!
