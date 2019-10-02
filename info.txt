@@ -114,3 +114,23 @@ v 1.01 Oct  1 2019 <4931597B>
 - error state ne sprazni flaše
 - pump_drive se lahko spreminja samo ce razlicen od 0; 
 	indikator za Enabled/Disabled !!!
+
+v 1.01 Oct  2 2019 <04280388>
+- air & bottle offset izmerjena po 'y' v spray setup
+
+
+ty ioc.ini
+
+   20,   50,   30,   40,59424,   34,  7 /.. pump
+   20,   95,   30,   40,    7           /.. fan
+16384,15142,16384,15344                 /.. offset
+16384, 8192,16384,24576                 /.. gain
+22742,-3917, 3574                       /.. pressure fit coeff.
+color 0=180,180,50
+color 1=180,180,50
+color 2=0,255,50
+color 3=180,180,50
+color 4=180,180,50
+color 5=0,255,50
+00002008,00002008                       /.. error, warning mask
+

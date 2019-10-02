@@ -381,6 +381,9 @@ void	*_SPRAY::Adjust() {
 			if(kbhit=='y')
 				kbhit=EOF;
 
+			offset.air=fval.air;
+			offset.bottle=fval.bottle;
+			
 			for(AirLevel = 1; AirLevel<=10 && kbhit == EOF; ++AirLevel) {
 				mode.Air=mode.Water=false;
 				bottle_event=0;
