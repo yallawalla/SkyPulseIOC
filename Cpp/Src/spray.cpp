@@ -47,7 +47,7 @@ _SPRAY::_SPRAY() {
 		
 			offset.air=offset.bottle=offset.compressor=	_BAR(1.0f);
 			gain.air=																		_BAR(1.5f);
-			gain.bottle=																_BAR(0.5f);
+			gain.bottle=																_BAR(0.3f);
 			gain.compressor=														_BAR(1.0f);
 
 			Air_P=Bottle_P=0;
@@ -64,9 +64,9 @@ _SPRAY::_SPRAY() {
 			offsetTimeout=__time__ + 5000;
 
 			pFit=new _FIT();
-			pFit->rp[0]=18726;
-			pFit->rp[1]=3551*1e-4f;
-			pFit->rp[2]=-1003*1e-8f;
+			pFit->rp[0]=15960;
+			pFit->rp[1]=9870*1e-4f;
+			pFit->rp[2]=-878*1e-8f;
 			sim=NULL;
 }
 /*******************************************************************************
@@ -210,10 +210,10 @@ int		_SPRAY::Fkey(int t) {
 					Increment(0,0);
 					break;
 					case __PageUp:
-						pFit->rp[0]=std::min((int)pFit->rp[0]+1000,_BAR(3.0f));
+						gain.bottle=std::min(gain.bottle+500,_BAR(0.5f));
 						break;
 					case __PageDown:
-						pFit->rp[0]=std::max((int)pFit->rp[0]-1000,_BAR(0.1f));
+						gain.bottle=std::max(gain.bottle-500,_BAR(0.2f));
 						break;					
 					case __CtrlV:
 						if(mode.Vibrate)

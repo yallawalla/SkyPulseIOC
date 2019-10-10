@@ -118,6 +118,10 @@ v 1.01 Oct  1 2019 <4931597B>
 v 1.01 Oct  2 2019 <04280388>
 - air & bottle offset izmerjena po 'y' v spray setup
 
+v 1.01 Oct 10 2019 <F6548C22>
+- zmanjšan gain.bottle
+- CtrlUp, CtrlDown spreminjata gain.bottle v inkrementih po 500
+
 
 ty ioc.ini
 
