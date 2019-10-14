@@ -249,9 +249,26 @@ void	_CAN::pollRx(void *v) {
 			break;
 //______________________________________________________________________________________							
 			case idCAN2FOOT:
-				if(ioFsw)
-					while(rx.DLC && !_buffer_push(ioFsw->tx,data,rx.DLC))
+				if(ioFsw) {
+					if(rx.DLC) {
+						while(rx.DLC && !_buffer_push(ioFsw->tx,data,rx.DLC))
+							_wait(2);
+						break;
+					} else {
+						int c=__CtrlE;
+						_buffer_put(ioc->com3.io->rx,&c,1);
+					}
+				} else {
+					int c=__CtrlE;
+					_buffer_put(ioc->com3.io->rx,&c,1);
+					while(!ioFsw)
 						_wait(2);
+					if(rx.DLC) {
+						while(rx.DLC && !_buffer_push(ioFsw->tx,data,rx.DLC))
+							_wait(2);
+						break;
+					} 
+				}
 			break;
 //______________________________________________________________________________________
 			case idCAN2COM:

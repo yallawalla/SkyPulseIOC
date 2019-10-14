@@ -122,6 +122,10 @@ v 1.01 Oct 10 2019 <F6548C22>
 - zmanjšan gain.bottle
 - CtrlUp, CtrlDown spreminjata gain.bottle v inkrementih po 500
 
+v 1.01 Oct 14 2019 <B53639EC>
+- CAN2COM message dobi funkcionalnost __CtrlE na footswitch portu
+- prvi msg naredi bridge, msg brez payloada ga ugasne
+
 
 ty ioc.ini
 
