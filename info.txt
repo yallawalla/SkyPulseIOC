@@ -142,3 +142,6 @@ color 4=180,180,50
 color 5=0,255,50
 00002008,00002008                       /.. error, warning mask
 
+V 1.01 Feb 27 2020 <91556DEB>
+- pump delay podaljšan na 6 sek zaradi zamenjave vrstnega reda
+filter <> flow senzor, ki zakasni polnenje :///
