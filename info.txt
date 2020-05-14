@@ -145,3 +145,16 @@ color 5=0,255,50
 V 1.01 Feb 27 2020 <91556DEB>
 - pump delay podaljšan na 6 sek zaradi zamenjave vrstnega reda
 filter <> flow senzor, ki zakasni polnenje :///
+
+
+
+
+enum BoostMode : quint8
+{
+        BoostOff = 0x00,     // nominal pump / fan level
+        PumpBoost = 0x01,    // boost pump
+        FanBoostLvl1 = 0x02, // boost fan level 1                                        // 45%
+        FanBoostLvl2 = 0x04, // boost fan level 2                                        // 70%
+        FanBoostLvl3 = 0x08, // boost fan level 3                                        // 85%
+        // for boost fan level 4 use OR, i.e. FanBoostLvl2 | FanBoostLvl3   // 95%
+}

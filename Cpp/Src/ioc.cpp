@@ -178,14 +178,14 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::SetState(uint8_t *data) {
+void	_IOC::SetState(uint8_t *data, uint8_t n) {
 			pump.mode &= ~_PUMP_BOOST;
-			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1);
-	
-			pump.mode |= data[1] & _PUMP_BOOST;
-			fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1);
-			data[1] & _CWBAR_ON ? cwbarOn() : cwbarOff();			
-			
+			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1 | _FAN_BOOST2);
+			if(n>1) {
+				pump.mode |= data[1] & _PUMP_BOOST;
+				fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1 | _FAN_BOOST2);
+				data[1] & _CWBAR_ON ? cwbarOn() : cwbarOff();			
+			}
 			SetState((_State)data[0]);
 }
 /*******************************************************************************

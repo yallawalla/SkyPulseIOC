@@ -149,7 +149,7 @@ class _IOC {
 		_CLI						com1,com3,comUsb;
 		~_IOC();
 
-		void SetState(uint8_t *);
+		void SetState(uint8_t *,uint8_t);
 		void SetState(_State);
 		void pollError();
 

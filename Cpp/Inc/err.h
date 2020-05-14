@@ -37,8 +37,9 @@ enum {
 	_PUMP_BOOST				= 1<<0,
 	_FAN_BOOST0				= 1<<1,
 	_FAN_BOOST1				= 1<<2,
-	_CWBAR_ON					= 1<<3,
-	_PUMP_FLOW				= 1<<4
+	_FAN_BOOST2				= 1<<3,
+	_CWBAR_ON					= 1<<4,
+	_PUMP_FLOW				= 1<<5
 };
 			
 inline _err operator ~(_err a)

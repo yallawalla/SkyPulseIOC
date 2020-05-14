@@ -133,7 +133,7 @@ int		_CAN::Fkey(int t) {
 *******************************************************************************/
 void	_CAN::pollRx(void *v) {
 	CAN_RxHeaderTypeDef		rx;
-	uint8_t								data[8];
+	uint8_t								data[8],n;
 	_IOC*									ioc = static_cast<_IOC *>(v);
 	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CAN_RxHeaderTypeDef))) {
 		_buffer_pull(canBuffer->rx,data,rx.DLC*sizeof(uint8_t));
@@ -147,7 +147,7 @@ void	_CAN::pollRx(void *v) {
 		switch(rx.StdId) {
 			case idIOC_State:
 				if(rx.DLC) {
-					ioc->SetState(data);
+					ioc->SetState(data,rx.DLC);
 					if(ioc->IOC_State.State == _ACTIVE)
 						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
 					else {
@@ -303,7 +303,6 @@ void	_CAN::pollRx(void *v) {
 	}
 //__CAN console processing______________________________________________________________
 	if(remote) {
-		uint8_t	data[8],n;
 		n=_buffer_pull(remote->io->tx,data,8);
 		if(n)
 			Send(idCOM2CAN,data,n);

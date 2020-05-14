@@ -1157,7 +1157,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : FSW2_Pin FSW3_Pin FSW0_Pin FSW1_Pin */
   GPIO_InitStruct.Pin = FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 

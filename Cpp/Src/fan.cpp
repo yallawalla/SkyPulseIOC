@@ -100,6 +100,9 @@ int		_FAN::rpm(int fsc) {
 				case _FAN_BOOST1:
 					plow=((fph-fpl)*2)/3 + fpl;
 					break;
+				case _FAN_BOOST2:
+					plow=((fph-fpl)*13)/15 + fpl;
+					break;
 				default:
 					plow=fph;
 				}
