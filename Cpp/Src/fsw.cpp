@@ -40,7 +40,25 @@ int		_FSW::Read() {
 			}
 			return EOF;
 }
-
+/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				:
+* Return				:
+*******************************************************************************/
+int 	_FSW::sTest(int k) {
+	if(k != EOF) {
+		GPIO_InitTypeDef GPIO_InitStruct = {0};
+		HAL_GPIO_WritePin(FSW0_GPIO_Port, FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin, GPIO_PIN_SET);
+		GPIO_InitStruct.Pin = FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin;
+		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+		GPIO_InitStruct.Pull = GPIO_PULLUP;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+		HAL_GPIO_Init(FSW0_GPIO_Port, &GPIO_InitStruct);
+		FSW0_GPIO_Port->ODR &= (~(FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin) | k);
+	}
+	return FSW0_GPIO_Port->IDR & (FSW2_Pin|FSW3_Pin|FSW0_Pin|FSW1_Pin);
+}
 /**
 * @}
 */ 

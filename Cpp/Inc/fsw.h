@@ -38,7 +38,8 @@ class _FSW {
 		int key,temp,timeout;
 	public:
 		_FSW();
-		int Read(void);
+		int 	Read(void),
+					sTest(int);
 	};
 /**
   * @}

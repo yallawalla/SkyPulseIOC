@@ -176,6 +176,7 @@ FRESULT _CLI::DecodeEq(char *c) {
 		for(c=strchr(c,' '); c && *c;)
 			ioc->can.Status((_err)(1<<strtoul(++c,&c,10)));
 		break;
+
 		default:
 			return FR_INVALID_NAME;
 	}
@@ -196,6 +197,13 @@ FRESULT _CLI::DecodeInq(char *c) {
 			debug = d;
 		}
 			break;	
+		case 'f':
+			c=strchr(c,' '); 
+			if(c && *c)
+				ioc->Fsw.sTest(strtoul(++c,&c,0));
+		  else
+				_print(" %02X",ioc->Fsw.sTest(EOF));
+		break;
 		default:
 			return FR_INVALID_NAME;
 	} 	
