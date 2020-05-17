@@ -234,6 +234,8 @@ int		_DL::Fkey(int t) {
 				break;
 				case __F1:
 				case __f1:
+					stest=selftest();
+				break;
 				case __Delete:
 					dlscale[0]=dlscale[1]=0;
 					Increment(0,0);
@@ -258,12 +260,63 @@ int		_DL::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_DL::Newline(void) {
-//			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",rpm(100),'%',th2o()/100,(th2o()%100)/10,k/10,k%10);
-			_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
-			for(int i=5*(3-idx)+1;i--;_print("\b")) {}
+			switch(stest) {
+				case 0:
+					_print("\r:dl ---                             ");
+				break;
+				case 0x0e:
+					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",stest,lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
+				break;
+				default:
+					_print("\r:dl(%02X)%4d,%4d,%4d,%4d,%4d,%4d",stest,lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
+				break;
+			}
+			for(int i=5*(3-idx)+11;i--;_print("\b"));
 			Repeat(200,__CtrlR);
 }
-
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+int	_DL::selftest(void) {
+	int	err=0;
+	int	n=0;
+	do {
+		switch(n) {
+			case 0:
+				if(high.val[0] > 0xfff/10 || high.val[1] > 0xfff/10)
+					err |= (1<<n);
+				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x90000000;
+				break;
+			case 1:
+				if(high.val[0] < 9*0xfff/10 || high.val[1] > 0xfff/10)
+					err |= (1<<n);
+				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x50000000;
+				break;
+			case 2:
+				if(high.val[0] < 9*0xfff/10 || high.val[1] < 9*0xfff/10)
+					err |= (1<<n);
+				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x60000000;
+				break;
+			case 3:
+				if(high.val[0] > 0xfff/10 || high.val[1] < 9*0xfff/10)
+					err |= (1<<n);
+				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0xA0000000;
+				break;
+			case 4:
+				if(high.val[0] > 0xfff/10 || high.val[1] > 0xfff/10)
+					err |= (1<<n);	
+				break;
+			default:
+				break;
+		}
+		_wait(20);
+	} while(n++ < 4);
+	return err;
+}
 /**
 * @}
 */ 

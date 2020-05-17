@@ -49,7 +49,7 @@ class	_DL  : public _TERM {
 			unsigned int 		ton,toff,timeout[2],ref[2];
 			unsigned int 		on,off,lim[2],mode;
 			lopass					high, filter, filterRef;
-			int							idx,dlscale[2],scale;
+			int							idx,dlscale[2],scale,stest;
 
 		public:
 			static _DL* instance;
@@ -58,6 +58,7 @@ class	_DL  : public _TERM {
 			void		filterCbk(int);
 			void 		setTiming(int,int);
 			void 		setLimits(int,int,int);
+			int			selftest(void);
 		
 			void		LoadSettings(FIL *);
 			void		SaveSettings(FIL *);

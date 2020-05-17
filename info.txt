@@ -147,14 +147,11 @@ V 1.01 Feb 27 2020 <91556DEB>
 filter <> flow senzor, ki zakasni polnenje :///
 
 
+diagnostika diodnega testa:
+06 ch 1, low
+19 ch 1, high
+0c ch 2, low
+13 ch 2, high
+0a ch1, ch2 short
 
-
-enum BoostMode : quint8
-{
-        BoostOff = 0x00,     // nominal pump / fan level
-        PumpBoost = 0x01,    // boost pump
-        FanBoostLvl1 = 0x02, // boost fan level 1                                        // 45%
-        FanBoostLvl2 = 0x04, // boost fan level 2                                        // 70%
-        FanBoostLvl3 = 0x08, // boost fan level 3                                        // 85%
-        // for boost fan level 4 use OR, i.e. FanBoostLvl2 | FanBoostLvl3   // 95%
-}
+TODO: implementacija v startupu, error handling, CAN messages
