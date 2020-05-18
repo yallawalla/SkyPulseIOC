@@ -29,6 +29,7 @@ _DL::_DL() : high(300,150000), filter(5, 2000),filterRef(5, 2000) {
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
 			scale=10;
+			stest_delay=__time__ + 200;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -49,7 +50,7 @@ int		n=sizeof(dma)/sizeof(short)/4;
 				high.eval(p[0],p[1]);
 			}
 
-			if(__time__ < _DL_OFFSET_DELAY) {
+			if(stest_delay) {
 				offset[0]=high.val[0];
 				offset[1]=high.val[1];
 			} else {
@@ -146,7 +147,6 @@ _err 	e=_NOERR;
 				if(!timeout[1])
 					timeout[1]=__time__ + _DL_ERROR_DELAY;
 				
-			
 			if(active) {
 				if(timeout[0] && __time__ > timeout[0]) {
 					timeout[0]=0;
@@ -160,6 +160,23 @@ _err 	e=_NOERR;
 				}
 			} else
 				timeout[0]=timeout[1]=0;
+			
+			if(stest_delay && __time__ > stest_delay) {
+				switch(selftest()) {
+					case 0x06:
+					case 0x19:
+						e = e | _DLpowerCh1;
+					break;
+					case 0x0c:
+					case 0x13:
+						e = e | _DLpowerCh2;
+					break;
+					case 0x0a:
+					case 0x1b:
+						e = e | _DLpowerCh1 | _DLpowerCh2;
+					break;
+				}
+			}
 			return e;
 }
 /*******************************************************************************/
@@ -234,7 +251,7 @@ int		_DL::Fkey(int t) {
 				break;
 				case __F1:
 				case __f1:
-					stest=selftest();
+					selftest();
 				break;
 				case __Delete:
 					dlscale[0]=dlscale[1]=0;
@@ -260,15 +277,15 @@ int		_DL::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_DL::Newline(void) {
-			switch(stest) {
+			switch(stest_err) {
 				case 0:
 					_print("\r:dl ---                             ");
 				break;
 				case 0x0e:
-					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",stest,lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
+					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
 				break;
 				default:
-					_print("\r:dl(%02X)%4d,%4d,%4d,%4d,%4d,%4d",stest,lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
+					_print("\r:dl(%02X)                             ",stest_err);
 				break;
 			}
 			for(int i=5*(3-idx)+11;i--;_print("\b"));
@@ -282,40 +299,42 @@ void	_DL::Newline(void) {
 	*/
 /*******************************************************************************/
 int	_DL::selftest(void) {
-	int	err=0;
-	int	n=0;
+	int	n=stest_err=0;
+	stest_delay=__time__ + 200;
 	do {
 		switch(n) {
 			case 0:
 				if(high.val[0] > 0xfff/10 || high.val[1] > 0xfff/10)
-					err |= (1<<n);
+					stest_err |= (1<<n);
 				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x90000000;
 				break;
 			case 1:
 				if(high.val[0] < 9*0xfff/10 || high.val[1] > 0xfff/10)
-					err |= (1<<n);
+					stest_err |= (1<<n);
 				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x50000000;
 				break;
 			case 2:
 				if(high.val[0] < 9*0xfff/10 || high.val[1] < 9*0xfff/10)
-					err |= (1<<n);
+					stest_err |= (1<<n);
 				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0x60000000;
 				break;
 			case 3:
 				if(high.val[0] > 0xfff/10 || high.val[1] < 9*0xfff/10)
-					err |= (1<<n);
+					stest_err |= (1<<n);
 				GPIOB->PUPDR = (GPIOB->PUPDR & 0x0fffffff) | 0xA0000000;
 				break;
 			case 4:
 				if(high.val[0] > 0xfff/10 || high.val[1] > 0xfff/10)
-					err |= (1<<n);	
+					stest_err |= (1<<n);	
 				break;
 			default:
 				break;
 		}
 		_wait(20);
 	} while(n++ < 4);
-	return err;
+	_wait(200);
+	stest_delay=0;
+	return stest_err;
 }
 /**
 * @}

@@ -56,7 +56,6 @@ inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<in
 #define _DL_POLL_DELAY		100
 #define _DL_OFFSET_THR		20
 #define _DL_ERROR_DELAY		500
-#define _DL_OFFSET_DELAY	3000
 
 #define	_12Voff_ENABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_RESET)
 #define	_12Voff_DISABLE		HAL_GPIO_WritePin(GPIOB,GPIO_Pin_3, GPIO_PIN_SET)

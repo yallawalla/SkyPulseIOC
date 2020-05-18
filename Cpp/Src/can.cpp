@@ -236,6 +236,17 @@ void	_CAN::pollRx(void *v) {
 				ioc->IOC_FootAck.Send();
 			break;
 //______________________________________________________________________________________
+			case idDL_sTestReq:
+				if(rx.DLC==1 && data[0]==_DIODE_READY) {
+					ioc->diode.selftest();
+				}
+				if(ioc->diode.stest_err==0x0e)
+					ioc->DL_sTestAck.Status=_DIODE_READY;
+				else
+					ioc->DL_sTestAck.Status=_DIODE_NOT_READY;
+				ioc->DL_sTestAck.Send();
+			break;
+//______________________________________________________________________________________
 			case idIOC_FootAck:
 			break;
 //______________________________________________________________________________________

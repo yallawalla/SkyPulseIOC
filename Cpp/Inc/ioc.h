@@ -22,6 +22,8 @@ typedef enum {
 	idIOC_Footreq			=0x202,
 	idIOC_AuxReq			=0x203,
 	idIOC_VersionReq	=0x204,
+	idDL_sTestReq			=0x205,
+	idDL_sTestAck			=0x245,
 	idDL_Limits				=0x21F,
 	idDL_State				=0x601,
 	idDL_Timing				=0x602,
@@ -60,6 +62,11 @@ typedef enum {
 	_SPRAY_READY,
 	_VIBRATE
 } _Spray;
+
+typedef enum {
+	_DIODE_NOT_READY,
+	_DIODE_READY
+} _DIODE;
 //_____________________________________________________________________
 typedef __packed struct _IOC_State {
 	_State 	State;
@@ -85,6 +92,13 @@ typedef __packed struct _IOC_SprayAck {
 		_CAN::Send(idIOC_SprayAck,(void *)&Status,sizeof(_IOC_SprayAck));
 	}
 } IOC_SprayAck;
+//_____________________________________________________________________
+typedef __packed struct _DL_sTestAck {
+	_DIODE	Status;
+	void	Send() {
+		_CAN::Send(idDL_sTestAck,(void *)&Status,sizeof(_DL_sTestAck));
+	}
+} DL_sTestAck;
 //_____________________________________________________________________
 typedef __packed struct _IOC_VersionAck {
 	uint16_t version;
@@ -137,6 +151,7 @@ class _IOC {
 		_IOC_SprayAck		IOC_SprayAck;
 		_IOC_Aux				IOC_Aux;
 		_IOC_VersionAck	IOC_VersionAck;
+		_DL_sTestAck		DL_sTestAck;
 	
 		_CAN						can;
 		_SPRAY 					spray;

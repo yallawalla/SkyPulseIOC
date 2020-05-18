@@ -70,7 +70,7 @@ void	_ADC::adcFilter() {
 void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 			if(hadc==&hadc1)
 					_ADC::adcFilter();
-			if(hadc==&hadc2)
+			if(_DL::instance && hadc==&hadc2)
 					_DL::instance->filterCbk(1);
 }
 /*******************************************************************************
@@ -80,7 +80,7 @@ void	HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 * Return				:
 *******************************************************************************/
 void	HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
-			if(hadc==&hadc2)
+			if(_DL::instance && hadc==&hadc2)
 					_DL::instance->filterCbk(0);
 }
 /*******************************************************************************
