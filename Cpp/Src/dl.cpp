@@ -285,7 +285,7 @@ void	_DL::Newline(void) {
 					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",lim[0],lim[1],std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
 				break;
 				default:
-					_print("\r:dl(%02X)                             ",stest_err);
+					_print("\r:dl err(%02X)                         ",stest_err);
 				break;
 			}
 			for(int i=5*(3-idx)+11;i--;_print("\b"));
