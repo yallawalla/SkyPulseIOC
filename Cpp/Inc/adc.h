@@ -11,7 +11,6 @@
 * Output				:
 * Return				:
 *******************************************************************************/
-#define	_ADC_ERR_DELAY		200
 #define	_UREF							3.3
 #define	_Rdiv(a,b)				((a)/(a+b))
 #define	_Rpar(a,b)				((a)*(b)/(a+b))

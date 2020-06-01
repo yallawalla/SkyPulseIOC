@@ -100,17 +100,15 @@ _err	e=_NOERR;
 				e = e | _emgDisabled;
 		}
 		
-		if(__time__ > _ADC_ERR_DELAY) {
-			if(abs(fval.V5  - _V5to16X)	> _V5to16X/10)
-				e = e | _V5;
-			if(abs(fval.V12 - _V12to16X) > _V12to16X/5)
-				e = e | _V12;
-			if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
-				e = e | _V24;
-			if(th2o() > 60*100)
-				e = e | _sysOverheat;
-			if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
-				e = e | _TsenseError;
-			}		
+		if(abs(fval.V5  - _V5to16X)	> _V5to16X/10)
+			e = e | _V5;
+		if(abs(fval.V12 - _V12to16X) > _V12to16X/5)
+			e = e | _V12;
+		if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
+			e = e | _V24;
+		if(th2o() > 60*100)
+			e = e | _sysOverheat;
+		if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
+			e = e | _TsenseError;
 		return e;
 	}

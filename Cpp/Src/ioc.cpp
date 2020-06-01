@@ -150,7 +150,7 @@ _err	err = can.Status();
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 
-			if(__time__ > 3000 && (e | w)) {
+			if(__time__ > _ADC_ERR_DELAY && (e | w)) {
 			
 				IOC_State.Error = (IOC_State.Error | e) ^ w ;
 				

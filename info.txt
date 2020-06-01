@@ -147,18 +147,15 @@ V 1.01 Feb 27 2020 <91556DEB>
 filter <> flow senzor, ki zakasni polnenje :///
 
 
-diagnostika diodnega testa:
-06 ch 1, low
-19 ch 1, high
-0c ch 2, low
-13 ch 2, high
-0a ch1, ch2 short
-0e ch1, ch2 low
-1b ch1, ch2 HIGH
+V 1.03 Jun  1 2020 <935A4FB3>
 
-TODO: implementacija v startupu, error handling, CAN messages
+1) diode adc meter selftest, CAN messages modified:
+
 - testiranje DL signalov se izvede 200 ms po restartu
 - rezultat je enabled / disabled, disabled pomeni da dioda ni zaznana, kar lahko primerjaš na SYS s svojim pinganjem DL
 - rezultat dobi sys z novim ukazom 0x205, odgovor je 0x245 in dodatni byte 0x00 (disabled) ali 0x01 (enabled)
 - ce vsebuje 0x205 dodatni byte 0x01, to pomeni zahtevo za ponovno testiranje (predvidoma samo v  STANDBY !!!... ne morem testirat brez HW) odgovor dobiš v cca 200ms, v tem casu IOC ne odgovarja na CAN.
 - vkolikor test ugotovi neveljaven odziv (konstanten nivo samo na eni ali  drugi liniji), vrže ven z error 18 ali 19
+
+2) FAN boost added
+3) 60 deg. thermal shutdown

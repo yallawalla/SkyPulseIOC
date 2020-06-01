@@ -29,7 +29,7 @@ _DL::_DL() : high(300,150000), filter(5, 2000),filterRef(5, 2000) {
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
 			scale=10;
-			stest_delay=__time__ + 200;
+			stest_delay=__time__ + _ADC_ERR_DELAY;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -163,22 +163,38 @@ _err 	e=_NOERR;
 			
 			if(stest_delay && __time__ > stest_delay) {
 				switch(selftest()) {
-					case 0x06:
-					case 0x19:
+					case 0x00:																// open
+					case 0x0e:																// both low
+						break;
+					case 0x06:																// 1 low,		2 open																
+					case 0x19:																// 1 high,	2 open
+					case 0x1d:																// 1 high,	2 low
 						e = e | _DLpowerCh1;
-					break;
-					case 0x0c:
-					case 0x13:
+						break;
+					case 0x0c:																// 1 open,	2 low
+					case 0x13:																// 1 open, 	2 high
+					case 0x17:																// 1 low, 	2 high
 						e = e | _DLpowerCh2;
-					break;
-					case 0x0a:
-					case 0x1b:
-						e = e | _DLpowerCh1 | _DLpowerCh2;
-					break;
+						break;
+					default:
+						e = e | _DLpowerCh1 | _DLpowerCh2;			// short,both high
+						break;
 				}
 			}
 			return e;
-}
+}	
+
+/*
+			xx  x0	x1	0x	1x	00	01	10	11
+00		0		0		1		0		1		0		1		1		1	
+01		0		1		0		0		1		1		0		1		1
+11		0		1		0		1		0		1		1		1		0
+10		0		0		1		1		0		1		1		0		1
+00		0		0		1		0		1		0		1		1		1
+
+			0		06	19	0c	13	0e	1d	17	1b
+			-		1		1		2		2		-		1		2		12	
+*/
 /*******************************************************************************/
 /**
 	* @brief
