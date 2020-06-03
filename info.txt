@@ -147,7 +147,7 @@ V 1.01 Feb 27 2020 <91556DEB>
 filter <> flow senzor, ki zakasni polnenje :///
 
 
-V 1.03 Jun  1 2020 <935A4FB3>
+V 1.03 Jun  3 2020 <85A3BAF6>
 
 1) diode adc meter selftest, CAN messages modified:
 
@@ -159,3 +159,4 @@ V 1.03 Jun  1 2020 <935A4FB3>
 
 2) FAN boost added
 3) 60 deg. thermal shutdown
+4) povecana histereza za detekcijo vhodnega tlaka, 2/3 bar 

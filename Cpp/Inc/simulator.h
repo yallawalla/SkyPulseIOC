@@ -10,11 +10,11 @@ private:
 	float	pComp,
 				pBott,
 				pNozz,
-				Pin,
-				Pext,
 				tau1,
 				tau2;
 public:
+	float	Pin,
+				Pext;
 	_SIMULATOR();
 	~_SIMULATOR();
 	_LCD *lcd;

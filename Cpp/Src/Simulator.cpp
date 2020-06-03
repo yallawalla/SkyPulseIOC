@@ -17,7 +17,7 @@
 	#define Uc2		pBott
 	#define Uc3		pNozz
 	
-	#define Rin		10
+	#define Rin		30
 	#define Rout	50
 	
 	#define R2		100
@@ -58,7 +58,7 @@ _SIMULATOR::_SIMULATOR() {
 	tau1=tau2=0;
 	srand(__time__);
 	
-	Pin=3.5f;	
+	Pin=3.8f;	
 	pComp= pBott= pNozz= Pext= 1.0f;
 	offset.air += rand() % 1000 - 500;
 	offset.bottle += rand() % 1000 - 500;

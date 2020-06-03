@@ -43,6 +43,7 @@ class	_VALVE {
 
 class	_SPRAY : public _TERM, public _ADC {
 	private:
+		int	inPressure;
 		int	Bottle_ref, Bottle_P,bottle_event;
 		int	Air_ref, Air_P;
 		int	idx,simrate;
