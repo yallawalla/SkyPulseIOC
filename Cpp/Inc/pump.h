@@ -7,7 +7,8 @@
 #include	"ff.h"
 #include	<algorithm>
 
-#define		__ramp(x,x1,x2,y1,y2)	std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
+#define		__ramp(x,x1,x2,y1,y2)		std::min(std::max(((y2-y1)*(x-x1))/(x2-x1)+y1,y1),y2)
+#define		__float_sensor_low			FSW0_GPIO_Port->IDR & FSW1_Pin
 
 extern 		DAC_HandleTypeDef hdac;
 
@@ -31,5 +32,6 @@ class	_PUMP : public _TERM, public _ADC {
 		bool		Setup(void),Enabled(void);
 		_err		Status(void);
 };
+
 
 #endif

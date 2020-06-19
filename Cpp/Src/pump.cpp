@@ -101,7 +101,7 @@ void		_PUMP::Disable() {
 /*******************************************************************************/
 _err	_PUMP::Status(void) {	
 int		e=_NOERR;
-	
+		
 			if(pump_drive != 0) {
 				if(pump_drive > rpm(1<<12))
 					--pump_drive;
@@ -134,7 +134,9 @@ int		e=_NOERR;
 				
 				if(e & (_pumpCurrent | _flowTacho))
 					Disable();
-
+				
+				if(__float_sensor_low)
+					e |= _floatError;
 			} 	
 			return (_err)e;
 }

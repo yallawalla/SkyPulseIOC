@@ -259,5 +259,6 @@ const string _IOC::ErrMsg[] = {
 			"DL power, channel 1",
 			"DL power, channel 2",
 			
-			"Temp. sensor error"
+			"Temp. sensor error",
+			"Float sensor error"
 };

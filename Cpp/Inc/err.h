@@ -30,7 +30,8 @@ typedef	enum {
 	_DLpowerCh1				=1<<18,
 	_DLpowerCh2				=1<<19,
 	
-	_TsenseError			=1<<20
+	_TsenseError			=1<<20,
+	_floatError				=1<<21
 } _err;
 
 enum {
