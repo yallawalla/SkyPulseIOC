@@ -147,9 +147,9 @@ V 1.01 Feb 27 2020 <91556DEB>
 filter <> flow senzor, ki zakasni polnenje :///
 
 
-V 1.03 Jun  3 2020 <85A3BAF6>
+V 1.03 Jun 22 2020 <8534EB6C>
 
-1) diode adc meter selftest, CAN messages modified:
+1) diode engmeter selftest, CAN messages modified:
 
 - testiranje DL signalov se izvede 200 ms po restartu
 - rezultat je enabled / disabled, disabled pomeni da dioda ni zaznana, kar lahko primerjaš na SYS s svojim pinganjem DL
@@ -160,3 +160,4 @@ V 1.03 Jun  3 2020 <85A3BAF6>
 2) FAN boost added
 3) 60 deg. thermal shutdown
 4) povecana histereza za detekcijo vhodnega tlaka, 2/3 bar 
+5) DL polling timeout poveèan na 200ms
