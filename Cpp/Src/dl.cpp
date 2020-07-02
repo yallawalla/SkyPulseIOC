@@ -12,7 +12,7 @@
 */
 #include	"dl.h"
 #include <algorithm>
-
+#include <math.h>
 _DL*	_DL::instance=NULL;
 /*******************************************************************************/
 /**
@@ -58,19 +58,24 @@ int		n=sizeof(dma)/sizeof(short)/4;
 				filter.eval(high.val[0]*(100-dlscale[0])/100-offset[0],high.val[1]*(100-dlscale[1])/100-offset[1]);
 			}
 
-			if(_TERM::debug & DBG_DL0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[mode-1]);			//filter
+			if(_TERM::debug & DBG_INP0)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[0]);			//filter1
+			if(_TERM::debug & DBG_INP1)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[1]);			//filter2
 			
-			if(_TERM::debug & DBG_DL1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[mode-1]);		// ref
+			if(_TERM::debug & DBG_REF0)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[0]);	// ref1
+			if(_TERM::debug & DBG_REF1)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[1]);	// ref2
 			
-			if(k && _TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[mode-1]);			// razlika
-			if(!k && _TERM::debug & DBG_DL2)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[mode-1]);
-			
-			if(_TERM::debug & DBG_DL3)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*high.val[mode-1]);
+			if(k && _TERM::debug & DBG_DIFF0)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[0]);			// razlika1
+			if(!k && _TERM::debug & DBG_DIFF0)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[0]);
+			if(k && _TERM::debug & DBG_DIFF1)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[1]);			// razlika2
+			if(!k && _TERM::debug & DBG_DIFF1)
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filterRef.val[1]);
 }
 /*******************************************************************************
 * Function Name	: 
@@ -134,7 +139,12 @@ _err 	e=_NOERR;
 					ton=toff+off;
 					toff=ton+on;
 				}
-			}				
+			}
+
+//			if(fabs(filter.val[0] - filterRef.val[0]) > std::max((int)lim[0]/5,_DL_OFFSET_THR) && mode & 1)
+//					e = e | _DLpowerCh1;	
+//			if(fabs(filter.val[1] - filterRef.val[1]) > std::max((int)lim[1]/5,_DL_OFFSET_THR) && mode & 2)
+//					e = e | _DLpowerCh2;
 
 			if(filter.val[0] > filterRef.val[0] + std::max((int)lim[0]/5,_DL_OFFSET_THR))
 					e = e | _DLpowerCh1;	
@@ -146,7 +156,7 @@ _err 	e=_NOERR;
 			if(filter.val[1] < filterRef.val[1] - std::max((int)lim[1]/5,_DL_OFFSET_THR))
 				if(!timeout[1])
 					timeout[1]=__time__ + _DL_ERROR_DELAY;
-				
+
 			if(active) {
 				if(timeout[0] && __time__ > timeout[0]) {
 					timeout[0]=0;

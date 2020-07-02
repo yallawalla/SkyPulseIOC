@@ -47,7 +47,7 @@ class	_DL  : public _TERM {
 			float 					offset[2];
 			unsigned short	dma[154][2];
 			unsigned int 		ton,toff,timeout[2],ref[2];
-			unsigned int 		on,off,lim[2],mode;
+			unsigned int 		on,off,lim[2];
 			lopass					high, filter, filterRef;
 			int							idx,dlscale[2],scale;
 
@@ -55,6 +55,7 @@ class	_DL  : public _TERM {
 			static _DL* instance;
 			_DL();
 			_err		Status(bool);
+			int			mode;
 			void		filterCbk(int);
 			void 		setTiming(int,int);
 			void 		setLimits(int,int,int);

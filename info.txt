@@ -161,3 +161,6 @@ V 1.03 Jun 22 2020 <8534EB6C>
 3) 60 deg. thermal shutdown
 4) povecana histereza za detekcijo vhodnega tlaka, 2/3 bar 
 5) DL polling timeout poveèan na 200ms
+
+V 1.04 Jul  2 2020 <C57EC859>
+- spr. diodni energ. aktivno stanje definirano z EMIT(od SYS) plus diode.mode(od DL) :/
