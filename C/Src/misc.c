@@ -208,13 +208,29 @@ void	Watchdog_init(int t) {
 			HAL_IWDG_Init(&hiwdg);
 }
 /*******************************************************************************
+* Function Name	: ff_format
+* Description		: formatting flash file system sectors
+* Input					: 
+* Output				: 
+* Return				: 
+*******************************************************************************/
+FRESULT	ff_format(char *drv) {
+	uint8_t	wbuf[SECTOR_SIZE];
+	Watchdog_init(4000);
+	for(int i=FATFS_SECTOR; i<FATFS_SECTOR+FLASH_SECTOR_1*PAGE_COUNT;i+=FLASH_SECTOR_1) {
+		FLASH_Erase(i,1);
+		Watchdog();
+	}
+	return f_mkfs(drv,1,CLUSTER_SIZE,wbuf,SECTOR_SIZE);
+}
+/*******************************************************************************
 * Function Name	: ff_pack
 * Description		: packing flash dile system sectors
 * Input					: mode flag, 0-analyze, 1-rewrite
 * Output				: 
 * Return				: percentage of number of sectors reduced
 *******************************************************************************/
-int		ff_pack(int mode) {
+int   ff_pack(int mode) {
 int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];
 int		c0=0,c1=0;
 
@@ -251,9 +267,10 @@ int		c0=0,c1=0;
 				_print(". OK");
 				_wait(2);
 				FLASH_Erase(f,1);																													// se zadnja !
-				return 0;
-			} else 
-				return(100*c1/c0);
+				c1=0;
+			}
+			Watchdog_init(400);
+			return(100*c1/c0);
 }
 /*******************************************************************************
 * Function Name	: 

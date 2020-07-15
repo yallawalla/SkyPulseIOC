@@ -58,6 +58,7 @@ class	_WS : public _CLI {
 		FRESULT					ColorOn(char *);
 		FRESULT					ColorOff(char *);
 		FRESULT					ColorSet(char *);
+		FRESULT					MakeColors(void);
 		void						Cmd(int,wsCmd);
 		static void			*proc_WS2812(_WS *);
 };

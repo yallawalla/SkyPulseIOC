@@ -22,9 +22,9 @@
 
 HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
-int		ff_pack(int );
-char	*trim(char **);
-
+int			ff_pack(int );
+char		*trim(char **);
+FRESULT	ff_format(char *);
 
 void		dumpHex(int, int);
 void		flushVCP(const void *);

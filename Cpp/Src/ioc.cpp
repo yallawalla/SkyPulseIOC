@@ -42,22 +42,7 @@ _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(pollVcp) {
 			parent=this;
 			error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
 			SetState(_STANDBY);	
-			
-			FIL f;
-			if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
-char		c[128];
-				pump.LoadSettings(&f);
-				fan.LoadSettings(&f);
-				spray.LoadSettings(&f);
-				ws2812.LoadSettings(&f);
-				if(f_gets(c,sizeof(c),&f))
-					sscanf(c,"%X,%X",&error_mask,&warn_mask);
-				while(!f_eof(&f))
-					com1.Parse(&f);	
-				f_close(&f);
-			}	else
-				_print("... error settings file");
-			
+			LoadSettings();
 			_proc_add((void *)pollStatus,this,(char *)"error task",1);
 			_proc_add((void *)taskRx,this,(char *)"can rx",0);
 			
@@ -81,6 +66,59 @@ char		c[128];
 _IOC::~_IOC() {
 	
 }
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+void	_IOC::LoadSettings(void) {	
+			FIL f;
+char	c[128];
+			if(f_open(&f,"0:/ioc.ini",FA_READ) == FR_OK) {
+				pump.LoadSettings(&f);
+				fan.LoadSettings(&f);
+				spray.LoadSettings(&f);
+				ws2812.LoadSettings(&f);
+				if(f_gets(c,sizeof(c),&f))
+					sscanf(c,"%X,%X",&error_mask,&warn_mask);
+				while(!f_eof(&f))
+					com1.Parse(&f);	
+				f_close(&f);
+				
+				if(f_open(&f,"0:/D670/standby.ws",FA_READ) != FR_OK)
+					ws2812.MakeColors();
+				else
+					f_close(&f);
+				
+			}	else {
+				ff_format((char *)"0:/");
+				SaveSettings();
+				ws2812.MakeColors();
+			}
+}
+/*******************************************************************************/
+/**
+	* @brief
+	* @param	: None
+	* @retval : None
+	*/
+/*******************************************************************************/
+void	_IOC::SaveSettings(void) {
+FIL 	*f=new FIL;
+			if(f_open(f,"0:/ioc.ini",FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
+				pump.SaveSettings(f);
+				fan.SaveSettings(f);
+				spray.SaveSettings(f);
+				ws2812.SaveSettings(f);
+				f_printf(f,"%08X,%08X                       /.. error, warning mask\r\n",error_mask,warn_mask);
+				_print("... saved");
+				f_close(f);
+			}	else
+				_print("... can't write file");		
+			delete f;
+}
 /*******************************************************************************
 * Function Name	:
 * Description		:
@@ -94,32 +132,51 @@ _err	_IOC::fswError() {
 				case __FSW_OFF:
 					IOC_FootAck.State=_OFF;
 					IOC_FootAck.Send();
-					_TERM::Debug(DBG_INFO,"footswitch disconnected\r\n/");					
+					_TERM::Debug(DBG_INFO,"footswitch disconnected\r\n/");		
+					Fsw.error_timeout=0;
 					break;
 				case __FSW_1:
 					IOC_FootAck.State=_1;
 					IOC_FootAck.Send();
 					_TERM::Debug(DBG_INFO,"FSW state 1\r\n/");					
+					Fsw.error_timeout=0;
 					break;
 				case __FSW_2:
 					IOC_FootAck.State=_2;
 					IOC_FootAck.Send();
 					_TERM::Debug(DBG_INFO,"FSW state 2\r\n/");					
+					Fsw.error_timeout=0;
 					break;
 				case __FSW_3:
 					IOC_FootAck.State=_3;
 					IOC_FootAck.Send();
 					_TERM::Debug(DBG_INFO,"FSW state 3\r\n/");					
+					Fsw.error_timeout=0;
 					break;
 				case __FSW_4:
 					IOC_FootAck.State=_4;
 					IOC_FootAck.Send();
 					_TERM::Debug(DBG_INFO,"FSW state 4\r\n/");										
+					Fsw.error_timeout=0;
 					break;
 				default:
-					_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
-					return _footswError;			
+					if(IOC_FootAck.State==_OFF) {
+						if(Fsw.error_timeout==0)
+							Fsw.error_timeout=__time__ + _FSW_ERR_DELAY;
+					} else {
+						Fsw.error_timeout = 0;
+						_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
+						return _footswError;
+					}
+					break;
 			}
+			
+			if(Fsw.error_timeout && __time__ > Fsw.error_timeout) {
+				Fsw.error_timeout = 0;
+				_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
+				return _footswError;			
+			}
+			
 			return _NOERR;
 }
 /*******************************************************************************

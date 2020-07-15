@@ -27,6 +27,20 @@ ws2812	_WS::ws[] =
 			{24,{240,255,50},NULL,noCOMM,{0,0,0},0},
 			{8,{300,255,50}, NULL,noCOMM,{0,0,0},0}};
 
+			
+struct colorfile {
+	const char *filename;
+	const char *script;
+} colorfiles[] = {
+	{"onoff.ws","col t=20\r\ncol 0,1,3,4=180,180,50\r\ncol 2,5=0,255,50\r\ncol 0,1,3,4,+r\r\ncol 2,+r\r\ncol 5,+l\r\nwait 1000\r\ncol 2,-r\r\ncol 5,-l\r\n"},
+	{"standby.ws","col 0,3=180,180,50\r\ncol 0,3,+l\r\ncol 2,-l\r\ncol 5,-r\r\n"},
+	{"ready.ws","col 2,5=0,255,50\r\ncol 2,+l\r\ncol 5,+r\r\n"},
+	{"error.ws","col 0,3=1,255,50\r\ncol 0,3,+l\r\ncol 2,-l\r\ncol 5,-r\r\n"},
+	{"D670/onoff.ws","col t=20\r\ncol 0,1,3,4=180,180,50\r\ncol 2,5=60,255,50\r\ncol 0,1,3,4,+r\r\ncol 2,+r\r\ncol 5,+l\r\nwait 1000\r\ncol 2,-r\r\ncol 5,-l\r\n"},
+	{"D670/standby.ws","col 0,3=180,180,50\r\ncol 0,3,+l\r\ncol 2,-l\r\ncol 5,-r\r\n"},
+	{"D670/ready.ws","col 2,5=60,255,50\r\ncol 2,+l\r\ncol 5,+r\r\n"},
+	{"D670/error.ws","col 0,3=60,255,50\r\ncol 0,3,+l\r\ncol 2,-l\r\ncol 5,-r\r\n"}
+};
 /*******************************************************************************/
 /**
 	* @brief	_WS class constructor
@@ -47,7 +61,7 @@ int			k=0;
 }
 /*******************************************************************************/
 /**
-	* @brief	_WS class constructor
+	* @brief	_WS class destructor
 	* @param	: None
 	* @retval : None
 	*/
@@ -485,7 +499,7 @@ void 		_WS::HSV2RGB(HSV HSV, RGB *RGB){
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief	_WS debugger line
 	* @param	: None
 	* @retval : None
 	*/
@@ -499,13 +513,16 @@ void		_WS::Newline(void) {
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief	_WS single key response parser
 	* @param	: None
 	* @retval : None
 	*/
 /*******************************************************************************/
 int			_WS::Fkey(int t) {
 				switch(t) {
+					case __f1:
+					case __F1: 
+					break;
 					case __f10:
 					case __F10:
 						return __F12;
@@ -528,7 +545,7 @@ int			_WS::Fkey(int t) {
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief	_WS cmd line response parser
 	* @param	: None
 	* @retval : None
 	*/ 
@@ -568,7 +585,7 @@ FRESULT _WS::Batch(char *filename) {
 }
 /*******************************************************************************/
 /**
-	* @brief	TIM3 IC2 ISR
+	* @brief	_WS cursor keys response parser
 	* @param	: None
 	* @retval : None
 	*/ 
@@ -607,6 +624,25 @@ void		_WS::Increment(int a, int b) {
 				ws[idxled].mode = MOD_ON;
 				trigger();
 }		
+/*******************************************************************************/
+/**
+	* @brief	_WS initial color files repair patch
+	* @param	: None
+	* @retval : None
+	*/ 
+/*******************************************************************************/
+FRESULT	_WS::MakeColors(void)
+{
+				FIL *f=new FIL;
+				FRESULT res=f_mkdir("D670");
+				for(int i=0; res==FR_OK && i<sizeof(colorfiles)/sizeof(colorfile); ++i) {
+					res=f_open(f,colorfiles[i].filename,FA_WRITE | FA_CREATE_ALWAYS);
+					f_printf(f,"%s",colorfiles[i].script);
+					f_close(f);
+				}	
+				delete f;
+				return res;
+}
 /**
 * @}
 */

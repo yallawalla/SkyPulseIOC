@@ -38,6 +38,7 @@ class _FSW {
 		int key,temp,timeout;
 	public:
 		_FSW();
+		int		error_timeout;
 		int 	Read(void),
 					sTest(int);
 	};

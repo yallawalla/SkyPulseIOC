@@ -75,21 +75,7 @@ int _CLI::Fkey(int t) {
 				return __F12;
 			case __f11:
 			case __F11:
-			{
-				FIL *f=new FIL;
-				if(f_open(f,"0:/ioc.ini",FA_WRITE | FA_CREATE_ALWAYS) == FR_OK) {
-					ioc->pump.SaveSettings(f);
-					ioc->fan.SaveSettings(f);
-					ioc->spray.SaveSettings(f);
-					ioc->ws2812.SaveSettings(f);
-					f_printf(f,"%08X,%08X                       /.. error, warning mask\r\n",ioc->error_mask,ioc->warn_mask);
-					_print("... saved");
-					f_close(f);
-					delete f;
-				}	else
-					_print("... error settings file");		
-				Newline();
-			}
+				ioc->SaveSettings();
 			break;
 
 			default:

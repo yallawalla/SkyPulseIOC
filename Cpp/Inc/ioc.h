@@ -152,6 +152,9 @@ class _IOC {
 		_IOC_Aux				IOC_Aux;
 		_IOC_VersionAck	IOC_VersionAck;
 		_DL_sTestAck		DL_sTestAck;
+
+		void						LoadSettings();
+		void						SaveSettings();
 	
 		_CAN						can;
 		_SPRAY 					spray;
