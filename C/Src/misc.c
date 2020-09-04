@@ -372,8 +372,8 @@ char* Months[]						= { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","O
 * Return				:
 ****************************f***************************************************/
 void	printVersion() {
-			_print(" %d.%02d %s <%08X>",
+			_print(" %d.%02d %s <%08X>, HW V%d",
 				SW_version/100,SW_version%100,
 					__DATE__,
-						HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)));
+						HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)),hwVersion);
 }

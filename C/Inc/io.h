@@ -8,6 +8,7 @@
 #include		<string.h>
 #include		<stdlib.h>
 #include		<stdarg.h>
+#include		<stdio.h>
 #include		"ffconf.h"
 #include		"ff.h"
 //______________________________________________________________________________________

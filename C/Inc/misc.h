@@ -30,6 +30,7 @@ void		dumpHex(int, int);
 void		flushVCP(const void *);
 void		flushUART(const void *);
 void		printVersion(void);
+extern	uint16_t	hwVersion;
 HAL_StatusTypeDef canFilterCfg(CAN_HandleTypeDef *);
 
 extern	uint32_t	__Vectors[];
@@ -53,7 +54,7 @@ extern 	RTC_TimeTypeDef sTime;
 extern 	RTC_DateTypeDef sDate;
 extern 	char *Days[],*Months[];
 extern 	_io	*_VCP,*canBuffer;
-	
+
 _io* 	  ioUsart(UART_HandleTypeDef *, int, int);
 void		pollVcp(void *);
 void		pollLed(void);

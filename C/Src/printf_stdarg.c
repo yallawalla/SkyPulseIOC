@@ -74,12 +74,13 @@
 //#include <sys/reent.h>
 //#include <sys/reent.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 //#define putchar(c) print_dbg_char(c)
 
 static void printchar(char **str, int c)
 {
-	extern int putchar(int c);
+//	extern int putchar(int c);
 	
 	if (str) {
 		**str = c;
