@@ -68,13 +68,29 @@ void	dumpHex(int a, int n) {
 }
 /*******************************************************************************
 * Function Name	: 
+* Description		: see https://community.st.com/s/question/0D50X00009XkfN8/restore-circular-dma-rx-after-uart-error
+* Output				:
+* Return				:
+*******************************************************************************/
+UART_HandleTypeDef	*huart_err=NULL;
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
+		huart_err=huart;
+}
+/*******************************************************************************
+* Function Name	: 
 * Description		: 
 * Output				:
 * Return				:
 *******************************************************************************/
 void	pollUsart(_io *io) {
 UART_HandleTypeDef *huart=io->huart;
-	io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
+	if(huart == huart_err) {
+		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->rx->size);
+		io->rx->_push = io->rx->_pull = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];
+		huart_err=NULL;
+		__RED1(1000);
+	} else
+		io->rx->_push = (char *)&huart->pRxBuffPtr[huart->RxXferSize - huart->hdmarx->Instance->NDTR];	
 	if(huart->gState == HAL_UART_STATE_READY) {
 		int len;
 		if(!huart->pTxBuffPtr)
@@ -96,7 +112,7 @@ _io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 	_io* io=_io_init(sizeRx,sizeTx);
 	if(io && huart) {
 		io->huart=huart;
-		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->tx->size);
+		HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->rx->size);
 		_proc_add(pollUsart,io,"uart",0);
 	}
 	return io;
