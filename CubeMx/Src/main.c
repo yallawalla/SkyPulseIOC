@@ -141,8 +141,9 @@ void makeIoc(void);																										// main app. C++ relay object
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint32_t	pumpTacho, fanTacho, flowTacho, valve_timeout[__VALVES];	// DMA memory registers..
-uint16_t	hwVersion,pump_drive, fan_drive, valve_drive[__VALVES], led_drive[__LEDS*24+2];
+uint16_t	pump_drive, fan_drive, valve_drive[__VALVES], led_drive[__LEDS*24+2];
 _io				*canBuffer=NULL;
+hwVersion	hw;
 /* USER CODE END 0 */
 
 /**
@@ -189,10 +190,12 @@ int main(void)
   MX_IWDG_Init();
   MX_CRC_Init();
   MX_TIM12_Init();
+	
   /* USER CODE BEGIN 2 */
-	hwVersion=0x07 & ~(HAL_GPIO_ReadPin(PE15_GPIO_Port, PE15_Pin) +
-							2*(HAL_GPIO_ReadPin(PE12_GPIO_Port, PE12_Pin) +
-								2*HAL_GPIO_ReadPin(PE10_GPIO_Port, PE10_Pin))) + 1;
+	
+	hw=(hwVersion)((~(HAL_GPIO_ReadPin(PE15_GPIO_Port, PE15_Pin) +
+			2*(HAL_GPIO_ReadPin(PE12_GPIO_Port, PE12_Pin) +
+				2*HAL_GPIO_ReadPin(PE10_GPIO_Port, PE10_Pin))) + 1) & 0x07);
 
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);

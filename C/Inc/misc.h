@@ -30,20 +30,32 @@ void		dumpHex(int, int);
 void		flushVCP(const void *);
 void		flushUART(const void *);
 void		printVersion(void);
-extern	uint16_t	hwVersion;
+
+typedef	enum {
+	_HW_INIT=1,
+	_HW_V1,
+	_HW_V2,
+	_HW_V3,
+	_HW_V4,
+	_HW_V5,
+	_HW_V6,
+	_HW_V7
+} hwVersion;
+extern hwVersion hw;
+
 HAL_StatusTypeDef canFilterCfg(CAN_HandleTypeDef *);
 
 extern	uint32_t	__Vectors[];
 	      
-extern	UART_HandleTypeDef huart1;
-extern	UART_HandleTypeDef huart3;
-extern	CAN_HandleTypeDef	hcan2;
-extern	RTC_HandleTypeDef 	hrtc;
-extern	ADC_HandleTypeDef	hadc1;
-extern	ADC_HandleTypeDef	hadc2;
-extern	DAC_HandleTypeDef	hdac;
-extern	TIM_HandleTypeDef	htim4;
-extern	IWDG_HandleTypeDef hiwdg;
+extern	UART_HandleTypeDef	huart1;
+extern	UART_HandleTypeDef	huart3;
+extern	CAN_HandleTypeDef		hcan2;
+extern	RTC_HandleTypeDef		hrtc;
+extern	ADC_HandleTypeDef		hadc1;
+extern	ADC_HandleTypeDef		hadc2;
+extern	DAC_HandleTypeDef		hdac;
+extern	TIM_HandleTypeDef		htim4;
+extern	IWDG_HandleTypeDef	hiwdg;
 extern	CRC_HandleTypeDef 	hcrc;
 
 extern	uint32_t pumpTacho, fanTacho, flowTacho,valve_timeout[];

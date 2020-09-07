@@ -375,5 +375,5 @@ void	printVersion() {
 			_print(" %d.%02d %s <%08X>, HW V%d",
 				SW_version/100,SW_version%100,
 					__DATE__,
-						HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)),hwVersion);
+						HAL_CRC_Calculate(&hcrc,__Vectors, (FATFS_ADDRESS-(int)__Vectors)/sizeof(int)),hw);
 }

@@ -135,8 +135,8 @@ int		e=_NOERR;
 				if(e & (_pumpCurrent | _flowTacho))
 					Disable();
 				
-//				if(__float_sensor_low)
-//					e |= _floatError;
+				if(hw > _HW_INIT && __float_sensor_low)
+					e |= _floatError;
 			} 	
 			return (_err)e;
 }
