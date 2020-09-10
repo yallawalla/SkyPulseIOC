@@ -135,7 +135,7 @@ int		e=_NOERR;
 				if(e & (_pumpCurrent | _flowTacho))
 					Disable();
 				
-				if(hw > _HW_INIT && __float_sensor_low)
+				if(hw > _HW_INIT && floatLow)
 					e |= _floatError;
 			} 	
 			return (_err)e;
@@ -212,7 +212,7 @@ int		_PUMP::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_PUMP::Newline(void) {
-int		k, i=fval.Ipump*3300/4096.0/2.1/16;
+int		k, i=fval.Ipump*3300/4096.0/0.05/21/16;
 			if(mode & _PUMP_FLOW)
 				k=flow/(2200/300);
 			else

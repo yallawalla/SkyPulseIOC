@@ -262,6 +262,7 @@ void	_IOC::SetState(_State s) {
 					IOC_State.State = _STANDBY;
 					pump.Enable();
 					_SYS_SHG_ENABLE;
+					fsw2None();
 					ws2812.Batch((char *)"@standby.ws");
 					break;
 				case	_READY:
@@ -278,6 +279,7 @@ void	_IOC::SetState(_State s) {
 					if(IOC_State.State != _ERROR) {
 						IOC_State.State = _ERROR;
 						_SYS_SHG_DISABLE;	
+						fsw2None();
 						spray.mode.Air=false;
 						spray.mode.Water=false;
 						ws2812.Batch((char *)"@error.ws");

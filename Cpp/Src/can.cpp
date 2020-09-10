@@ -18,7 +18,7 @@ _CAN::_CAN(CAN_HandleTypeDef *handle) {
 	
 	canFilterCfg(idIOC_State,	0x7C0, idBOOT,			0x7ff);
 	canFilterCfg(idEM_ack,		0x7ff, idEC20_req,	0x7ff);
-	canFilterCfg(idDL_Timing,	0x7f0, idDL_Timing,	0x7f0);
+	canFilterCfg(idDL_Params,	0x7f0, idEC20_Params,	0x7f0);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_RX_FIFO0_MSG_PENDING);
 	HAL_CAN_ActivateNotification(hcan,CAN_IT_TX_MAILBOX_EMPTY);
 	HAL_CAN_Start(hcan);
@@ -226,11 +226,16 @@ void	_CAN::pollRx(void *v) {
 			}
 			break;				
 //______________________________________________________________________________________
-			case idDL_Timing: {
+			case idDL_Params: {
 				DL_Timing *p=(DL_Timing *)data;
 				ioc->diode.setTiming(p->Ton,p->Toff);
+				fsw2DL();
 			}
-			break;				
+			break;
+//______________________________________________________________________________________
+			case idEC20_Params:
+				fsw2EC();
+			break;
 //______________________________________________________________________________________
 			case idIOC_Footreq:
 				ioc->IOC_FootAck.Send();

@@ -26,7 +26,7 @@ typedef enum {
 	idDL_sTestAck			=0x245,
 	idDL_Limits				=0x21F,
 	idDL_State				=0x601,
-	idDL_Timing				=0x602,
+	idDL_Params				=0x602,
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
@@ -37,6 +37,7 @@ typedef enum {
 	idCAN2FOOT				=0x20C,
 	idFOOT2CAN				=0x24C,
 	idEC20_req				=0x280,
+	idEC20_Params			=0x103,
 	idEM_ack					=0x0C0,
   idBOOT						=0x20
 } _StdId;

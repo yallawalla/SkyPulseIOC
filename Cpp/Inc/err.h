@@ -4,32 +4,32 @@
 
 typedef	enum {
 	_NOERR						=0,
-	
+
 	_V5								=1<<0,
 	_V12							=1<<1,
 	_V24							=1<<2,
 	_sprayInPressure	=1<<3,
-	
+
 	_sysOverheat			=1<<4,
 	_pumpTacho				=1<<5,
 	_DLtimeout				=1<<6,
 	_pumpCurrent			=1<<7,
-	
+
 	_fanTacho					=1<<8,
 	_emgDisabled			=1<<9,
 	_handpcDisabled		=1<<10,
 	_flowTacho				=1<<11,
-	
+
 	_ENMtimeout				=1<<12,
 	_sprayNotReady		=1<<13,
 	_doorswDisabled		=1<<14,
 	_footswError			=1<<15,
-	
+
 	_illEC20req				=1<<16,
 	_illENMack				=1<<17,
 	_DLpowerCh1				=1<<18,
 	_DLpowerCh2				=1<<19,
-	
+
 	_TsenseError			=1<<20,
 	_floatError				=1<<21
 } _err;
@@ -42,7 +42,7 @@ enum {
 	_CWBAR_ON					= 1<<4,
 	_PUMP_FLOW				= 1<<5
 };
-			
+
 inline _err operator ~(_err a)
 { return static_cast<_err> (~static_cast<int>(a)); }
 inline _err operator |  (_err a, _err b)	{return static_cast<_err>(static_cast<int>(a) | static_cast<int>(b));}
