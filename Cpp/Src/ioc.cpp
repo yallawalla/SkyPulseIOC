@@ -282,6 +282,8 @@ void	_IOC::SetState(_State s) {
 						fsw2None();
 						spray.mode.Air=false;
 						spray.mode.Water=false;
+						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
+							pump.Disable();
 						ws2812.Batch((char *)"@error.ws");
 					}
 					break;

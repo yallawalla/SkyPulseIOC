@@ -25,9 +25,9 @@ FIL USERFile;       /* File object for USER */
 
 /* USER CODE BEGIN Variables */
 
-/* USER CODE END Variables */    
+/* USER CODE END Variables */
 
-void MX_FATFS_Init(void) 
+void MX_FATFS_Init(void)
 {
   /*## FatFS: Link the USER driver ###########################*/
   retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
@@ -38,7 +38,7 @@ void MX_FATFS_Init(void)
 }
 
 /**
-  * @brief  Gets Time from RTC 
+  * @brief  Gets Time from RTC
   * @param  None
   * @retval Time in DWORD
   */
@@ -51,7 +51,7 @@ RTC_DateTypeDef d;
 	HAL_RTC_GetTime(&hrtc,&t,RTC_FORMAT_BIN);
 	HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
 	return (d.Year << 25) | (d.Month << 21) | (d.Date << 16) | (t.Seconds + t.Minutes*60 + t.Hours*3600);
-  /* USER CODE END get_fattime */  
+  /* USER CODE END get_fattime */
 }
 
 /* USER CODE BEGIN Application */

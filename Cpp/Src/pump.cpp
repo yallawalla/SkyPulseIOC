@@ -102,20 +102,17 @@ void		_PUMP::Disable() {
 _err	_PUMP::Status(void) {	
 int		e=_NOERR;
 		
-			if(pump_drive != 0) {
-				if(pump_drive > rpm(1<<12))
-					--pump_drive;
-				else
-					++pump_drive;
-			}
-
+			if(pump_drive)
+				pump_drive > rpm(1<<12) ? --pump_drive:++pump_drive;
+			current = std::max((int)fval.Ipump,current);
+			
 			if(__time__ > timeout) {
 				if(tacho_limit && flow_limit && curr_limit) {
 					if(pumpTacho-__pumpTacho <= tacho_limit)
 						e |= _pumpTacho;
 					if(flowTacho-__flowTacho <= flow_limit)
 						e |= _flowTacho;						
-					if(fval.Ipump > curr_limit)
+					if(current > curr_limit)
 						e |= _pumpCurrent;
 				} else if(tacho_limit || flow_limit || curr_limit) {
 					if(!pumpTacho)
@@ -126,14 +123,11 @@ int		e=_NOERR;
 						e |= _pumpCurrent;
 				}
 				timeout=__time__+100;
-				
+				current = fval.Ipump;
 				speed=pumpTacho-__pumpTacho;
 				flow=flowTacho-__flowTacho;
 				__pumpTacho=pumpTacho;
 				__flowTacho=flowTacho;
-				
-				if(e & (_pumpCurrent | _flowTacho))
-					Disable();
 				
 				if(hw > _HW_INIT && floatLow)
 					e |= _floatError;
@@ -212,7 +206,7 @@ int		_PUMP::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_PUMP::Newline(void) {
-int		k, i=fval.Ipump*3300/4096.0/0.05/21/16;
+int		k, i=current*3300/4096.0/0.05/21/16;
 			if(mode & _PUMP_FLOW)
 				k=flow/(2200/300);
 			else
@@ -246,11 +240,14 @@ int 		i=fph, cmax=0;
 				i=fpl;
 				fpl=fph;
 
-				for(int t=__time__ + 5000; __time__ < t;_wait(2))
+				for(int t=__time__ + 5000; __time__ < t;_wait(200)) {
+					Newline();
 					if(fval.Ipump > cmax)
-						cmax=fval.Ipump;
+						cmax=current; //fval.Ipump;
+				}
 					
-				curr_limit=(cmax * 6)/5;
+				curr_limit=(cmax * 11)/10
+				;
 				fpl=i;
 				_print("\r\npump errors enabled ...\r\n");
 			}

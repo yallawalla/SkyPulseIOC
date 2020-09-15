@@ -32,6 +32,7 @@ wait 100
 col 2,5,+l
 
 ---------------------------------------------------------------------------------------
+STM32Cube FW_F4 V1.25.0, CubeMx 6.0.1
 
 /v 0.21 Sep  4 2018 <5005D271>
 
@@ -164,3 +165,14 @@ V 1.03 Jun 22 2020 <8534EB6C>
 
 V 1.04 Jul  2 2020 <C57EC859>
 - spr. diodni energ. aktivno stanje definirano z EMIT(od SYS) plus diode.mode(od DL) :/
+
+
+V 1.06 Sep 15 2020 <0271DCD0>, HW V2
+
+- STM32Cube FW_F4 V1.25.0, CubeMX 6.0.1
+- pump.Disable() se premakne iz pump::Status to IOC::Set>State
+  razlog: na prejšnjem mestu ni bilo mogoce maskirati zaustavitve pumpe ampak zgolj error stanje oz. izpis
+- uvedena. max. vrednost za Ipump v int. 100ms; predhodno odbiranje na 100ms je preskakovala pulzirajoce max. pri zaprtem vofokrogu  
+- preizkušena distrib. fsw
+
+

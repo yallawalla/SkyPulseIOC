@@ -104,7 +104,7 @@ extern DMA_HandleTypeDef hdma_usart3_tx;
 
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
-                        
+
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
                                                             /**
   * Initializes the Global MSP.
@@ -143,11 +143,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
   /* USER CODE END ADC1_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_ADC1_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**ADC1 GPIO Configuration    
+    /**ADC1 GPIO Configuration
     PC0     ------> ADC1_IN10
     PC1     ------> ADC1_IN11
     PC2     ------> ADC1_IN12
@@ -159,9 +159,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     PC4     ------> ADC1_IN14
     PC5     ------> ADC1_IN15
     PB0     ------> ADC1_IN8
-    PB1     ------> ADC1_IN9 
+    PB1     ------> ADC1_IN9
     */
-    GPIO_InitStruct.Pin = Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
+    GPIO_InitStruct.Pin = Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin
                           |DLsense1_Pin|DLsense2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -207,11 +207,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
   /* USER CODE END ADC2_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_ADC2_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**ADC2 GPIO Configuration    
+    /**ADC2 GPIO Configuration
     PC4     ------> ADC2_IN14
-    PC5     ------> ADC2_IN15 
+    PC5     ------> ADC2_IN15
     */
     GPIO_InitStruct.Pin = DLsense1_Pin|DLsense2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -259,8 +259,8 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   /* USER CODE END ADC1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_ADC1_CLK_DISABLE();
-  
-    /**ADC1 GPIO Configuration    
+
+    /**ADC1 GPIO Configuration
     PC0     ------> ADC1_IN10
     PC1     ------> ADC1_IN11
     PC2     ------> ADC1_IN12
@@ -272,9 +272,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     PC4     ------> ADC1_IN14
     PC5     ------> ADC1_IN15
     PB0     ------> ADC1_IN8
-    PB1     ------> ADC1_IN9 
+    PB1     ------> ADC1_IN9
     */
-    HAL_GPIO_DeInit(GPIOC, Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin 
+    HAL_GPIO_DeInit(GPIOC, Psense0_Pin|Psense1_Pin|Psense2_Pin|Psense3_Pin
                           |DLsense1_Pin|DLsense2_Pin);
 
     HAL_GPIO_DeInit(GPIOA, PUMP_CSENSE_Pin|T1_H2O_Pin|T1_H2OA2_Pin|_5V_Pin);
@@ -294,10 +294,10 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   /* USER CODE END ADC2_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_ADC2_CLK_DISABLE();
-  
-    /**ADC2 GPIO Configuration    
+
+    /**ADC2 GPIO Configuration
     PC4     ------> ADC2_IN14
-    PC5     ------> ADC2_IN15 
+    PC5     ------> ADC2_IN15
     */
     HAL_GPIO_DeInit(GPIOC, DLsense1_Pin|DLsense2_Pin);
 
@@ -327,11 +327,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* hcan)
     /* Peripheral clock enable */
     __HAL_RCC_CAN2_CLK_ENABLE();
     __HAL_RCC_CAN1_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**CAN2 GPIO Configuration    
+    /**CAN2 GPIO Configuration
     PB13     ------> CAN2_TX
-    PB5     ------> CAN2_RX 
+    PB5     ------> CAN2_RX
     */
     GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -370,10 +370,10 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
     /* Peripheral clock disable */
     __HAL_RCC_CAN2_CLK_DISABLE();
     __HAL_RCC_CAN1_CLK_DISABLE();
-  
-    /**CAN2 GPIO Configuration    
+
+    /**CAN2 GPIO Configuration
     PB13     ------> CAN2_TX
-    PB5     ------> CAN2_RX 
+    PB5     ------> CAN2_RX
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_13|GPIO_PIN_5);
 
@@ -448,11 +448,11 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
   /* USER CODE END DAC_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_DAC_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**DAC GPIO Configuration    
+    /**DAC GPIO Configuration
     PA4     ------> DAC_OUT1
-    PA5     ------> DAC_OUT2 
+    PA5     ------> DAC_OUT2
     */
     GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -503,10 +503,10 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
   /* USER CODE END DAC_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_DAC_CLK_DISABLE();
-  
-    /**DAC GPIO Configuration    
+
+    /**DAC GPIO Configuration
     PA4     ------> DAC_OUT1
-    PA5     ------> DAC_OUT2 
+    PA5     ------> DAC_OUT2
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_4|GPIO_PIN_5);
 
@@ -579,11 +579,11 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM3_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM3_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM3 GPIO Configuration    
+    /**TIM3 GPIO Configuration
     PA6     ------> TIM3_CH1
-    PA7     ------> TIM3_CH2 
+    PA7     ------> TIM3_CH2
     */
     GPIO_InitStruct.Pin = PUMP_TACHO_Pin|FLOW_TACHO_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -606,11 +606,11 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM9_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM9_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOE_CLK_ENABLE();
-    /**TIM9 GPIO Configuration    
+    /**TIM9 GPIO Configuration
     PE5     ------> TIM9_CH1
-    PE6     ------> TIM9_CH2 
+    PE6     ------> TIM9_CH2
     */
     GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -644,11 +644,11 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM12_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM12_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM12 GPIO Configuration    
+    /**TIM12 GPIO Configuration
     PB14     ------> TIM12_CH1
-    PB15     ------> TIM12_CH2 
+    PB15     ------> TIM12_CH2
     */
     GPIO_InitStruct.Pin = DSenseTIM1_Pin|DSenseTIM1B15_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -679,7 +679,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE END TIM4_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM4_CLK_ENABLE();
-  
+
     /* TIM4 DMA Init */
     /* TIM4_UP Init */
     hdma_tim4_up.Instance = DMA1_Stream6;
@@ -713,7 +713,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
   /* USER CODE END TIM8_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM8_CLK_ENABLE();
-  
+
     /* TIM8 DMA Init */
     /* TIM8_UP Init */
     hdma_tim8_up.Instance = DMA2_Stream1;
@@ -752,9 +752,9 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
   /* USER CODE END TIM4_MspPostInit 0 */
     __HAL_RCC_GPIOD_CLK_ENABLE();
-    /**TIM4 GPIO Configuration    
+    /**TIM4 GPIO Configuration
     PD12     ------> TIM4_CH1
-    PD13     ------> TIM4_CH2 
+    PD13     ------> TIM4_CH2
     */
     GPIO_InitStruct.Pin = _LED1_Pin|_LED2_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
@@ -772,13 +772,13 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM8_MspPostInit 0 */
 
   /* USER CODE END TIM8_MspPostInit 0 */
-  
+
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**TIM8 GPIO Configuration    
+    /**TIM8 GPIO Configuration
     PC6     ------> TIM8_CH1
     PC7     ------> TIM8_CH2
     PC8     ------> TIM8_CH3
-    PC9     ------> TIM8_CH4 
+    PC9     ------> TIM8_CH4
     */
     GPIO_InitStruct.Pin = _BOTTLE_OUT_Pin|_BOTTLE_IN_Pin|_AIR_Pin|_WATER_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -796,10 +796,10 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   /* USER CODE BEGIN TIM10_MspPostInit 0 */
 
   /* USER CODE END TIM10_MspPostInit 0 */
-  
+
     __HAL_RCC_GPIOB_CLK_ENABLE();
-    /**TIM10 GPIO Configuration    
-    PB8     ------> TIM10_CH1 
+    /**TIM10 GPIO Configuration
+    PB8     ------> TIM10_CH1
     */
     GPIO_InitStruct.Pin = FAN_PWM_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -829,10 +829,10 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM3_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM3_CLK_DISABLE();
-  
-    /**TIM3 GPIO Configuration    
+
+    /**TIM3 GPIO Configuration
     PA6     ------> TIM3_CH1
-    PA7     ------> TIM3_CH2 
+    PA7     ------> TIM3_CH2
     */
     HAL_GPIO_DeInit(GPIOA, PUMP_TACHO_Pin|FLOW_TACHO_Pin);
 
@@ -849,10 +849,10 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM9_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM9_CLK_DISABLE();
-  
-    /**TIM9 GPIO Configuration    
+
+    /**TIM9 GPIO Configuration
     PE5     ------> TIM9_CH1
-    PE6     ------> TIM9_CH2 
+    PE6     ------> TIM9_CH2
     */
     HAL_GPIO_DeInit(GPIOE, GPIO_PIN_5|GPIO_PIN_6);
 
@@ -880,10 +880,10 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE END TIM12_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM12_CLK_DISABLE();
-  
-    /**TIM12 GPIO Configuration    
+
+    /**TIM12 GPIO Configuration
     PB14     ------> TIM12_CH1
-    PB15     ------> TIM12_CH2 
+    PB15     ------> TIM12_CH2
     */
     HAL_GPIO_DeInit(GPIOB, DSenseTIM1_Pin|DSenseTIM1B15_Pin);
 
@@ -949,11 +949,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   /* USER CODE END USART1_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_USART1_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**USART1 GPIO Configuration    
+    /**USART1 GPIO Configuration
     PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
+    PA10     ------> USART1_RX
     */
     GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -1013,11 +1013,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   /* USER CODE END USART3_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_USART3_CLK_ENABLE();
-  
+
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**USART3 GPIO Configuration    
+    /**USART3 GPIO Configuration
     PC10     ------> USART3_TX
-    PC11     ------> USART3_RX 
+    PC11     ------> USART3_RX
     */
     GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_11;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -1088,10 +1088,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   /* USER CODE END USART1_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_USART1_CLK_DISABLE();
-  
-    /**USART1 GPIO Configuration    
+
+    /**USART1 GPIO Configuration
     PA9     ------> USART1_TX
-    PA10     ------> USART1_RX 
+    PA10     ------> USART1_RX
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9|GPIO_PIN_10);
 
@@ -1112,10 +1112,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   /* USER CODE END USART3_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_USART3_CLK_DISABLE();
-  
-    /**USART3 GPIO Configuration    
+
+    /**USART3 GPIO Configuration
     PC10     ------> USART3_TX
-    PC11     ------> USART3_RX 
+    PC11     ------> USART3_RX
     */
     HAL_GPIO_DeInit(GPIOC, GPIO_PIN_10|GPIO_PIN_11);
 
