@@ -202,10 +202,10 @@ _err	err = can.Status();
 			err = err | fan.Status();
 			err = err | spray.Status();
 			err = err | fswError();
-//		err = err | diode.Status(IOC_State.State == _ACTIVE);
+			err = err | diode.Status(IOC_State.State == _ACTIVE);
 //		err = err | diode.Status((IOC_State.State == _ACTIVE) && HAL_GPIO_ReadPin(FSW0_GPIO_Port,FSW0_Pin)==GPIO_PIN_RESET);
 //		err = err | diode.Status(IOC_State.State == _ACTIVE && (IOC_FootAck.State==_3 || IOC_FootAck.State==_4));
-			err = err | diode.Status(IOC_State.State == _ACTIVE && diode.mode);
+//		err = err | diode.Status(IOC_State.State == _ACTIVE && diode.mode);
 
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;

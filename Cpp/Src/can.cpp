@@ -206,18 +206,6 @@ void	_CAN::pollRx(void *v) {
 				}
 			break;
 //______________________________________________________________________________________
-			case idDL_Limits: {
-				DL_Limits *p=(DL_Limits *)data;
-				ioc->diode.setLimits(p->L0,p->L1,p->mode);
-				
-				if(ioc->IOC_State.State == _ACTIVE) {
-					dlTimeout=__time__ + _DL_POLL_DELAY;
-					ecTimeout=0;
-				}
-				ioc->IOC_FootAck.Send();
-			}
-			break;
-//______________________________________________________________________________________
 			case idDL_State: {
 				DL_State *p=(DL_State *)data;
 				if(p->State == _CALIBRATE) {
@@ -226,15 +214,25 @@ void	_CAN::pollRx(void *v) {
 			}
 			break;				
 //______________________________________________________________________________________
+			case idDL_Limits: {
+				ioc->IOC_FootAck.Send();
+				ioc->diode.Setup((DL_Limits *)data);
+				if(ioc->IOC_State.State == _ACTIVE) {
+					dlTimeout=__time__ + _DL_POLL_DELAY;
+					ecTimeout=0;
+				}
+			}
+			break;
+//______________________________________________________________________________________
 			case idDL_Params: {
-				DL_Timing *p=(DL_Timing *)data;
-				ioc->diode.setTiming(p->Ton,p->Toff);
+				ioc->diode.Setup((DL_Timing *)data);
 				fsw2DL();
 			}
 			break;
 //______________________________________________________________________________________
-			case idEC20_Params:
+			case idEC20_Params: 
 				fsw2EC();
+				ioc->diode.Setup();
 			break;
 //______________________________________________________________________________________
 			case idIOC_Footreq:

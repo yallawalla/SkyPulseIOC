@@ -4,7 +4,23 @@
 #include "err.h"
 #include "term.h"
 #include "misc.h"
-
+//_____________________________________________________________________
+typedef __packed struct {
+	uint16_t	Pavg:14,ch:2;
+	uint32_t	on:24,off:24;
+} DL_Timing;
+//_____________________________________________________________________
+typedef __packed struct {
+	uint16_t	l0,l1,l2;
+	uint8_t		ch0:2,ch1:2,ch2:2;
+} DL_Limits;
+//_____________________________________________________________________
+typedef	__packed struct {
+	uint32_t 	on,off;
+	uint32_t	val;
+	uint8_t		mode:2;
+} limit;
+//_____________________________________________________________________
 class lopass {
 	private:
 		class _lopass {
@@ -43,22 +59,29 @@ class lopass {
 
 class	_DL  : public _TERM {
 		private:
-			bool						active,synced;
+			bool						selected, emit;
 			float 					offset[2];
 			unsigned short	dma[154][2];
-			unsigned int 		ton,toff,timeout[2],ref[2];
-			unsigned int 		on,off,lim[2];
-			lopass					high, filter, filterRef;
+			unsigned int 		errtout[2],ref[2],ton,toff;
+			lopass					high, filter;
 			int							idx,dlscale[2],scale;
-
+			limit						limits[3];
+			uint8_t					count;
+			
 		public:
 			static _DL* instance;
 			_DL();
+		
 			_err		Status(bool);
-			int			mode;
-			void		filterCbk(int);
-			void 		setTiming(int,int);
-			void 		setLimits(int,int,int);
+			void		filterCbk(bool);
+		
+			
+			uint8_t	setActiveCh(uint8_t);
+		
+			void 		Setup();
+			void 		Setup(DL_Timing *);
+			void 		Setup(DL_Limits *);
+		
 			int			stest_delay,stest_err,selftest(void);
 		
 			void		LoadSettings(FIL *);

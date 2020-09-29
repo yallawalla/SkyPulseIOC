@@ -128,16 +128,6 @@ typedef __packed struct _DL_State {
 	_State 	State;
 } DL_State;
 //_____________________________________________________________________
-typedef __packed struct _DL_Timing {
-	unsigned short Pavg;
-	unsigned Ton:24,Toff:24;
-} DL_Timing;
-//_____________________________________________________________________
-typedef __packed struct _DL_Limits {
-	unsigned short L0,L1;
-	unsigned char mode;
-} DL_Limits;
-//_____________________________________________________________________
 class _IOC {
 	private:
 		int key,temp;

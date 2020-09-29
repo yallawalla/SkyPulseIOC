@@ -82,9 +82,13 @@ void 		__YELLOW2(int32_t);
 void 		__BLUE2(int32_t);
 
 #define __time__		HAL_GetTick()
+
 #define	cwbarOn()		HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_RESET)
 #define	cwbarOff()	HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET)
-#define	floatLow		FSW0_GPIO_Port->IDR & FSW1_Pin
+
+#define	floatLow		(FSW0_GPIO_Port->IDR & FSW1_Pin)
+
+
 #define	fsw2DL()		HAL_GPIO_WritePin(FSW_DL_GPIO_Port, FSW_DL_Pin, GPIO_PIN_RESET); \
 										HAL_GPIO_WritePin(FSW_EC_GPIO_Port, FSW_EC_Pin, GPIO_PIN_SET)
 #define	fsw2EC()		HAL_GPIO_WritePin(FSW_DL_GPIO_Port, FSW_DL_Pin, GPIO_PIN_SET); \
