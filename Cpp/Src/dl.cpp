@@ -43,7 +43,7 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 
 			k ? p=&dma[n][0] : p=&dma[0][0];
 			while(n--) {
-				high.eval(p[0]*(100-dlscale[0])/100,p[1]*(100-dlscale[1])/100);
+				high.eval(p[0]*(100-dlscale[0])/100- offset[0],p[1]*(100-dlscale[1])/100- offset[1]);
 				++p;++p;
 			}
 
@@ -96,14 +96,14 @@ _err 	e=_NOERR;
 					switch (limits[count].mode) {
 						case 1:
 						ref[0]=limits[count].val;
-						e = e | Check(high.val[0] - ref[0] - offset[0], offset[1]);
+						e = e | Check(high.val[0] - ref[0], 0);
 						break;
 						case 2:
 						ref[1]=limits[count].val;
-						e = e | Check(offset[0], high.val[1] - ref[1] - offset[1]);
+						e = e | Check(0, high.val[1] - ref[1]);
 						break;
 						default:
-						e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
+						e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
 					 break;
 					}
 				}
@@ -115,11 +115,11 @@ _err 	e=_NOERR;
 //						if(_TERM::debug & (0x3ff<<10))
 //							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 3000);			//high filter
 					}
-					e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
+					e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
 				}
 			} else {
 				ton=toff=0;
-				e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
+				e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
 			}
 //______________________________________________________________________________________
 //
