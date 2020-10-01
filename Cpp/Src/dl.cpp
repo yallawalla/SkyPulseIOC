@@ -21,13 +21,14 @@ _DL*	_DL::instance=NULL;
 	* @retval : None
 	*/
 /*******************************************************************************/
-_DL::_DL() : high(300,150000), filter(5, 1000) {
+_DL::_DL() : high(300,150000), filter(2.5, 1000) {
 			instance=this;
 			selected=emit=false;
 			errtout[0]=errtout[1]=offset[0]=offset[1]=ton=toff=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
-			scale=10;
+			dacScale=1;
+			dacOffset=1000;
 			stest_delay=__time__ + _ADC_ERR_DELAY;
 }
 /*******************************************************************************
@@ -39,7 +40,7 @@ _DL::_DL() : high(300,150000), filter(5, 1000) {
 void	_DL::filterCbk(bool k) {
 
 uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
-	
+
 			k ? p=&dma[n][0] : p=&dma[0][0];
 			while(n--) {
 				high.eval(p[0]*(100-dlscale[0])/100,p[1]*(100-dlscale[1])/100);
@@ -50,28 +51,31 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 				offset[0]=high.val[0];
 				offset[1]=high.val[1];
 			}
-
-			if(_TERM::debug & DBG_INP0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[0]);			//filter1
-			if(_TERM::debug & DBG_INP1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[1]);			//filter2
-			if(_TERM::debug & DBG_REF0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*high.val[0]);				//high filter1
-			if(_TERM::debug & DBG_REF1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*high.val[1]);				//high filter2
 			
-			if(k && _TERM::debug & DBG_DIFF0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*limits[0].val);			// razlika 0
-			if(!k && _TERM::debug & DBG_DIFF0)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[0]);
-			if(k && _TERM::debug & DBG_DIFF1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*limits[1].val);			// razlika 1
-			if(!k && _TERM::debug & DBG_DIFF1)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[1]);
-			if(k && _TERM::debug & DBG_DIFFab)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[0]);			// razlika hiva a,b
-			if(!k && _TERM::debug & DBG_DIFFab)
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, scale*filter.val[1]);
+			dac(10,high.val[0]);
+			dac(11,high.val[1]);
+			dac(12,ref[0]);
+			dac(13,ref[1]);
+			dac(14,filter.val[0]);
+			dac(15,filter.val[1]);
+
+			if(k) dac(16,high.val[0]);		else dac(16,ref[0]);
+			if(k) dac(17,high.val[1]);		else dac(17,ref[1]);
+			if(k) dac(18,filter.val[0]);	else dac(18,ref[0]);
+			if(k) dac(19,filter.val[1]);	else dac(19,ref[1]);
+}
+//______________________________________________________________________________________
+//
+//	DL levels check
+//______________________________________________________________________________________
+_err	_DL::Check(float ch1, float ch2) {
+_err	e=_NOERR;
+			filter.eval(ch1, ch2);
+			if(fabs(filter.val[0])  > std::max((int32_t)ch1/5,_DL_OFFSET_THR))
+				e = e | _DLpowerCh1;
+			if(fabs(filter.val[1])  > std::max((int32_t)ch2/5,_DL_OFFSET_THR))
+				e = e | _DLpowerCh2;
+			return e;
 }
 //______________________________________________________________________________________
 //
@@ -81,20 +85,25 @@ _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
 
 			emit=k;
+			ref[0]=ref[1]=0;
 			if(selected && emit && ton && toff) {
 				if (__time__ > ton) {
 					if (toff <= ton) {
 						toff = ton + limits[count].on;
+//						if(_TERM::debug & (0x3ff<<10))
+//							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 4000);			//high filter
 					}
-          switch (limits[count].mode) {
-					 case 1:
-						 filter.eval(limits[count].val - high.val[0] - offset[0],0);
-					 break;
-					 case 2:
-						 filter.eval(0,limits[count].val - high.val[1] - offset[1]);
-					 break;
-					 default:
-						 filter.eval(0,0);
+					switch (limits[count].mode) {
+						case 1:
+						ref[0]=limits[count].val;
+						e = e | Check(high.val[0] - ref[0] - offset[0], offset[1]);
+						break;
+						case 2:
+						ref[1]=limits[count].val;
+						e = e | Check(offset[0], high.val[1] - ref[1] - offset[1]);
+						break;
+						default:
+						e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
 					 break;
 					}
 				}
@@ -103,65 +112,15 @@ _err 	e=_NOERR;
 						ton = toff + limits[count].off;
 						high.val[limits[count].mode-1] < limits[count].val/2 ? --ton : ++ton;
 						setActiveCh(++count);
+//						if(_TERM::debug & (0x3ff<<10))
+//							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 3000);			//high filter
 					}
-					filter.eval(high.val[0] - offset[0],high.val[1] - offset[1]);
+					e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
 				}
 			} else {
 				ton=toff=0;
-				filter.eval(high.val[0] - offset[0],high.val[1] - offset[1]);
+				e = e | Check(high.val[0] - ref[0] - offset[0], high.val[1] - ref[1] - offset[1]);
 			}
-/*
-				limits *p=&limits[count];
-				if(selected && emit) {
-					if(ton && toff) {		
-						if(__time__ >= ton) {																							// on sekvenca:
-							toff=ton+p->on;																									// prenastavitev preklopnih casov
-							ton=toff+p->off;
-							if(high.val[p->mode-1] < p->val/2+offset[p->mode-1]) {
-								++ton; ++toff;
-							}	else {
-								--ton; --toff;
-							}
-						} else if(__time__ >= toff) {
-							ton=toff+p->off;																								// prenastavitev preklopnih casov
-							toff=ton+p->on;
-						}
-					} else {
-						filter.eval(high.val[0]*(100-dlscale[0])/100-offset[0],high.val[1]*(100-dlscale[1])/100-offset[1]);
-						toff=ton=0;
-					}
-				}
-
-//			if(fabs(filter.val[0] - filterRef.val[0]) > std::max((int)limits[0]/5,_DL_OFFSET_THR) && mode & 1)
-//					e = e | _DLpowerCh1;	
-//			if(fabs(filter.val[1] - filterRef.val[1]) > std::max((int)limits[1]/5,_DL_OFFSET_THR) && mode & 2)
-//					e = e | _DLpowerCh2;
-
-			if(filter.val[0] > filterRef.val[0] + std::max((int)limits[0]/5,_DL_OFFSET_THR))
-					e = e | _DLpowerCh1;	
-			if(filter.val[0] < filterRef.val[0] - std::max((int)limits[0]/5,_DL_OFFSET_THR))
-				if(!errtout[0])
-					errtout[0]=__time__ + _DL_ERROR_DELAY;
-			if(filter.val[1] > filterRef.val[1] + std::max((int)limits[1]/5,_DL_OFFSET_THR))
-					e = e | _DLpowerCh2;	
-			if(filter.val[1] < filterRef.val[1] - std::max((int)limits[1]/5,_DL_OFFSET_THR))
-				if(!errtout[1])
-					errtout[1]=__time__ + _DL_ERROR_DELAY;
-
-			if(emit) {
-				if(errtout[0] && __time__ > errtout[0]) {
-					errtout[0]=0;
-					if(mode & 1)
-						e = e | _DLpowerCh1;
-				}
-				if(errtout[1] && __time__ > errtout[1]) {
-					errtout[1]=0;
-					if(mode & 2)
-						e = e | _DLpowerCh2;
-				}
-			} else
-				errtout[0]=errtout[1]=0;
-*/
 //______________________________________________________________________________________
 //
 //	DL presence & selftest
@@ -197,10 +156,10 @@ _err 	e=_NOERR;
 *******************************************************************************/
 uint8_t	_DL::setActiveCh(uint8_t n) {
 			int i;
-			count = n % ((sizeof limits)/sizeof(limit));
-			for(i=0; !limits[count].mode && i<sizeof(limits)/sizeof(limit); ++i)
-				count = ++count % (sizeof(limits)/sizeof(limit));
-			if(i == sizeof(limits)/sizeof(limit))
+			count = n % 3;
+			for(i=0; !limits[count].mode && i<3; ++i)
+				count = ++count % 3;
+			if(i == 3)
 				count=0;
 			return count;
 }
@@ -222,15 +181,17 @@ void	_DL::Setup() {
 void	_DL::Setup(DL_Limits *p) {
 			selected=true;
 			if(emit && !ton && !toff) {
-				count=setActiveCh(0);
+				setActiveCh(0);
 				ton=toff=__time__;
 			}	else {
-				limits[0].val	= (p->l0 * 5)/6;
-				limits[1].val	= (p->l1 * 5)/6;
-				limits[2].val	= (p->l2 * 5)/6;
-				limits[0].mode	= p->ch0;
-				limits[1].mode	= p->ch1;
-				limits[2].mode	= p->ch2;
+				if( p->ch0 || p->ch1 || p->ch2) {
+					limits[0].val	= (p->l0 * 5)/6;
+					limits[1].val	= (p->l1 * 5)/6;
+					limits[2].val	= (p->l2 * 5)/6;
+					limits[0].mode	= p->ch0;
+					limits[1].mode	= p->ch1;
+					limits[2].mode	= p->ch2;
+				}
 			}				
 }
 /*******************************************************************************
@@ -327,10 +288,16 @@ int		_DL::Fkey(int t) {
 				Increment(0,0);
 				break;
 				case __PageUp:
-				scale=std::min(scale+1,100);
+				dacScale=std::min(dacScale+1,100);
 				break;
 				case __PageDown:
-				scale=std::max(scale-1,1);
+				dacScale=std::max(dacScale-1,1);
+				break;
+				case __Home:
+				dacOffset=std::min(dacOffset+100,3000);
+				break;
+				case __End:
+				dacOffset=std::max(dacOffset-100,0);
 				break;
 			}
 			return EOF;
@@ -348,7 +315,7 @@ void	_DL::Newline(void) {
 					_print("\r:dl ---                             ");
 				break;
 				case 0x0e:
-					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",limits[0].val,limits[1].val,std::max(0,(int)filter.val[0]),std::max(0,(int)filter.val[1]),(int)offset[0],(int)offset[1]);
+					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",limits[0].val,limits[1].val,(int)filter.val[0],(int)filter.val[1],(int)offset[0],(int)offset[1]);
 				break;
 				default:
 					_print("\r:dl err(%02X)                         ",stest_err);

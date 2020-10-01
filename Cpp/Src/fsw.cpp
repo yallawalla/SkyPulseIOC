@@ -31,7 +31,7 @@ int		_FSW::Read() {
 
 			if(i != temp) {
 				temp = i;
-				timeout = __time__ + 10;
+				timeout = __time__ + 5;
 			} else 
 					if(timeout && __time__ > timeout) {
 						timeout=0;

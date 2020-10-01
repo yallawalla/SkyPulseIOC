@@ -60,11 +60,11 @@ class lopass {
 class	_DL  : public _TERM {
 		private:
 			bool						selected, emit;
-			float 					offset[2];
+			float 					offset[2],ref[2];
 			unsigned short	dma[154][2];
-			unsigned int 		errtout[2],ref[2],ton,toff;
+			unsigned int 		errtout[2],ton,toff;
 			lopass					high, filter;
-			int							idx,dlscale[2],scale;
+			int							idx,dlscale[2],dacScale,dacOffset;
 			limit						limits[3];
 			uint8_t					count;
 			
@@ -81,6 +81,8 @@ class	_DL  : public _TERM {
 			void 		Setup();
 			void 		Setup(DL_Timing *);
 			void 		Setup(DL_Limits *);
+
+			_err 		Check(float, float);
 		
 			int			stest_delay,stest_err,selftest(void);
 		
@@ -91,4 +93,9 @@ class	_DL  : public _TERM {
 			virtual void	Newline(void);
 			virtual int Fkey(int);
 };
+
+#define	dac(a,b) do \
+										if(_TERM::debug & (1<<a)) \
+										 HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, dacScale*(b) + dacOffset); \
+										while(0)
 #endif
