@@ -149,13 +149,6 @@
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint/>
-      <WatchWindow1>
-        <Ww>
-          <count>0</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>_DL::instance</ItemText>
-        </Ww>
-      </WatchWindow1>
       <MemoryWindow4>
         <Mm>
           <WinNumber>4</WinNumber>

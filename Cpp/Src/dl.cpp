@@ -43,7 +43,7 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 
 			k ? p=&dma[n][0] : p=&dma[0][0];
 			while(n--) {
-				high.eval(p[0]*(100-dlscale[0])/100- offset[0],p[1]*(100-dlscale[1])/100- offset[1]);
+				high.eval((p[0]*(100-dlscale[0]))/100- offset[0],(p[1]*(100-dlscale[1]))/100- offset[1]);
 				++p;++p;
 			}
 
@@ -235,15 +235,14 @@ void 	_DL::Increment(int a, int b)	{
 			idx= std::min(std::max(idx+b,0),3);
 			switch(idx) {
 				case 0:
-					limits[0].val= std::min(std::max((int)limits[0].val+a,0),4095);
+					dlscale[0]= std::min(std::max(dlscale[0]-a,-100),100);
 					break;
 				case 1:
-					limits[1].val= std::min(std::max((int)limits[1].val+a,0),4095);
+					dlscale[1]= std::min(std::max(dlscale[1]-a,-100),100);
 					break;
 				case 2:
-					dlscale[0]= std::min(std::max(dlscale[0]-a,-100),100);
+					break;
 				case 3:
-					dlscale[1]= std::min(std::max(dlscale[1]-a,-100),100);
 					break;
 			}
 			Newline();
@@ -315,7 +314,10 @@ void	_DL::Newline(void) {
 					_print("\r:dl ---                             ");
 				break;
 				case 0x0e:
-					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",limits[0].val,limits[1].val,(int)filter.val[0],(int)filter.val[1],(int)offset[0],(int)offset[1]);
+					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",
+						(limits[0].val * (100-dlscale[0]))/100,(limits[1].val*(100-dlscale[1]))/100,
+						(int)filter.val[0],(int)filter.val[1],
+						(int)offset[0],(int)offset[1]);
 				break;
 				default:
 					_print("\r:dl err(%02X)                         ",stest_err);

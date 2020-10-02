@@ -96,6 +96,6 @@ class	_DL  : public _TERM {
 
 #define	dac(a,b) do \
 										if(_TERM::debug & (1<<a)) \
-										 HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, dacScale*(b) + dacOffset); \
+											HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, std::max(0,std::min(0xfff,(int)(dacScale*(b) + dacOffset)))); \
 										while(0)
 #endif
