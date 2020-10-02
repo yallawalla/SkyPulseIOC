@@ -1,5 +1,6 @@
 #include "term.h"
 #include "ioc.h"
+#include <math.h>
 
 FATFS		_FS::fatfs;
 DIR			_FS::dir;			

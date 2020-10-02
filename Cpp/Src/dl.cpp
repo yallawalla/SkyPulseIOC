@@ -24,7 +24,7 @@ _DL*	_DL::instance=NULL;
 _DL::_DL() : high(300,150000), filter(2.5, 1000) {
 			instance=this;
 			selected=emit=false;
-			errtout[0]=errtout[1]=offset[0]=offset[1]=ton=toff=0;
+			offset[0]=offset[1]=ton=toff=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
 			dacScale=1;
@@ -70,10 +70,11 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 //______________________________________________________________________________________
 _err	_DL::Check(float ch1, float ch2) {
 _err	e=_NOERR;
-			filter.eval(ch1, ch2);
-			if(fabs(filter.val[0])  > std::max((int32_t)ch1/5,_DL_OFFSET_THR))
+			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2)
+				filter.eval(ch1 - ref[0], ch2 - ref[1]);
+			if(ref[0] && fabs(filter.val[0])  > std::max(_DL_OFFSET_THR, (int)ref[0]/5))
 				e = e | _DLpowerCh1;
-			if(fabs(filter.val[1])  > std::max((int32_t)ch2/5,_DL_OFFSET_THR))
+			if(ref[1] && fabs(filter.val[1])  > std::max(_DL_OFFSET_THR, (int)ref[1]/5))
 				e = e | _DLpowerCh2;
 			return e;
 }
@@ -96,14 +97,14 @@ _err 	e=_NOERR;
 					switch (limits[count].mode) {
 						case 1:
 						ref[0]=limits[count].val;
-						e = e | Check(high.val[0] - ref[0], 0);
+						e = e | Check(high.val[0], 0);
 						break;
 						case 2:
 						ref[1]=limits[count].val;
-						e = e | Check(0, high.val[1] - ref[1]);
+						e = e | Check(0, high.val[1]);
 						break;
 						default:
-						e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
+						e = e | Check(high.val[0], high.val[1]);
 					 break;
 					}
 				}
@@ -115,11 +116,11 @@ _err 	e=_NOERR;
 //						if(_TERM::debug & (0x3ff<<10))
 //							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 3000);			//high filter
 					}
-					e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
+					e = e | Check(high.val[0], high.val[1]);
 				}
 			} else {
 				ton=toff=0;
-				e = e | Check(high.val[0] - ref[0], high.val[1] - ref[1]);
+				e = e | Check(high.val[0], high.val[1]);
 			}
 //______________________________________________________________________________________
 //
