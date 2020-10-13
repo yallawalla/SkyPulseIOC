@@ -21,7 +21,7 @@ _DL*	_DL::instance=NULL;
 	* @retval : None
 	*/
 /*******************************************************************************/
-_DL::_DL() : high(300,150000), filter(2.5, 1000) {
+_DL::_DL() : high(300,150000), filter(2.5, 1000), max(2.5, 1000) {
 			instance=this;
 			selected=emit=false;
 			offset[0]=offset[1]=ton=toff=0;
@@ -42,15 +42,19 @@ void	_DL::filterCbk(bool k) {
 uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 
 			k ? p=&dma[n][0] : p=&dma[0][0];
-			while(n--) {
-				high.eval((p[0]*(100-dlscale[0]))/100- offset[0],(p[1]*(100-dlscale[1]))/100- offset[1]);
-				++p;++p;
-			}
 
 			if(stest_delay) {
+				while(n--) {
+					high.eval(p[0],p[1]);
+					++p;++p;
+				}
 				offset[0]=high.val[0];
 				offset[1]=high.val[1];
-			}
+			} else
+				while(n--) {
+					high.eval((p[0]*(100-dlscale[0]))/100- offset[0],(p[1]*(100-dlscale[1]))/100- offset[1]);
+					++p;++p;
+				}
 			
 			dac(10,high.val[0]);
 			dac(11,high.val[1]);
@@ -63,6 +67,7 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 			if(k) dac(17,high.val[1]);		else dac(17,ref[1]);
 			if(k) dac(18,filter.val[0]);	else dac(18,ref[0]);
 			if(k) dac(19,filter.val[1]);	else dac(19,ref[1]);
+			if(k) dac(20,max.val[0]);			else dac(20,max.val[1]);
 }
 //______________________________________________________________________________________
 //
@@ -70,11 +75,13 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 //______________________________________________________________________________________
 _err	_DL::Check(float ch1, float ch2) {
 _err	e=_NOERR;
-			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2)
+			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2) {
 				filter.eval(ch1 - ref[0], ch2 - ref[1]);
-			if(ref[0] && fabs(filter.val[0])  > std::max(_DL_OFFSET_THR, (int)ref[0]/5))
+				max.eval(std::max(_DL_OFFSET_THR,(int)ref[0]/5), std::max(_DL_OFFSET_THR,(int)ref[1]/5));
+			}
+			if(fabs(filter.val[0])  > max.val[0])
 				e = e | _DLpowerCh1;
-			if(ref[1] && fabs(filter.val[1])  > std::max(_DL_OFFSET_THR, (int)ref[1]/5))
+			if(fabs(filter.val[1])  > max.val[1])
 				e = e | _DLpowerCh2;
 			return e;
 }
@@ -89,32 +96,27 @@ _err 	e=_NOERR;
 			ref[0]=ref[1]=0;
 			if(selected && emit && ton && toff) {
 				if (__time__ > ton) {
-					if (toff <= ton) {
+					if (toff <= ton)
 						toff = ton + limits[count].on;
-//						if(_TERM::debug & (0x3ff<<10))
-//							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 4000);			//high filter
-					}
 					switch (limits[count].mode) {
 						case 1:
-						ref[0]=limits[count].val;
-						e = e | Check(high.val[0], 0);
+							ref[0]=limits[count].val;
+							e = e | Check(high.val[0], 0);
 						break;
 						case 2:
-						ref[1]=limits[count].val;
-						e = e | Check(0, high.val[1]);
+							ref[1]=limits[count].val;
+							e = e | Check(0, high.val[1]);
 						break;
 						default:
-						e = e | Check(high.val[0], high.val[1]);
+							e = e | Check(high.val[0], high.val[1]);
 					 break;
 					}
 				}
-				if (__time__ > toff) {
+				if (limits[count].off && __time__ > toff) {
 					if(ton <= toff) {
 						ton = toff + limits[count].off;
 						high.val[limits[count].mode-1] < limits[count].val/2 ? --ton : ++ton;
 						setActiveCh(++count);
-//						if(_TERM::debug & (0x3ff<<10))
-//							HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R, 3000);			//high filter
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
@@ -375,5 +377,10 @@ int	_DL::selftest(void) {
 /**
 * @}
 */ 
+/*
+tandem
+____---____________---____________---____________---____________---_________
+___________-----__________-----__________-----__________-----__________-----___
+*/
 
 

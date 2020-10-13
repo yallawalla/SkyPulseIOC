@@ -129,6 +129,9 @@ int		e=_NOERR;
 				__pumpTacho=pumpTacho;
 				__flowTacho=flowTacho;
 				
+				if(debug & DBG_INFO)
+					HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed*100);
+
 				if(hw > _HW_INIT && floatLow)
 					e |= _floatError;
 			} 	
@@ -246,7 +249,7 @@ int 		i=fph, cmax=0;
 						cmax=current; //fval.Ipump;
 				}
 					
-				curr_limit=(cmax * 11)/10
+				curr_limit=(cmax * 6)/5
 				;
 				fpl=i;
 				_print("\r\npump errors enabled ...\r\n");

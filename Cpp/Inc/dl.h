@@ -63,7 +63,7 @@ class	_DL  : public _TERM {
 			float						offset[2];
 			uint16_t				dma[154][2];
 			uint32_t				ton,toff,count,ref[2];
-			lopass					high, filter;
+			lopass					high, filter, max;
 			int32_t					idx,dlscale[2],dacScale,dacOffset;
 			limit						limits[3];
 			

@@ -15,7 +15,7 @@ typedef enum {
 	DBG_CAN_RX				=1<<1,
 	DBG_ERR						=1<<2,
 	DBG_INFO					=1<<3,
-	DBG_CAN_COM				=1<<21,
+	DBG_COM_CAN				=1<<21,
 	DBG_EC_SIM				=1<<22,
 	DBG_ENRG					=1<<23
 }	_dbg;

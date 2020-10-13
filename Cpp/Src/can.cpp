@@ -318,6 +318,8 @@ void	_CAN::pollRx(void *v) {
 //__CAN console processing______________________________________________________________
 	if(remote) {
 		n=_buffer_pull(remote->io->tx,data,8);
+		for(int i=0; i < n; ++i)
+			Debug(DBG_COM_CAN,"%c",data[i]);
 		if(n)
 			Send(idCOM2CAN,data,n);
 	}
