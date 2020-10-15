@@ -17,30 +17,37 @@
 #include <ctype.h>
 
 typedef enum {    
-	idIOC_State				=0x200,
-	idIOC_SprayParm		=0x201,
-	idIOC_Footreq			=0x202,
-	idIOC_AuxReq			=0x203,
-	idIOC_VersionReq	=0x204,
-	idDL_sTestReq			=0x205,
-	idDL_sTestAck			=0x245,
-	idDL_Limits				=0x21F,
-	idDL_State				=0x601,
-	idDL_Params				=0x602,
+// inputs from SYS, filter 1
+	idIOC_State				=0x200,			// state request
+	idIOC_SprayParm		=0x201,			// spray parameters
+	idIOC_Footreq			=0x202,			// footswitch request
+	idIOC_AuxReq			=0x203,			// debug request
+	idIOC_VersionReq	=0x204,			// sw version
+	idDL_sTestReq			=0x205,			// diode selftest
+	idCAN2FOOT				=0x20C,			// send to fsw port
+	idCAN2COM					=0x20B,			// send to console port
+// ack. outputs to SYS, filter 
 	idIOC_State_Ack		=0x240,
 	idIOC_FootAck			=0x241,
 	idIOC_SprayAck		=0x242,
 	idIOC_AuxAck			=0x243,
 	idIOC_VersionAck	=0x244,
-	idCAN2COM					=0x20B,
+	idDL_sTestAck			=0x245,
   idCOM2CAN					=0x24B,
-	idCAN2FOOT				=0x20C,
 	idFOOT2CAN				=0x24C,
-	idEC20_req				=0x280,
-	idEC20_Params			=0x103,
-	idEM_ack					=0x0C0,
-  idBOOT						=0x20
+// input from DL
+	idDL_Limits				=0x21F,			// DL ports limit parameters
+	idDL_State				=0x601,			// DL state req.(from SYS)			
+	idDL_Params				=0x602,			// DL pulse parameters(from SYS)			
+// inputs EC20
+	idEC20_req				=0x280,			// laser announce
+	idEC20_Params			=0x103,			// EC20 pulse parameters(from SYS)
+// inputs ENM
+	idEM_ack					=0x0C0,			// ENM pulse acknowledge 
+// misc (from SYS)
+  idBOOT						=0x20				// BOOT request
 } _StdId;
+
 
 typedef enum {
 	_STANDBY,
