@@ -183,13 +183,23 @@ FRESULT _CLI::DecodeInq(char *c) {
 			ioc->pollError();
 			debug = d;
 		}
-			break;	
+		break;	
 		case 'f':
 			c=strchr(c,' '); 
 			if(c && *c)
 				ioc->Fsw.sTest(strtoul(++c,&c,0));
 		  else
 				_print(" %02X",ioc->Fsw.sTest(EOF));
+		break;
+			
+		case 'm':
+			c=strchr(c,' '); 
+			if(c && *c) {
+				char*			p=(char *)strtoul(++c,&c,0);
+				uint32_t	n=strtoul(++c,&c,0);
+				while(n--)
+					_print(" %02X",*p++);
+			}
 		break;
 		default:
 			return FR_INVALID_NAME;

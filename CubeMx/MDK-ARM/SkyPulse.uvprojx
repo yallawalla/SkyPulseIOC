@@ -384,6 +384,11 @@
           <GroupName>Drivers/CMSIS</GroupName>
           <Files>
             <File>
+              <FileName>printf_stdarg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\C\Src\printf_stdarg.c</FilePath>
+            </File>
+            <File>
               <FileName>system_stm32f4xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/system_stm32f4xx.c</FilePath>
@@ -487,11 +492,6 @@
               <FileName>lcd.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\..\lcd\Objects\lcd.lib</FilePath>
-            </File>
-            <File>
-              <FileName>printf_stdarg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\C\Src\printf_stdarg.c</FilePath>
             </File>
           </Files>
         </Group>

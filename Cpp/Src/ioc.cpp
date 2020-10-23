@@ -125,9 +125,14 @@ FIL 	*f=new FIL;
 * Output				:
 * Return				:
 *******************************************************************************/
-_err	_IOC::fswError() {
+_err	_IOC::fswStatus() {
 			switch(Fsw.Read()) {
 				case EOF:
+					if(Fsw.error_timeout && __time__ > Fsw.error_timeout) {
+						Fsw.error_timeout = 0;
+						_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
+						return _footswError;			
+					}
 					break;
 				case __FSW_OFF:
 					IOC_FootAck.State=_OFF;
@@ -160,23 +165,11 @@ _err	_IOC::fswError() {
 					Fsw.error_timeout=0;
 					break;
 				default:
-					if(IOC_FootAck.State==_OFF) {
-						if(Fsw.error_timeout==0)
-							Fsw.error_timeout=__time__ + _FSW_ERR_DELAY;
-					} else {
-						Fsw.error_timeout = 0;
-						_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
-						return _footswError;
-					}
+					Fsw.error_timeout = __time__;
+					if(IOC_FootAck.State==_OFF)
+						Fsw.error_timeout += _FSW_ERR_DELAY;
 					break;
-			}
-			
-			if(Fsw.error_timeout && __time__ > Fsw.error_timeout) {
-				Fsw.error_timeout = 0;
-				_TERM::Debug(DBG_INFO,"FSW error\r\n/");		
-				return _footswError;			
-			}
-			
+			}			
 			return _NOERR;
 }
 /*******************************************************************************
@@ -197,15 +190,13 @@ _IOC	*ioc = static_cast<_IOC *>(v);
 * Return				:
 *******************************************************************************/
 void	_IOC::pollError() {
-_err	err = can.Status();
+_err	err = spray.adcError();
+			err = err | spray.Status();
+			err = err | can.Status();
 			err = err | pump.Status();
 			err = err | fan.Status();
-			err = err | spray.Status();
-			err = err | fswError();
-//			err = err | diode.Status(IOC_State.State == _ACTIVE);
-//		err = err | diode.Status((IOC_State.State == _ACTIVE) && HAL_GPIO_ReadPin(FSW0_GPIO_Port,FSW0_Pin)==GPIO_PIN_RESET);
+			err = err | fswStatus();
 			err = err | diode.Status(IOC_State.State == _ACTIVE && (IOC_FootAck.State==_3 || IOC_FootAck.State==_4));
-//		err = err | diode.Status(IOC_State.State == _ACTIVE && diode.mode);
 
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
@@ -282,10 +273,10 @@ void	_IOC::SetState(_State s) {
 						fsw2None();
 						spray.mode.Air=false;
 						spray.mode.Water=false;
-						if(IOC_State.Error & (_pumpCurrent | _flowTacho))
-							pump.Disable();
 						ws2812.Batch((char *)"@error.ws");
 					}
+					if(IOC_State.Error & (_pumpCurrent | _flowTacho))
+						pump.Disable();
 					break;
 				case	_CALIBRATE:
 					break;

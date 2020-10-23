@@ -165,6 +165,8 @@ class _IOC {
 		_CLI						com1,com3,comUsb;
 		~_IOC();
 
+		_err fswStatus(void);
+		
 		void SetState(uint8_t *,uint8_t);
 		void SetState(_State);
 		void pollError();
@@ -174,6 +176,5 @@ class _IOC {
 		static void	taskRx(_IOC *me) {
 			me->can.pollRx(me);
 		}
-		_err fswError(void);
 };
 #endif

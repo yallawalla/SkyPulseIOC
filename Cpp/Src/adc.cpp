@@ -2,10 +2,12 @@
 #include	"dl.h"
 #include	"misc.h"
 
-adc		_ADC::val[16]	={},
-			_ADC::fval={},
-			_ADC::offset={},
-			_ADC::gain={};
+adc				_ADC::val[16]	={},
+					_ADC::fval={},
+					_ADC::offset={},
+					_ADC::gain={};
+lopass		_ADC::temp(1,1000),
+					_ADC::curr(1,1000);
 /*******************************************************************************
 * Function Name	: ADC constructor
 * Description		: 2-APB2 clock divider
@@ -26,7 +28,7 @@ _ADC::_ADC() {
 * Return				: None
 *******************************************************************************/
 int		_ADC::th2o() {
-			return (__fit(fval.T1,Rtab,Ttab) + __fit(fval.T2,Rtab,Ttab))/2;
+			return (__fit(temp.val[0],Rtab,Ttab) + __fit(temp.val[1],Rtab,Ttab))/2;
 }
 /*******************************************************************************
 * Function Name	:
@@ -35,10 +37,16 @@ int		_ADC::th2o() {
 * Return				: None
 *******************************************************************************/
 int		_ADC::th2o(int n) {
-				if(n)
-					return __fit(fval.T2,Rtab,Ttab);
-				else
-					return __fit(fval.T1,Rtab,Ttab);
+			return __fit(temp.val[n],Rtab,Ttab);
+}
+/*******************************************************************************
+* Function Name	:
+* Description		: 
+* Output				:
+* Return				: None
+*******************************************************************************/
+int		_ADC::current() {
+			return curr.val[1];
 }
 /*******************************************************************************
 * Function Name	:
@@ -91,6 +99,10 @@ void	HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 *******************************************************************************/
 _err _ADC::adcError() {
 _err	e=_NOERR;
+	
+		curr.eval(fval.Ipump,curr.val[0]);
+		temp.eval(fval.T1,fval.T2);
+
 		if(_SYS_SHG_ENABLED && !_cwbBUTTON) {
 			if(!_cwbENGM)
 				e = e | _handpcDisabled;
@@ -106,9 +118,12 @@ _err	e=_NOERR;
 			e = e | _V12;
 		if(abs(fval.V24 - _V24to16X) > _V24to16X/10)
 			e = e | _V24;
-		if(th2o() > 60*100)
-			e = e | _sysOverheat;
-		if(fval.T1 > 0xf000 ||  fval.T2 > 0xf000 || abs(fval.T1  - fval.T2)	> 0x0a00)
-			e = e | _TsenseError;
+		
+		if(__time__ > _ADC_LPASS_DELAY) {
+			if(th2o() > 6000)
+				e = e | _sysOverheat;
+			if(abs(th2o(0) - th2o(1)) > 500)
+				e = e | _TsenseError;
+		}
 		return e;
 	}

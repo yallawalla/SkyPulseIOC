@@ -3,6 +3,7 @@
 
 #include "err.h"
 #include "term.h"
+#include "adc.h"
 #include "misc.h"
 //_____________________________________________________________________
 typedef __packed struct {
@@ -21,42 +22,6 @@ typedef	__packed struct {
 	uint8_t		mode:2;
 } limit;
 //_____________________________________________________________________
-class lopass {
-	private:
-		class _lopass {
-			private:
-				float x,dx,k;
-			public:
-				_lopass(float fo, float fs) {
-					x=dx=0;
-					k=2*_PI*fo/fs;
-				}
-				float eval(float inp) {
-					float _dx = inp-x-dx-dx;
-					x += k*dx;
-					dx += k*_dx;
-					return x;
-				}
-				void reset() {
-					x=dx=0;
-				}
-		} ch1,ch2;
-	public:
-		float val[2];
-		lopass(float fo, float fs) : ch1(fo,fs),ch2(fo,fs) {
-			val[0]=val[1]=0;
-		}
-		void eval(float in0,float in1) {
-			val[0]=ch1.eval(in0);
-			val[1]=ch2.eval(in1);
-		}	
-		void reset() {
-			ch1.reset();
-			ch2.reset();
-			val[0]=val[1]=0;
-		}	
-};
-
 class	_DL  : public _TERM {
 		private:
 			bool						selected, emit;			

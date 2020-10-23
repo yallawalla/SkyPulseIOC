@@ -19,11 +19,12 @@
 	* @retval : None
 	*/
 /*******************************************************************************/
-_PUMP::_PUMP()  {
+_PUMP::_PUMP() {
 			ftl=30; fth=40; fpl=20; fph=50;
 			offset.cooler=_BAR(1);
 			gain.cooler=_BAR(1);
 			idx=0;
+			err=_NOERR;
 			timeout=__time__ + _PUMP_ERR_DELAY;
 			mode=_PUMP_FLOW;
 			tacho_limit=curr_limit=flow_limit;
@@ -100,30 +101,26 @@ void		_PUMP::Disable() {
 	*/
 /*******************************************************************************/
 _err	_PUMP::Status(void) {	
-int		e=_NOERR;
-		
 			if(pump_drive)
-				pump_drive > rpm(1<<12) ? --pump_drive:++pump_drive;
-			current = std::max((int)fval.Ipump,current);
-			
+				pump_drive > rpm(1<<12) ? --pump_drive : ++pump_drive;
 			if(__time__ > timeout) {
+				err=_NOERR;
 				if(tacho_limit && flow_limit && curr_limit) {
 					if(pumpTacho-__pumpTacho <= tacho_limit)
-						e |= _pumpTacho;
+						err = err | _pumpTacho;
 					if(flowTacho-__flowTacho <= flow_limit)
-						e |= _flowTacho;						
-					if(current > curr_limit)
-						e |= _pumpCurrent;
+						err = err | _flowTacho;						
+					if(current() > curr_limit)
+						err = err | _pumpCurrent;
 				} else if(tacho_limit || flow_limit || curr_limit) {
 					if(!pumpTacho)
-						e |= _pumpTacho;
+						err = err | _pumpTacho;
 					if(!flowTacho)
-						e |= _flowTacho;						
-					if(!fval.Ipump)
-						e |= _pumpCurrent;
+						err = err | _flowTacho;						
+					if(!current())
+						err = err | _pumpCurrent;
 				}
 				timeout=__time__+100;
-				current = fval.Ipump;
 				speed=pumpTacho-__pumpTacho;
 				flow=flowTacho-__flowTacho;
 				__pumpTacho=pumpTacho;
@@ -131,11 +128,10 @@ int		e=_NOERR;
 				
 				if(debug & DBG_INFO)
 					HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,speed*100);
-
 				if(hw > _HW_INIT && floatLow)
-					e |= _floatError;
-			} 	
-			return (_err)e;
+					err = err | _floatError;
+			}
+			return err;
 }
 /*******************************************************************************/
 /**
@@ -209,7 +205,7 @@ int		_PUMP::Fkey(int t) {
 	*/
 /*******************************************************************************/
 void	_PUMP::Newline(void) {
-int		k, i=current*3300/4096.0/0.05/21/16;
+int		k, i=current()*(3300/4096.0/0.05/21/16);
 			if(mode & _PUMP_FLOW)
 				k=flow/(2200/300);
 			else
@@ -234,24 +230,18 @@ bool	_PUMP::Setup(void) {
 				_print("\r\npump errors disabled ...\r\n");
 				tacho_limit=flow_limit=curr_limit=0;
 			} else {
-int 		i=fph, cmax=0;
-				fph=fpl;
-				_wait(5000);	
+int 		i=fpl,j=fph;
+				fph=fpl=i;
+				for(int t=__time__ + 5000; __time__ < t;_wait(200))
+					Newline();			
 				tacho_limit=speed/2;
-				flow_limit=flow/2;
-				fph=i;
-				i=fpl;
-				fpl=fph;
-
-				for(int t=__time__ + 5000; __time__ < t;_wait(200)) {
-					Newline();
-					if(fval.Ipump > cmax)
-						cmax=current; //fval.Ipump;
-				}
-					
-				curr_limit=(cmax * 6)/5
-				;
+				flow_limit=flow/2;			
+				fph=fpl=j;
+				for(int t=__time__ + 5000; __time__ < t;_wait(200))
+					Newline();		
+				curr_limit=(current() * 11)/10;
 				fpl=i;
+				fph=j;
 				_print("\r\npump errors enabled ...\r\n");
 			}
 			return true;

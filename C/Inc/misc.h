@@ -18,8 +18,6 @@
 #define		CLUSTER_SIZE	4*SECTOR_SIZE
 #define		SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + sizeof(uint32_t)))
 	
-#define		_PI 3.14159265358979323846
-
 HAL_StatusTypeDef	FLASH_Program(uint32_t, uint32_t);
 HAL_StatusTypeDef	FLASH_Erase(uint32_t, uint32_t);
 int			ff_pack(int );
@@ -87,7 +85,6 @@ void 		__BLUE2(int32_t);
 #define	cwbarOff()	HAL_GPIO_WritePin(cwbOVRD_GPIO_Port, cwbOVRD_Pin, GPIO_PIN_SET)
 
 #define	floatLow		(FSW0_GPIO_Port->IDR & FSW1_Pin)
-
 
 #define	fsw2DL()		HAL_GPIO_WritePin(FSW_DL_GPIO_Port, FSW_DL_Pin, GPIO_PIN_RESET); \
 										HAL_GPIO_WritePin(FSW_EC_GPIO_Port, FSW_EC_Pin, GPIO_PIN_SET)

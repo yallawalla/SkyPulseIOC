@@ -80,7 +80,7 @@ _SPRAY::_SPRAY() {
 
 _err	_SPRAY::Status() {
 //------------------------------------------------------------------------------
-_err	_err = adcError();
+_err	e = _NOERR;
 //------------------------------------------------------------------------------
 			if(offsetTimeout && __time__ > offsetTimeout) {
 				offset.bottle += fval.air - offset.air;
@@ -127,14 +127,14 @@ _err	_err = adcError();
 			}
 
 			if(fval.compressor < inPressure) {
-				_err = _err | _sprayInPressure;	
+				e = e | _sprayInPressure;	
 				readyTimeout=0;
 				inPressure = _BAR(3.0f);
 			} else			
 				inPressure = _BAR(2.0f);
 			
 			if(readyTimeout && __time__ < readyTimeout)
-				_err = _err | _sprayNotReady;
+				e = e | _sprayNotReady;
 			else
 				readyTimeout=0;
 			
@@ -160,7 +160,7 @@ _err	_err = adcError();
 			if(sim)
 				sim->Poll(_IOC::parent);
 
-			return _err;
+			return e;
 }
 //_________________________________________________________________________________
 void	_SPRAY::Newline(void) {

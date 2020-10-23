@@ -16,7 +16,7 @@ class	_PUMP : public _TERM, public _ADC {
 		int 		fpl,fph,ftl,fth;
 		int			idx,timeout,__pumpTacho,__flowTacho;
 		int			tacho_limit, flow_limit, curr_limit;
-
+		_err		err;
 	public:
 		_PUMP();
 		void		LoadSettings(FIL *);
@@ -27,7 +27,7 @@ class	_PUMP : public _TERM, public _ADC {
 		void		Increment(int, int);
 		void		Enable(void),Disable(void);
 		int			rpm(int),mode;
-		int			speed, flow, current;
+		int			speed, flow;
 		bool		Setup(void),Enabled(void);
 		_err		Status(void);
 };

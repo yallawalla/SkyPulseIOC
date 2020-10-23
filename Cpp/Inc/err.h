@@ -50,6 +50,7 @@ inline _err operator &  (_err a, _err b)	{return static_cast<_err>(static_cast<i
 inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<int>(a) ^ static_cast<int>(b));}
 
 #define	_ADC_ERR_DELAY		200
+#define	_ADC_LPASS_DELAY	3000
 #define _PUMP_ERR_DELAY		6000
 #define _FAN_ERR_DELAY		3000
 #define _FSW_ERR_DELAY		3000

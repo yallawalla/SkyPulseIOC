@@ -14,6 +14,7 @@ class	_FAN : public _TERM, public _ADC {
 	private:
 		int fpl,fph,ftl,fth;
 		int	idx,timeout,speed,tacho_limit,__fanTacho;
+		_err	err;
 	public:
 		_FAN();
 		void		LoadSettings(FIL *);

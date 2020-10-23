@@ -23,6 +23,7 @@ _FAN::_FAN()  {
 			ftl=30; fth=40; fpl=20; fph=95;
 			idx=speed=tacho_limit=mode=0;
 			timeout=__time__ + _FAN_ERR_DELAY;
+			err=_NOERR;
 }
 /*******************************************************************************/
 /**
@@ -116,22 +117,17 @@ int		_FAN::rpm(int fsc) {
 	*/
 /*******************************************************************************/
 _err	_FAN::Status(void) {
-int		e=_NOERR;
-			if(__time__ % 4 == 0) {
-				if(fan_drive > rpm(__PWMRATE))
-					--fan_drive;
-				else
-					++fan_drive;
-			}
+			if(__time__ % 4 == 0)
+				fan_drive > rpm(__PWMRATE) ? --fan_drive : ++fan_drive;
 			if(__time__ > timeout) {
+				err=_NOERR;
 				if(tacho_limit && (fanTacho-__fanTacho) <= tacho_limit)
-					e |= _fanTacho;
+					err = err | _fanTacho;
 				timeout=__time__+100;
-				
 				speed=fanTacho-__fanTacho;
 				__fanTacho=fanTacho;
-				}
-			return (_err)e;
+			}
+			return err;
 }
 /*******************************************************************************/
 /**
@@ -166,10 +162,14 @@ void 	_FAN::Increment(int a, int b)	{
 	*/
 /*******************************************************************************/
 void	_FAN::Newline(void) {
+			int dt=th2o(0)-th2o(1);
 			_print("\r:fan   %3d%c,%2d.%d'C",rpm(100),'%',th2o()/100,(th2o()%100)/10);
-			if(idx>0)
-				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);
-			for(int i=4*(4-idx)+3;idx && i--;_print("\b"));
+			if(idx>0) {
+				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);      
+				dt < 0 ? _print(",-") : _print(", ");
+				_print("%d.%02d'C",abs(dt/100),abs(dt%100));
+			}
+			for(int i=4*(6-idx)+3;idx && i--;_print("\b"));
 			Repeat(200,__CtrlR);
 }
 /*******************************************************************************/
@@ -184,11 +184,13 @@ bool	_FAN::Setup(void) {
 				_print("\r\nfan errors disabled ...\r\n");
 				tacho_limit=0;
 			} else {
-				int 	i=fph;
-				fph=fpl;
-				_wait(3000);
-				tacho_limit=speed-speed/3;
-				fph=i;
+int 		i=fpl,j=fph;
+				fph=fpl=i;
+				for(int t=__time__ + 5000; __time__ < t;_wait(200))
+					Newline();		
+				tacho_limit=speed/2;
+				fpl=i;
+				fph=j;
 				_print("\r\nfan errors enabled ...\r\n");
 			}
 			return true;
