@@ -40,7 +40,7 @@ class	_DL  : public _TERM {
 			void		filterCbk(bool);
 		
 			
-			uint8_t	setActiveCh(uint8_t);
+			uint8_t	getActiveCh(uint8_t);
 		
 			void 		Setup();
 			void 		Setup(DL_Timing *);

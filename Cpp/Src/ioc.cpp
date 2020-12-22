@@ -196,7 +196,8 @@ _err	err = spray.adcError();
 			err = err | pump.Status();
 			err = err | fan.Status();
 			err = err | fswStatus();
-			err = err | diode.Status(IOC_State.State == _ACTIVE && (IOC_FootAck.State==_3 || IOC_FootAck.State==_4));
+//			err = err | diode.Status(IOC_State.State == _ACTIVE && (IOC_FootAck.State==_3 || IOC_FootAck.State==_4));
+			err = err | diode.Status(IOC_State.State == _ACTIVE);
 
 _err	w = (err ^ IOC_State.Error) & warn_mask;
 _err	e = (err ^ IOC_State.Error) & err & ~error_mask;

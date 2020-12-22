@@ -92,7 +92,7 @@ _err	e=_NOERR;
 _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
 
-			emit=k;
+			emit=k && (limits[0].mode || limits[1].mode || limits[2].mode);
 			ref[0]=ref[1]=0;
 			if(selected && emit && ton && toff) {
 				if (__time__ > ton) {
@@ -116,7 +116,7 @@ _err 	e=_NOERR;
 					if(ton <= toff) {
 						ton = toff + limits[count].off;
 						high.val[limits[count].mode-1] < limits[count].val/2 ? --ton : ++ton;
-						setActiveCh(++count);
+						getActiveCh(++count);
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
@@ -157,7 +157,7 @@ _err 	e=_NOERR;
 * Output				:
 * Return				:
 *******************************************************************************/
-uint8_t	_DL::setActiveCh(uint8_t n) {
+uint8_t	_DL::getActiveCh(uint8_t n) {
 			int i;
 			count = n % 3;
 			for(i=0; !limits[count].mode && i<3; ++i)
@@ -184,18 +184,15 @@ void	_DL::Setup() {
 void	_DL::Setup(DL_Limits *p) {
 			selected=true;
 			if(emit && !ton && !toff) {
-				setActiveCh(0);
+				getActiveCh(0);
 				ton=toff=__time__;
-			}	else {
-				if( p->ch0 || p->ch1 || p->ch2) {
-					limits[0].val	= (p->l0 * 5)/6;
-					limits[1].val	= (p->l1 * 5)/6;
-					limits[2].val	= (p->l2 * 5)/6;
-					limits[0].mode	= p->ch0;
-					limits[1].mode	= p->ch1;
-					limits[2].mode	= p->ch2;
-				}
-			}				
+			}			
+			limits[0].val	= (p->l0);
+			limits[1].val	= (p->l1);
+			limits[2].val	= (p->l2);
+			limits[0].mode	= p->ch0;
+			limits[1].mode	= p->ch1;
+			limits[2].mode	= p->ch2;		
 }
 /*******************************************************************************
 * Function Name	: 
