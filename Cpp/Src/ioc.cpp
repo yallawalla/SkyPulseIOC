@@ -289,7 +289,7 @@ void	_IOC::SetState(_State s) {
 * Output				:
 * Return				:
 *******************************************************************************/
-const string _IOC::ErrMsg[] = {
+const	string _IOC::ErrMsg[] = {
 			"5V  supply",
 			"12V supply",
 			"24V supply",

@@ -65,9 +65,8 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 
 			if(k) dac(16,high.val[0]);		else dac(16,ref[0]);
 			if(k) dac(17,high.val[1]);		else dac(17,ref[1]);
-			if(k) dac(18,filter.val[0]);	else dac(18,ref[0]);
-			if(k) dac(19,filter.val[1]);	else dac(19,ref[1]);
-			if(k) dac(20,max.val[0]);			else dac(20,max.val[1]);
+			if(k) dac(18,filter.val[0]);	else dac(18,max.val[0]);
+			if(k) dac(19,filter.val[1]);	else dac(19,max.val[1]);
 }
 //______________________________________________________________________________________
 //
@@ -77,11 +76,11 @@ _err	_DL::Check(float ch1, float ch2) {
 _err	e=_NOERR;
 			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2) {
 				filter.eval(ch1 - ref[0], ch2 - ref[1]);
-				max.eval(std::max(_DL_OFFSET_THR,(int)ref[0]/5), std::max(_DL_OFFSET_THR,(int)ref[1]/5));
+				max.eval(ref[0],ref[1]);
 			}
-			if(fabs(filter.val[0])  > max.val[0])
+			if(fabs(filter.val[0]) > std::max(_DL_OFFSET_THR,(int)max.val[0]/5))
 				e = e | _DLpowerCh1;
-			if(fabs(filter.val[1])  > max.val[1])
+			if(fabs(filter.val[1]) > std::max(_DL_OFFSET_THR,(int)max.val[1]/5))
 				e = e | _DLpowerCh2;
 			return e;
 }
@@ -200,9 +199,14 @@ void	_DL::Setup(DL_Limits *p) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_DL::Setup(DL_Timing *p) {		
-			limits[p->ch-1].on	= p->on/1000;
-			limits[p->ch-1].off	= p->off/1000;
+void	_DL::Setup(DL_Timing *p) {
+			if(p->on && p->off) {
+				limits[p->ch-1].on	= p->on/1000;
+				limits[p->ch-1].off	= p->off/1000;
+			} else {
+				limits[p->ch-1].on	= 9990;
+				limits[p->ch-1].off	= 10;
+			}
 }
 /*******************************************************************************/
 /**
@@ -273,7 +277,8 @@ int		_DL::Fkey(int t) {
 				break;
 				case __F1:
 				case __f1:
-					selftest();
+					if(!emit)
+						selftest();
 					_print("\r\n\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n\r\n",
 						limits[0].val,limits[0].on,limits[0].off,limits[0].mode,
 						limits[1].val,limits[1].on,limits[1].off,limits[1].mode,
@@ -315,7 +320,8 @@ void	_DL::Newline(void) {
 				break;
 				case 0x0e:
 					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",
-						(limits[0].val * (100-dlscale[0]))/100,(limits[1].val*(100-dlscale[1]))/100,
+						(int)(max.val[0] * (100-dlscale[0]))/100,
+						(int)(max.val[1] * (100-dlscale[1]))/100,
 						(int)filter.val[0],(int)filter.val[1],
 						(int)offset[0],(int)offset[1]);
 				break;
