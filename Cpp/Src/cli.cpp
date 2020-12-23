@@ -175,6 +175,7 @@ FRESULT _CLI::DecodeInq(char *c) {
 	switch(*trim(&++c)) {
 		case 'E':
 		{
+			_print("     %08X(err),%08X(warn)",ioc->error_mask,ioc->warn_mask);
 			dbgio=io;
 			_dbg d = debug;
 			debug = (_dbg)(d | DBG_ERR);
