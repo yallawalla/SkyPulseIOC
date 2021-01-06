@@ -23,7 +23,7 @@ _DL*	_DL::instance=NULL;
 /*******************************************************************************/
 _DL::_DL() : high(300,150000), filter(2.5, 1000), max(2.5, 1000) {
 			instance=this;
-			selected=emit=false;
+			selected=false;
 			offset[0]=offset[1]=ton=toff=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
@@ -91,10 +91,17 @@ _err	e=_NOERR;
 _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
 
-			emit=k && (limits[0].mode || limits[1].mode || limits[2].mode);
+			if(!selected || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))
+				k=false;
+			
 			ref[0]=ref[1]=0;
-			if(selected && emit && ton && toff) {
-				if (__time__ > ton) {
+			if(k) {
+				if(ton==0 && toff==0) {
+				getActiveCh(0);
+				ton=toff=__time__;
+				}
+
+				if (__time__ >= ton) {
 					if (toff <= ton)
 						toff = ton + limits[count].on;
 					switch (limits[count].mode) {
@@ -120,7 +127,7 @@ _err 	e=_NOERR;
 					e = e | Check(high.val[0], high.val[1]);
 				}
 			} else {
-				ton=toff=0;
+				ton=toff=limits[0].mode=limits[1].mode=limits[2].mode=0;
 				e = e | Check(high.val[0], high.val[1]);
 			}
 //______________________________________________________________________________________
@@ -182,16 +189,12 @@ void	_DL::Setup() {
 *******************************************************************************/
 void	_DL::Setup(DL_Limits *p) {
 			selected=true;
-			if(emit && !ton && !toff) {
-				getActiveCh(0);
-				ton=toff=__time__;
-			}			
 			limits[0].val	= (p->l0);
 			limits[1].val	= (p->l1);
 			limits[2].val	= (p->l2);
 			limits[0].mode	= p->ch0;
 			limits[1].mode	= p->ch1;
-			limits[2].mode	= p->ch2;		
+			limits[2].mode	= p->ch2;	
 }
 /*******************************************************************************
 * Function Name	: 
@@ -277,7 +280,7 @@ int		_DL::Fkey(int t) {
 				break;
 				case __F1:
 				case __f1:
-					if(!emit)
+					if(!ton && !toff)
 						selftest();
 					_print("\r\n\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n\r\n",
 						limits[0].val,limits[0].on,limits[0].off,limits[0].mode,

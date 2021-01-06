@@ -24,7 +24,7 @@ typedef	__packed struct {
 //_____________________________________________________________________
 class	_DL  : public _TERM {
 		private:
-			bool						selected, emit;			
+			bool						selected;			
 			float						offset[2];
 			uint16_t				dma[154][2];
 			uint32_t				ton,toff,count,ref[2];
