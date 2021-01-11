@@ -24,7 +24,7 @@ typedef	__packed struct {
 //_____________________________________________________________________
 class	_DL  : public _TERM {
 		private:
-			bool						selected, emit;			
+			bool						selected;			
 			float						offset[2];
 			uint16_t				dma[154][2];
 			uint32_t				ton,toff,count,ref[2];
@@ -40,7 +40,7 @@ class	_DL  : public _TERM {
 			void		filterCbk(bool);
 		
 			
-			uint8_t	setActiveCh(uint8_t);
+			uint8_t	getActiveCh(uint8_t);
 		
 			void 		Setup();
 			void 		Setup(DL_Timing *);

@@ -23,7 +23,7 @@ _DL*	_DL::instance=NULL;
 /*******************************************************************************/
 _DL::_DL() : high(300,150000), filter(2.5, 1000), max(2.5, 1000) {
 			instance=this;
-			selected=emit=false;
+			selected=false;
 			offset[0]=offset[1]=ton=toff=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
@@ -65,9 +65,8 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 
 			if(k) dac(16,high.val[0]);		else dac(16,ref[0]);
 			if(k) dac(17,high.val[1]);		else dac(17,ref[1]);
-			if(k) dac(18,filter.val[0]);	else dac(18,ref[0]);
-			if(k) dac(19,filter.val[1]);	else dac(19,ref[1]);
-			if(k) dac(20,max.val[0]);			else dac(20,max.val[1]);
+			if(k) dac(18,filter.val[0]);	else dac(18,max.val[0]);
+			if(k) dac(19,filter.val[1]);	else dac(19,max.val[1]);
 }
 //______________________________________________________________________________________
 //
@@ -77,11 +76,11 @@ _err	_DL::Check(float ch1, float ch2) {
 _err	e=_NOERR;
 			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2) {
 				filter.eval(ch1 - ref[0], ch2 - ref[1]);
-				max.eval(std::max(_DL_OFFSET_THR,(int)ref[0]/5), std::max(_DL_OFFSET_THR,(int)ref[1]/5));
+				max.eval(ref[0],ref[1]);
 			}
-			if(fabs(filter.val[0])  > max.val[0])
+			if(fabs(filter.val[0]) > std::max(_DL_OFFSET_THR,(int)max.val[0]/5))
 				e = e | _DLpowerCh1;
-			if(fabs(filter.val[1])  > max.val[1])
+			if(fabs(filter.val[1]) > std::max(_DL_OFFSET_THR,(int)max.val[1]/5))
 				e = e | _DLpowerCh2;
 			return e;
 }
@@ -92,10 +91,17 @@ _err	e=_NOERR;
 _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
 
-			emit=k;
+			if(!selected || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))
+				k=false;
+			
 			ref[0]=ref[1]=0;
-			if(selected && emit && ton && toff) {
-				if (__time__ > ton) {
+			if(k) {
+				if(ton==0 && toff==0) {
+				getActiveCh(0);
+				ton=toff=__time__;
+				}
+
+				if (__time__ >= ton) {
 					if (toff <= ton)
 						toff = ton + limits[count].on;
 					switch (limits[count].mode) {
@@ -116,12 +122,12 @@ _err 	e=_NOERR;
 					if(ton <= toff) {
 						ton = toff + limits[count].off;
 						high.val[limits[count].mode-1] < limits[count].val/2 ? --ton : ++ton;
-						setActiveCh(++count);
+						getActiveCh(++count);
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
 			} else {
-				ton=toff=0;
+				ton=toff=limits[0].mode=limits[1].mode=limits[2].mode=0;
 				e = e | Check(high.val[0], high.val[1]);
 			}
 //______________________________________________________________________________________
@@ -157,7 +163,7 @@ _err 	e=_NOERR;
 * Output				:
 * Return				:
 *******************************************************************************/
-uint8_t	_DL::setActiveCh(uint8_t n) {
+uint8_t	_DL::getActiveCh(uint8_t n) {
 			int i;
 			count = n % 3;
 			for(i=0; !limits[count].mode && i<3; ++i)
@@ -183,19 +189,12 @@ void	_DL::Setup() {
 *******************************************************************************/
 void	_DL::Setup(DL_Limits *p) {
 			selected=true;
-			if(emit && !ton && !toff) {
-				setActiveCh(0);
-				ton=toff=__time__;
-			}	else {
-				if( p->ch0 || p->ch1 || p->ch2) {
-					limits[0].val	= (p->l0 * 5)/6;
-					limits[1].val	= (p->l1 * 5)/6;
-					limits[2].val	= (p->l2 * 5)/6;
-					limits[0].mode	= p->ch0;
-					limits[1].mode	= p->ch1;
-					limits[2].mode	= p->ch2;
-				}
-			}				
+			limits[0].val	= (p->l0);
+			limits[1].val	= (p->l1);
+			limits[2].val	= (p->l2);
+			limits[0].mode	= p->ch0;
+			limits[1].mode	= p->ch1;
+			limits[2].mode	= p->ch2;	
 }
 /*******************************************************************************
 * Function Name	: 
@@ -203,9 +202,14 @@ void	_DL::Setup(DL_Limits *p) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_DL::Setup(DL_Timing *p) {		
-			limits[p->ch-1].on	= p->on/1000;
-			limits[p->ch-1].off	= p->off/1000;
+void	_DL::Setup(DL_Timing *p) {
+			if(p->on && p->off) {
+				limits[p->ch-1].on	= p->on/1000;
+				limits[p->ch-1].off	= p->off/1000;
+			} else {
+				limits[p->ch-1].on	= 9990;
+				limits[p->ch-1].off	= 10;
+			}
 }
 /*******************************************************************************/
 /**
@@ -276,7 +280,8 @@ int		_DL::Fkey(int t) {
 				break;
 				case __F1:
 				case __f1:
-					selftest();
+					if(!ton && !toff)
+						selftest();
 					_print("\r\n\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n%4d,%4d,%4d,%2d\r\n\r\n",
 						limits[0].val,limits[0].on,limits[0].off,limits[0].mode,
 						limits[1].val,limits[1].on,limits[1].off,limits[1].mode,
@@ -318,7 +323,8 @@ void	_DL::Newline(void) {
 				break;
 				case 0x0e:
 					_print("\r:dl    %4d,%4d,%4d,%4d,%4d,%4d",
-						(limits[0].val * (100-dlscale[0]))/100,(limits[1].val*(100-dlscale[1]))/100,
+						(int)(max.val[0] * (100-dlscale[0]))/100,
+						(int)(max.val[1] * (100-dlscale[1]))/100,
 						(int)filter.val[0],(int)filter.val[1],
 						(int)offset[0],(int)offset[1]);
 				break;

@@ -176,10 +176,11 @@ V 1.06 Sep 15 2020 <0271DCD0>, HW V2
 - preizkušena distrib. fsw
 
 
-
 - pri +/-50  general. offset error ga 1064 nm presee pri 4W
 - CW ne deluje, treba obravnavati loceno
 
 
-
+> 602 00 40 00 00 01 00 00 01
+> 602 00 80 00 00 01 00 00 01
+> 21f 01 10 02 10 03 10 06
 
