@@ -68,65 +68,66 @@ uint16_t *p,n=sizeof(dma)/sizeof(short)/4;
 			if(k) dac(18,filter.val[0]);	else dac(18,max.val[0]);
 			if(k) dac(19,filter.val[1]);	else dac(19,max.val[1]);
 }
-//______________________________________________________________________________________
-//
-//	DL levels check
-//______________________________________________________________________________________
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 _err	_DL::Check(float ch1, float ch2) {
 _err	e=_NOERR;
-			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2) {
-				filter.eval(ch1 - ref[0], ch2 - ref[1]);
-				max.eval(ref[0],ref[1]);
+			if(abs((int)(__time__ - ton)) > 2 && abs((int)(__time__ - toff)) > 2) {					// skip on transients
+				filter.eval(ch1 - ref[0], ch2 - ref[1]);																			// ref vs. high/default difference
+				max.eval(ref[0],ref[1]);																											// ref. filter.
 			}
-			if(fabs(filter.val[0]) > std::max(_DL_OFFSET_THR,(int)max.val[0]/5))
+			if(fabs(filter.val[0]) > std::max(_DL_OFFSET_THR,(int)max.val[0]/5))						// error triggers
 				e = e | _DLpowerCh1;
 			if(fabs(filter.val[1]) > std::max(_DL_OFFSET_THR,(int)max.val[1]/5))
 				e = e | _DLpowerCh2;
 			return e;
 }
-//______________________________________________________________________________________
-//
-//	DL levels check
-//______________________________________________________________________________________
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
-
-			if(!selected || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))
+			if(!selected || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))	// deny active if not selected or no active channels
 				k=false;
-			
 			ref[0]=ref[1]=0;
-			if(k) {
-				if(ton==0 && toff==0) {
-				getActiveCh(0);
-				ton=toff=__time__;
+			if(k) {																																					// check on active			
+				if(ton==0 && toff==0) {																												// first active entry
+					setActiveCh(0);
+					ton=toff=__time__;
 				}
-
-				if (__time__ >= ton) {
-					if (toff <= ton)
-						toff = ton + limits[count].on;
-					switch (limits[count].mode) {
+				if (__time__ >= ton) {																												// leading edge
+					if (toff <= ton)																														// flip off time															
+						toff = ton + limits[active].on;
+					switch (limits[active].mode) {																							// process active channel
 						case 1:
-							ref[0]=limits[count].val;
+							ref[0]=limits[active].val;
 							e = e | Check(high.val[0], 0);
 						break;
 						case 2:
-							ref[1]=limits[count].val;
+							ref[1]=limits[active].val;
 							e = e | Check(0, high.val[1]);
 						break;
 						default:
-							e = e | Check(high.val[0], high.val[1]);
+							e = e | Check(high.val[0], high.val[1]);																// shouldn't be here !!!
 					 break;
 					}
 				}
-				if (limits[count].off && __time__ > toff) {
-					if(ton <= toff) {
-						ton = toff + limits[count].off;
-						high.val[limits[count].mode-1] < limits[count].val/2 ? --ton : ++ton;
-						getActiveCh(++count);
+				if (limits[active].on && limits[active].off && __time__ > toff) {							// trailing edge, deny on CW
+					if(ton <= toff) {																														// flip on time	
+						ton = toff + limits[active].off;
+						high.val[limits[active].mode-1] < limits[active].val/2 ? --ton : ++ton;		// sync trailing edge on active
+						setActiveCh(++active);
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
-			} else {
+			} else {																																				// processing standby, ready or fsw break;
 				ton=toff=limits[0].mode=limits[1].mode=limits[2].mode=0;
 				e = e | Check(high.val[0], high.val[1]);
 			}
@@ -163,14 +164,13 @@ _err 	e=_NOERR;
 * Output				:
 * Return				:
 *******************************************************************************/
-uint8_t	_DL::getActiveCh(uint8_t n) {
+void	_DL::setActiveCh(uint32_t n) {
 			int i;
-			count = n % 3;
-			for(i=0; !limits[count].mode && i<3; ++i)
-				count = ++count % 3;
+			active = n % 3;
+			for(i=0; !limits[active].mode && i<3; ++i)
+				active = ++active % 3;
 			if(i == 3)
-				count=0;
-			return count;
+				active=0;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -189,9 +189,9 @@ void	_DL::Setup() {
 *******************************************************************************/
 void	_DL::Setup(DL_Limits *p) {
 			selected=true;
-			limits[0].val	= (p->l0);
-			limits[1].val	= (p->l1);
-			limits[2].val	= (p->l2);
+			limits[0].val	= 	p->l0;
+			limits[1].val	= 	p->l1;
+			limits[2].val	= 	p->l2;
 			limits[0].mode	= p->ch0;
 			limits[1].mode	= p->ch1;
 			limits[2].mode	= p->ch2;	
@@ -203,41 +203,33 @@ void	_DL::Setup(DL_Limits *p) {
 * Return				:
 *******************************************************************************/
 void	_DL::Setup(DL_Timing *p) {
-			if(p->on && p->off) {
 				limits[p->ch-1].on	= p->on/1000;
 				limits[p->ch-1].off	= p->off/1000;
-			} else {
-				limits[p->ch-1].on	= 9990;
-				limits[p->ch-1].off	= 10;
-			}
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void	_DL::LoadSettings(FIL *f) {
 char	c[128];
 			f_gets(c,sizeof(c),f);
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void	_DL::SaveSettings(FIL *f) {
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void 	_DL::Increment(int a, int b)	{
 			idx= std::min(std::max(idx+b,0),3);
 			switch(idx) {
@@ -254,13 +246,12 @@ void 	_DL::Increment(int a, int b)	{
 			}
 			Newline();
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 int		_DL::Fkey(int t) {
 			switch(t) {
 				case __f4:
@@ -309,13 +300,12 @@ int		_DL::Fkey(int t) {
 			}
 			return EOF;
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
 void	_DL::Newline(void) {
 			switch(stest_err) {
 				case 0:
@@ -335,14 +325,13 @@ void	_DL::Newline(void) {
 			for(int i=5*(3-idx)+11;i--;_print("\b"));
 			Repeat(200,__CtrlR);
 }
-/*******************************************************************************/
-/**
-	* @brief
-	* @param	: None
-	* @retval : None
-	*/
-/*******************************************************************************/
-int	_DL::selftest(void) {
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+int		_DL::selftest(void) {
 	int	n=stest_err=0;
 	stest_delay=__time__ + 200;
 	do {
