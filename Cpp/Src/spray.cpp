@@ -46,8 +46,8 @@ _SPRAY::_SPRAY() {
 			Water->Close();
 		
 			offset.air=offset.bottle=offset.compressor=	_BAR(1.0f);
-			gain.air=																		_BAR(1.5f);
-			gain.bottle=																_BAR(0.3f);
+			gain.air=																		_BAR(1.0f);
+			gain.bottle=																_BAR(0.5f);
 			gain.compressor=														_BAR(1.0f);
 
 			Air_P=Bottle_P=0;
@@ -65,9 +65,9 @@ _SPRAY::_SPRAY() {
 			offsetTimeout=__time__ + 5000;
 
 			pFit=new _FIT();
-			pFit->rp[0]=15960;
-			pFit->rp[1]=9870*1e-4f;
-			pFit->rp[2]=-878*1e-8f;
+			pFit->rp[0]=	17526;
+			pFit->rp[1]=	7065*1e-4f;
+			pFit->rp[2]=	1128*1e-8f;
 			sim=NULL;
 }
 /*******************************************************************************
@@ -215,12 +215,6 @@ int		_SPRAY::Fkey(int t) {
 					case __CtrlR:
 					Increment(0,0);
 					break;
-					case __PageUp:
-						gain.bottle=std::min(gain.bottle+500,_BAR(0.5f));
-						break;
-					case __PageDown:
-						gain.bottle=std::max(gain.bottle-500,_BAR(0.2f));
-						break;					
 					case __CtrlV:
 						if(mode.Vibrate)
 							mode.Vibrate=false;
@@ -249,7 +243,6 @@ int		_SPRAY::Fkey(int t) {
 						break;
 					case __F1:
 					case __f1:
-					case __Delete:
 						Adjust();
 						break;
 					}
@@ -309,10 +302,11 @@ void	_SPRAY::Increment(int a, int b) {
 					if(a)
 						readyTimeout	= __time__ + _SPRAY_READY_T;
 					break;
-						case 2:
-							break;
+				case 2:
+						gain.air=std::min(std::max(gain.air+a*_BAR(1.0f)/10,_BAR(0.5f)),_BAR(1.5f));
+					break;
 				case 3:
-					gain.bottle		= std::min(std::max(_BAR(0.1f),gain.bottle+100*a),_BAR(0.5f));
+						gain.bottle=std::min(std::max(gain.bottle+a*_BAR(1.0f)/20,_BAR(0.25f)),_BAR(0.75f));
 					break;
 				case 4:
 					if(sim)
