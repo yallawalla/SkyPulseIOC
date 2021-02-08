@@ -20,14 +20,15 @@
 	*/
 /*******************************************************************************/
 _PUMP::_PUMP() {
-			ftl=30; fth=40; fpl=20; fph=50;
-			offset.cooler=_BAR(1);
-			gain.cooler=_BAR(1);
+			ftl=34; fth=35; fpl=20; fph=50;
+			mode=_PUMP_FLOW;
+			curr_limit=26232;
+			flow_limit=37;
+			tacho_limit=8;
 			idx=0;
 			err=_NOERR;
+			offset.cooler=gain.cooler=_BAR(1);
 			timeout=__time__ + _PUMP_ERR_DELAY;
-			mode=_PUMP_FLOW;
-			tacho_limit=curr_limit=flow_limit;
 }
 /*******************************************************************************/
 /**

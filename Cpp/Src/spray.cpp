@@ -7,7 +7,6 @@
 	* @brief	Timers initialization & ISR
 	*
 	*/
-
 /** @addtogroup
 * @{
 */

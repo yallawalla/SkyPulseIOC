@@ -40,7 +40,8 @@ _IOC*	_IOC::parent			= NULL;
 *******************************************************************************/
 _IOC::_IOC() : can(&hcan2),com1(&huart1),com3(&huart3),comUsb(pollVcp) {
 			parent=this;
-			error_mask = warn_mask = _sprayInPressure | _sprayNotReady;
+			error_mask = _sprayInPressure | _sprayNotReady | _floatError;
+			warn_mask = _sprayInPressure | _sprayNotReady;
 			SetState(_STANDBY);	
 			LoadSettings();
 			_proc_add((void *)pollStatus,this,(char *)"error task",1);
