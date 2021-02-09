@@ -21,7 +21,7 @@
 /*******************************************************************************/
 _FAN::_FAN()  {
 			ftl=30; fth=40; fpl=20; fph=95;
-			tacho_limit=5;
+			tacho_limit=4;
 			timeout=__time__ + _FAN_ERR_DELAY;
 			idx=mode=0;
 			err=_NOERR;

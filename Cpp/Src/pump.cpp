@@ -22,8 +22,8 @@
 _PUMP::_PUMP() {
 			ftl=34; fth=35; fpl=20; fph=50;
 			mode=_PUMP_FLOW;
-			curr_limit=26232;
-			flow_limit=37;
+			curr_limit=33432;
+			flow_limit=35;
 			tacho_limit=8;
 			idx=0;
 			err=_NOERR;
