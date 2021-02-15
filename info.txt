@@ -179,8 +179,15 @@ V 1.06 Sep 15 2020 <0271DCD0>, HW V2
 - pri +/-50  general. offset error ga 1064 nm preseže pri 4W
 - CW ne deluje, treba obravnavati loceno
 
+V 1.06 Feb  9 2021 <98E6F21D>, HW V1
+- popravki default vrednosti v konstruktorju _IOC in _SPRAY zaradi možnosti brisanja ioc.ini, premenjenega obsega spraya 
+  in spremenjene maske
+- popravki tandem (CW)
+- sprememba max. vrednost pritiska v zraèni liniji je +1Bar
+- float switch, kodiranje plate in izpis verzije HW
+- odpravljeni bugi zaradi vtikanja/iztikanja footswitcha
 
-> 602 00 40 00 00 01 00 00 01
-> 602 00 80 00 00 01 00 00 01
-> 21f 01 10 02 10 03 10 06
+I-10611, S-2024
+I-10397, S-1975
+I-10295, S-1949
 
