@@ -122,7 +122,7 @@ _err	e=_NOERR;
 		if(__time__ > _ADC_LPASS_DELAY) {
 			if(th2o() > 6000)
 				e = e | _sysOverheat;
-			if(abs(th2o(0) - th2o(1)) > 500)
+			if(abs(th2o(0) - th2o(1)) > 500 || th2o() < 0)
 				e = e | _TsenseError;
 		}
 		return e;

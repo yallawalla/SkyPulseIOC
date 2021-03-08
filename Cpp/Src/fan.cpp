@@ -164,7 +164,7 @@ void 	_FAN::Increment(int a, int b)	{
 /*******************************************************************************/
 void	_FAN::Newline(void) {
 			int dt=th2o(0)-th2o(1);
-			_print("\r:fan   %3d%c,%2d.%d'C",rpm(100),'%',th2o()/100,(th2o()%100)/10);
+			_print("\r:fan   %3d%c,%2d.%d'C",rpm(100),'%',th2o()/100,abs(th2o()%100)/10);
 			if(idx>0) {
 				_print("        %2d%c-%2d%c,%2d'-%2d'",fpl,'%',fph,'%',ftl,fth);      
 				dt < 0 ? _print(",-") : _print(", ");

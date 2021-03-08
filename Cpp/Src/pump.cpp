@@ -211,7 +211,7 @@ int		k, i=current()*(3300/4096.0/0.05/21/16);
 				k=flow/(2200/300);
 			else
 				k=10*(fval.cooler-offset.cooler)/gain.cooler;
-			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",rpm(100),'%',th2o()/100,(th2o()%100)/10,k/10,k%10);
+			_print("\r:pump  %3d%c,%2d.%d'C,%2d.%d",rpm(100),'%',th2o()/100,abs(th2o()%100)/10,k/10,k%10);
 			if(idx>0) {
 				_print("   %2d%c-%2d%c,%2d'-%2d',%d.%03dA",fpl,'%',fph,'%',ftl,fth,i/1000,i%1000);
 				for(int i=4*(6-idx)+2;idx && i--;_print("\b")) {}
