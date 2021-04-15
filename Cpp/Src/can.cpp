@@ -210,6 +210,7 @@ void	_CAN::pollRx(void *v) {
 				DL_State *p=(DL_State *)data;
 				if(p->State == _CALIBRATE) {
 					ioc->error_mask = ioc->error_mask | _DLpowerCh1 | _DLpowerCh2 | _ENMtimeout | _DLtimeout;
+					fsw2DL();
 				}
 			}
 			break;				
