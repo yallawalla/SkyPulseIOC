@@ -73,8 +73,10 @@ int		_PUMP::rpm(int fsc) {
 	* @retval : None
 	*/
 void		_PUMP::Enable() {
-				if(!pump_drive++)
+				if(!pump_drive++) {
+					err=_NOERR;
 					timeout=__time__ +  _PUMP_ERR_DELAY;
+				}
 }
 /*******************************************************************************/
 /**

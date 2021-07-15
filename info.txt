@@ -191,3 +191,12 @@ I-10611, S-2024
 I-10397, S-1975
 I-10295, S-1949
 
+15.7.21
+
+- bug v pump.cpp
+- pump.Enable() aktivira pump & float errors delay; posledicno pump.Status() preskakuje diagnostiko
+- zaradi tega pump.Status() vraca predhodne error pumpe (inic. je v kretnici, sicer dobiš poplavo msg), ki takoj preklicejo prehod v _STANDBY in 
+  ponovno ugasnejo pumpo.
+- rešitev: v pump.Enable() dodaš inic. lokalne err spremenljivke v pump objektu.
+
+
