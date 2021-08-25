@@ -191,7 +191,10 @@ I-10611, S-2024
 I-10397, S-1975
 I-10295, S-1949
 
-15.7.21
+25.8.21
+
+v 1.08 Aug 25 2021 <9AB7E286>
+I-11458, S-2210
 
 - bug v pump.cpp
 - pump.Enable() aktivira pump & float errors delay; posledicno pump.Status() preskakuje diagnostiko
