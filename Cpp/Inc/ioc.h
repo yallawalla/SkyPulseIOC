@@ -125,7 +125,8 @@ typedef __packed struct _IOC_Aux{
 	uint8_t		Flow;
 	uint8_t		Pump;
 	uint8_t		Fan;
-	_IOC_Aux() : Temp(0),Flow(0),Pump(0),Fan(0)	{}	
+	uint8_t		PumpCurrent;
+	_IOC_Aux() : Temp(0),Flow(0),Pump(0),Fan(0),PumpCurrent(0)	{}	
 	void	Send() {
 		_CAN::Send(idIOC_AuxAck,(void *)&Temp,sizeof(_IOC_Aux));
 	}

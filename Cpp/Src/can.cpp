@@ -178,7 +178,8 @@ void	_CAN::pollRx(void *v) {
 				ioc->IOC_Aux.Pump = ioc->pump.rpm(100);
 				ioc->IOC_Aux.Temp = ioc->pump.th2o();
 				ioc->IOC_Aux.Fan = ioc->fan.rpm(100);
-				ioc->IOC_Aux.Send();
+				ioc->IOC_Aux.PumpCurrent = std::min(255,(int)(ioc->pump.current()*(3300/4096.0/0.05/21/16)+5)/10);
+				ioc->IOC_Aux.Send();		
 			break;
 //______________________________________________________________________________________
 			case idIOC_VersionReq:
