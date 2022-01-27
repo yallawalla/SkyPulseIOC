@@ -122,7 +122,7 @@ _err 	e=_NOERR;
 				if (limits[active].on && limits[active].off && __time__ > toff) {							// trailing edge, deny on CW
 					if(ton <= toff) {																														// flip on time	
 						ton = toff + limits[active].off;
-						high.val[limits[active].mode-1] < limits[active].val/2 ? --ton : ++ton;		// sync trailing edge on active
+//						high.val[limits[active].mode-1] < limits[active].val/2 ? --ton : ++ton;		// sync trailing edge on active
 						setActiveCh(++active);
 					}
 					e = e | Check(high.val[0], high.val[1]);
@@ -194,7 +194,16 @@ void	_DL::Setup(DL_Limits *p) {
 			limits[2].val	= 	p->l2;
 			limits[0].mode	= p->ch0;
 			limits[1].mode	= p->ch1;
-			limits[2].mode	= p->ch2;	
+			limits[2].mode	= p->ch2;
+			if(ton && toff) {
+				if(__time__ > sync) {
+					++ton; ++toff;
+				}
+				if(__time__ < sync) {
+					--ton; --toff;
+				}
+				sync=__time__+_DL_POLLING;
+			}
 }
 /*******************************************************************************
 * Function Name	: 

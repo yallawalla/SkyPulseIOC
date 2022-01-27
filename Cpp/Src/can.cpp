@@ -219,7 +219,7 @@ void	_CAN::pollRx(void *v) {
 				ioc->IOC_FootAck.Send();
 				ioc->diode.Setup((DL_Limits *)data);
 				if(ioc->IOC_State.State == _ACTIVE) {
-					dlTimeout=__time__ + _DL_POLL_DELAY;
+					dlTimeout=__time__ + 4*_DL_POLLING;
 					ecTimeout=0;
 				}
 			}

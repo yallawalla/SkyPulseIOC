@@ -56,7 +56,7 @@ inline _err operator ^	(_err a, _err b)	{return static_cast<_err>(static_cast<in
 #define _FSW_ERR_DELAY		3000
 #define _EC20_MAX_PERIOD	600
 #define _EC20_ENM_DELAY		5
-#define _DL_POLL_DELAY		200
+#define _DL_POLLING				50
 #define _DL_OFFSET_THR		50
 #define _DL_ERROR_DELAY		200
 
