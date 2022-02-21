@@ -27,7 +27,7 @@ class	_DL  : public _TERM {
 			bool						selected;			
 			float						offset[2];
 			uint16_t				dma[154][2];
-			uint32_t				ton,toff,active,ref[2];
+			uint32_t				ton,toff,active,ref[2],synclevel;
 			lopass					high, filter, max;
 			int32_t					idx,dlscale[2],dacScale,dacOffset;
 			limit						limits[3];

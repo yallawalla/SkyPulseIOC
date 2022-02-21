@@ -24,7 +24,7 @@ _DL*	_DL::instance=NULL;
 _DL::_DL() : high(300,150000), filter(2.5, 1000), max(2.5, 1000) {
 			instance=this;
 			selected=false;
-			offset[0]=offset[1]=ton=toff=0;
+			offset[0]=offset[1]=ton=toff=synclevel=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
 			dacScale=1;
@@ -122,13 +122,18 @@ _err 	e=_NOERR;
 				if (limits[active].on && limits[active].off && __time__ > toff) {							// trailing edge, deny on CW
 					if(ton <= toff) {																														// flip on time	
 						ton = toff + limits[active].off;
-						high.val[limits[active].mode-1] < limits[active].val/2 ? --ton : ++ton;		// sync trailing edge on active
+						
+						if(limits[active].val >= synclevel) {																			// set max. limit as sync level & ident. the channel
+							synclevel=limits[active].val;
+							high.val[limits[active].mode-1] < synclevel/2 ? --ton : ++ton;					// sync trailing edge on active
+						}
+						
 						setActiveCh(++active);
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
 			} else {																																				// processing standby, ready or fsw break;
-				ton=toff=limits[0].mode=limits[1].mode=limits[2].mode=0;
+				ton=toff=limits[0].mode=limits[1].mode=limits[2].mode=synclevel=0;
 				e = e | Check(high.val[0], high.val[1]);
 			}
 //______________________________________________________________________________________
