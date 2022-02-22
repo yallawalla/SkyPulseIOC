@@ -78,7 +78,21 @@ int _CLI::Fkey(int t) {
 			case __F11:
 				ioc->SaveSettings();
 			break;
-
+			case __CtrlR: {
+				FLASH_OBProgramInitTypeDef obp;
+				HAL_FLASHEx_OBGetConfig(&obp);
+				if(obp.RDPLevel == OB_RDP_LEVEL_1) {
+					_print("ok...");
+				} else {
+					HAL_FLASH_OB_Unlock();
+					obp.OptionType = OPTIONBYTE_RDP;
+					obp.RDPLevel = OB_RDP_LEVEL_1;
+					HAL_FLASHEx_OBProgram(&obp);
+					HAL_FLASH_OB_Launch();
+					HAL_FLASH_OB_Lock();
+				}
+			}
+			break;
 			default:
 				return t;
 		}
