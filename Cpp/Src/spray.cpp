@@ -51,6 +51,7 @@ _SPRAY::_SPRAY() {
 
 			Air_P=Bottle_P=0;
 			AirLevel=WaterLevel=0;
+			WaterGain=100;
 			Bottle_ref=Air_ref=													_BAR(1.0f);
 			inPressure=																	_BAR(1.5f);
 
@@ -88,7 +89,7 @@ _err	e = _NOERR;
 			}
 //------------------------------------------------------------------------------
 			Air_ref			= offset.air + AirLevel*gain.air/10;
-			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*pFit->Eval(Air_ref - offset.air)/0x10000 + gain.bottle*WaterLevel/10;
+			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*pFit->Eval(Air_ref - offset.air)/0x10000 + gain.bottle*WaterLevel*WaterGain/10/100;
 //
 //			Bottle_ref	= offset.bottle + (Air_ref - offset.air)*waterGain/0x10000 + gain.bottle*WaterLevel/10;
 //			Bottle_ref	= offset.bottle + AirLevel*waterGain*(100+4*WaterLevel)/100/10;

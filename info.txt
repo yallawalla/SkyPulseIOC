@@ -202,4 +202,8 @@ I-11458, S-2210
   ponovno ugasnejo pumpo.
 - rešitev: v pump.Enable() dodaš inic. lokalne err spremenljivke v pump objektu.
 
+v 1.11 Aug 22 2022 <578E697C>
+I-13217
 
+- 0x201 message updated with byte parameter 0-255%, stored in WaterGain variable (new)
+  In spray control loop, gain.bottle is dinamically controlled (multiplied) with 0-255%, sent from SYS (not stored in ioc.ini)

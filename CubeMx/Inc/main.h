@@ -99,7 +99,7 @@ void Error_Handler(void);
 #define __TH 94
 #define __TL 36
 #define __TP 130
-#define SW_version 110
+#define SW_version 111
 #define FSW2_Pin GPIO_PIN_2
 #define FSW2_GPIO_Port GPIOE
 #define FSW3_Pin GPIO_PIN_3

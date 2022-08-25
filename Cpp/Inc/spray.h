@@ -63,7 +63,7 @@ class	_SPRAY : public _TERM, public _ADC {
 		_err		Status();
 		mode		mode;
 
-		int			AirLevel, WaterLevel;
+		int			AirLevel, WaterLevel, WaterGain;
 		int			readyTimeout, offsetTimeout;
 		_LCD		*lcd;
 };

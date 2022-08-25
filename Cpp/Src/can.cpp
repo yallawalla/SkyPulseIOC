@@ -133,7 +133,7 @@ int		_CAN::Fkey(int t) {
 *******************************************************************************/
 void	_CAN::pollRx(void *v) {
 	CAN_RxHeaderTypeDef		rx;
-	uint8_t								data[8],n;
+	uint8_t								data[8]={0},n;
 	_IOC*									ioc = static_cast<_IOC *>(v);
 	if(_buffer_pull(canBuffer->rx,&rx,sizeof(CAN_RxHeaderTypeDef))) {
 		_buffer_pull(canBuffer->rx,data,rx.DLC*sizeof(uint8_t));
@@ -170,6 +170,9 @@ void	_CAN::pollRx(void *v) {
 					ioc->spray.mode.Air=data[2] & 0x01;
 					ioc->spray.mode.Water=data[2] & 0x02;
 					ioc->spray.mode.BlowJob = false;
+					
+					if(data[3])
+						ioc->spray.WaterGain=data[3];
 				}
 			break;
 //______________________________________________________________________________________
