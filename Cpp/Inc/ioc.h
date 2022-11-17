@@ -168,8 +168,8 @@ class _IOC {
 
 		_err fswStatus(void);
 		
-		void SetState(uint8_t *,uint8_t);
-		void SetState(_State);
+		_State SetState(uint8_t *,uint8_t);
+		_State SetState(_State);
 		void pollError();
 
 		static const string	ErrMsg[];

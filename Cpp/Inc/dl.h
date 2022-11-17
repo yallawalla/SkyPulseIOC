@@ -24,10 +24,10 @@ typedef	__packed struct {
 //_____________________________________________________________________
 class	_DL  : public _TERM {
 		private:
-			bool						selected;			
+			bool						active;			
 			float						offset[2];
 			uint16_t				dma[154][2];
-			uint32_t				ton,toff,active,ref[2];
+			uint32_t				ton,toff,ch,ref[2];
 			lopass					high, filter, max;
 			int32_t					idx,dlscale[2],dacScale,dacOffset;
 			limit						limits[3];
@@ -39,7 +39,8 @@ class	_DL  : public _TERM {
 			_err		Status(bool);
 			void		filterCbk(bool);
 			void		setActiveCh(uint32_t);
-			void 		Setup();
+			void 		isActive(bool);
+			bool 		isActive();
 			void 		Setup(DL_Timing *);
 			void 		Setup(DL_Limits *);
 

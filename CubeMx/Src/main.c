@@ -193,7 +193,9 @@ int main(void)
 	
 	hw=(hwVersion)((~(HAL_GPIO_ReadPin(PE15_GPIO_Port, PE15_Pin) +
 			2*(HAL_GPIO_ReadPin(PE12_GPIO_Port, PE12_Pin) +
-				2*HAL_GPIO_ReadPin(PE10_GPIO_Port, PE10_Pin))) + 1) & 0x07);
+				2*(HAL_GPIO_ReadPin(PE10_GPIO_Port, PE10_Pin) +
+					2*(HAL_GPIO_ReadPin(PE8_GPIO_Port, PE8_Pin) +
+						2*HAL_GPIO_ReadPin(PE7_GPIO_Port, PE7_Pin))))) + 1) & 0x1f);
 
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_1);
 	HAL_TIM_IC_Start_IT(&htim3,TIM_CHANNEL_2);

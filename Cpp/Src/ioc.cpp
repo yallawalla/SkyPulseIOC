@@ -231,7 +231,7 @@ _err	e = (err ^ IOC_State.Error) & err & ~error_mask;
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::SetState(uint8_t *data, uint8_t n) {
+_State _IOC::SetState(uint8_t *data, uint8_t n) {
 			pump.mode &= ~_PUMP_BOOST;
 			fan.mode &= ~(_FAN_BOOST0 | _FAN_BOOST1 | _FAN_BOOST2);
 			if(n>1) {
@@ -239,7 +239,7 @@ void	_IOC::SetState(uint8_t *data, uint8_t n) {
 				fan.mode |= data[1] & (_FAN_BOOST0 | _FAN_BOOST1 | _FAN_BOOST2);
 				data[1] & _CWBAR_ON ? cwbarOn() : cwbarOff();			
 			}
-			SetState((_State)data[0]);
+			return SetState((_State)data[0]);
 }
 /*******************************************************************************
 * Function Name	:
@@ -247,7 +247,7 @@ void	_IOC::SetState(uint8_t *data, uint8_t n) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_IOC::SetState(_State s) {
+_State _IOC::SetState(_State s) {
 			switch(s) {
 				case	_STANDBY:
 					if(IOC_State.State == _ERROR)
@@ -283,6 +283,7 @@ void	_IOC::SetState(_State s) {
 				case	_CALIBRATE:
 					break;
 			}
+			return IOC_State.State;
 }
 /*******************************************************************************
 * Function Name	:

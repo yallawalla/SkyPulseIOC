@@ -23,7 +23,7 @@ _DL*	_DL::instance=NULL;
 /*******************************************************************************/
 _DL::_DL() : high(300,150000), filter(2.5, 1000), max(2.5, 1000) {
 			instance=this;
-			selected=false;
+			active=false;
 			offset[0]=offset[1]=ton=toff=0;
 			HAL_ADC_Start_DMA(&hadc2, (uint32_t*)&dma, sizeof(dma)/sizeof(uint16_t));
 			dlscale[0]=dlscale[0]=0;
@@ -94,7 +94,7 @@ _err	e=_NOERR;
 *******************************************************************************/
 _err	_DL::Status(bool k) {
 _err 	e=_NOERR;
-			if(!selected || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))	// deny active if not selected or no active channels
+			if(!active || (limits[0].mode==0 && limits[1].mode==0 && limits[2].mode==0))	// deny active if not selected or no active channels
 				k=false;
 			ref[0]=ref[1]=0;
 			if(k) {																																					// check on active			
@@ -104,14 +104,14 @@ _err 	e=_NOERR;
 				}
 				if (__time__ >= ton) {																												// leading edge
 					if (toff <= ton)																														// flip off time															
-						toff = ton + limits[active].on;
-					switch (limits[active].mode) {																							// process active channel
+						toff = ton + limits[ch].on;
+					switch (limits[ch].mode) {																									// process active channel
 						case 1:
-							ref[0]=limits[active].val;
+							ref[0]=limits[ch].val;
 							e = e | Check(high.val[0], 0);
 						break;
 						case 2:
-							ref[1]=limits[active].val;
+							ref[1]=limits[ch].val;
 							e = e | Check(0, high.val[1]);
 						break;
 						default:
@@ -119,11 +119,11 @@ _err 	e=_NOERR;
 					 break;
 					}
 				}
-				if (limits[active].on && limits[active].off && __time__ > toff) {							// trailing edge, deny on CW
+				if (limits[ch].on && limits[ch].off && __time__ > toff) {											// trailing edge, deny on CW
 					if(ton <= toff) {																														// flip on time	
-						ton = toff + limits[active].off;
-						high.val[limits[active].mode-1] < limits[active].val/2 ? --ton : ++ton;		// sync trailing edge on active
-						setActiveCh(++active);
+						ton = toff + limits[ch].off;
+						high.val[limits[ch].mode-1] < limits[ch].val/2 ? --ton : ++ton;						// sync trailing edge on ch
+						setActiveCh(++ch);
 					}
 					e = e | Check(high.val[0], high.val[1]);
 				}
@@ -166,11 +166,11 @@ _err 	e=_NOERR;
 *******************************************************************************/
 void	_DL::setActiveCh(uint32_t n) {
 			int i;
-			active = n % 3;
-			for(i=0; !limits[active].mode && i<3; ++i)
-				active = ++active % 3;
+			ch = n % 3;
+			for(i=0; !limits[ch].mode && i<3; ++i)
+				ch = ++ch % 3;
 			if(i == 3)
-				active=0;
+				ch=0;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -178,8 +178,17 @@ void	_DL::setActiveCh(uint32_t n) {
 * Output				:
 * Return				:
 *******************************************************************************/
-void	_DL::Setup() {		
-			selected=false;
+void	_DL::isActive(bool b) {		
+			active=b;
+}
+/*******************************************************************************
+* Function Name	: 
+* Description		: 
+* Output				:
+* Return				:
+*******************************************************************************/
+bool	_DL::isActive() {		
+			return active;
 }
 /*******************************************************************************
 * Function Name	: 
@@ -188,7 +197,6 @@ void	_DL::Setup() {
 * Return				:
 *******************************************************************************/
 void	_DL::Setup(DL_Limits *p) {
-			selected=true;
 			limits[0].val	= 	p->l0;
 			limits[1].val	= 	p->l1;
 			limits[2].val	= 	p->l2;
@@ -203,8 +211,8 @@ void	_DL::Setup(DL_Limits *p) {
 * Return				:
 *******************************************************************************/
 void	_DL::Setup(DL_Timing *p) {
-				limits[p->ch-1].on	= p->on/1000;
-				limits[p->ch-1].off	= p->off/1000;
+			limits[p->ch-1].on	= p->on/1000;
+			limits[p->ch-1].off	= p->off/1000;
 }
 /*******************************************************************************
 * Function Name	: 

@@ -147,11 +147,12 @@ void	_CAN::pollRx(void *v) {
 		switch(rx.StdId) {
 			case idIOC_State:
 				if(rx.DLC) {
-					ioc->SetState(data,rx.DLC);
-					if(ioc->IOC_State.State == _ACTIVE)
-						ecTimeout=dlTimeout=__time__ + _EC20_MAX_PERIOD;
-					else {
-						ecTimeout=dlTimeout=0;
+					ecTimeout=dlTimeout=0;
+					if(ioc->SetState(data,rx.DLC) == _ACTIVE) {
+						if(ioc->diode.isActive())
+							dlTimeout=__time__ + _DL_POLL_DELAY;
+						else
+							ecTimeout=__time__ + _EC20_MAX_PERIOD;							
 					}
 				}
 				ioc->IOC_State.Send();
@@ -232,12 +233,13 @@ void	_CAN::pollRx(void *v) {
 			case idDL_Params: {
 				ioc->diode.Setup((DL_Timing *)data);
 				fsw2DL();
+				ioc->diode.isActive(true);
 			}
 			break;
 //______________________________________________________________________________________
 			case idEC20_Params: 
 				fsw2EC();
-				ioc->diode.Setup();
+				ioc->diode.isActive(false);
 			break;
 //______________________________________________________________________________________
 			case idIOC_Footreq:

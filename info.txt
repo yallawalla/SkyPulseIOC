@@ -207,3 +207,10 @@ I-13217
 
 - 0x201 message updated with byte parameter 0-255%, stored in WaterGain variable (new)
   In spray control loop, gain.bottle is dinamically controlled (multiplied) with 0-255%, sent from SYS (not stored in ioc.ini)
+  
+v 1.12 Nov 17 2022 <FFD4314F>
+I-12560
+
+- dl pump error delay nazaj na 3 sec
+- ob vstopu v EMIT, polling delay glede na izbran izvor (DL or EC20)
+- izpis hw verzije podaljšan na 5 bitov
